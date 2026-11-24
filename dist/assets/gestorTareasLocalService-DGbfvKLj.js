@@ -1,0 +1,1 @@
+import{o as e}from"./gpPermisosService-Bw9r0axJ.js";var t=`qaway-tasks-v1`,n=`8bbc04cb-f030-48cc-904e-954c5b5af813`;function r(e){return(e??null)===n}function i(){let n=e();return n===`8bbc04cb-f030-48cc-904e-954c5b5af813`?t:n?`${t}::${n}`:`${t}::__sin_tenant__`}export{r as n,i as t};

@@ -5944,6 +5944,7 @@ export default function CronogramaGanttView({
         <div
           key="progress"
           className="progress editable"
+          style={{ position: 'relative' }}
           title="Clic para ajustar el avance (0–100%)"
           onClick={(e) => {
             e.stopPropagation();

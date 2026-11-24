@@ -15,7 +15,7 @@ import { obtenerUsuarioSesion } from './services/contextoSesion';
 import { usePerfilGp, capacidadesDe } from './services/gpPermisosService';
 import { usePerfilVisible } from './services/perfilVisibleService';
 import { GestorRouteLoading } from '../../../../router/GestorRouteLoading';
-import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
+const ResumenCopiaView = lazy(() => import('./modules/resumen-2/CronogramaGanttView'));
 import TareasView from './modules/tareas/TareasView';
 const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
 const Reuniones2View = lazy(() => import('./modules/reuniones-2/Reuniones2View'));
@@ -525,6 +525,10 @@ function GestorProyectosApp() {
   };
 
   const handleDeleteProject = (id: string) => {
+    if (perfilGp && !capGp.eliminarProyecto) {
+      notifyActive('No tienes permiso para eliminar proyectos (requiere rol admin o la llave especial gp.eliminar_proyecto).');
+      return;
+    }
     void deleteGestorProject(id).catch((error) => {
       console.warn('[Gestor Projects] no se pudo eliminar el proyecto:', error?.message || error);
     });
@@ -620,9 +624,17 @@ function GestorProyectosApp() {
           {/* La maqueta se monta siempre, incluso sin proyecto del tenant.
               Los módulos consultan el tenant real y muestran sus tablas/Gantt
               vacíos: sin datos ajenos, pero con la interfaz completa. */}
-           {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-             <ResumenProyectoView userRole={userRole} canCreateProject={puedeCrearProyectoUi} sesionReal={sesionReal} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={handleOpenCreateProject} onActions={(h) => { binds.current['resumen'] = h; }} />
-           </div>}
+           {visitedModules.has('resumen') && (
+             <Suspense fallback={<ModuleLoadingFallback text="Cargando Resumen…" />}>
+               <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+                 <ResumenCopiaView
+                   activeProject={activeProject}
+                   isActive={active === 'resumen'}
+                   onActions={(h) => { binds.current['resumen'] = h; }}
+                 />
+               </div>
+             </Suspense>
+           )}
            {visitedModules.has('tareas2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Tareas 2…" />}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />
            </div></Suspense>}

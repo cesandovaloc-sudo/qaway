@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home, Building2, MapPin, X } from 'lucide-react'
+import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home, Building2, MapPin, X, Globe, Eye } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useTenant } from '@/context/TenantContext'
@@ -247,6 +247,8 @@ export default function Header({
   const roleLabel = activeData?.roleLabel || (loading ? '' : 'Miembro del equipo')
   const initials = activeData?.initials || '?'
   const email = session?.user?.email ?? ''
+  const storefrontSlug = activeTenant?.slug || activeTenant?.id || ''
+  const storefrontUrl = storefrontSlug ? `/tienda/${storefrontSlug}` : ''
 
   const handleLogout = async () => {
     try {
@@ -549,6 +551,31 @@ export default function Header({
             <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[var(--hub-chip)] rounded text-[var(--hub-faint)] border border-[var(--hub-border)]">K</kbd>
           </div>
         </div>
+
+        {storefrontUrl ? (
+          <>
+            <a
+              href={`${storefrontUrl}?preview=1`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-xl text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] transition-colors cursor-pointer"
+              title="Ver borrador"
+              aria-label="Ver borrador"
+            >
+              <Eye size={18} />
+            </a>
+            <a
+              href={storefrontUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-xl text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] transition-colors cursor-pointer"
+              title="Ver mi web"
+              aria-label="Ver mi web"
+            >
+              <Globe size={18} />
+            </a>
+          </>
+        ) : null}
 
         <button
           className="relative p-2 rounded-xl text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] transition-colors cursor-pointer"

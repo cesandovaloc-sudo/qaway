@@ -35,7 +35,9 @@ export default function StoreHeader({ tenant, categories, cartCount }: Props) {
       <nav className="qwt-nav">
         <div className="qwt-container">
           <Link to={`/tienda/${tenant.slug}`}>Inicio</Link>
-          {categories.map(c => <Link key={c.id} to={`/tienda/${tenant.slug}/c/${c.slug}`}>{c.name}</Link>)}
+          {(categories.length > 0 ? categories : Array.from({ length: 4 }, (_, i) => ({ id: `ph-${i + 1}`, slug: `categoria-${i + 1}`, name: `Categoría ${i + 1}` }))).map(c => (
+            <Link key={c.id} to={`/tienda/${tenant.slug}/c/${c.slug}`}>{c.name}</Link>
+          ))}
         </div>
       </nav>
     </header>

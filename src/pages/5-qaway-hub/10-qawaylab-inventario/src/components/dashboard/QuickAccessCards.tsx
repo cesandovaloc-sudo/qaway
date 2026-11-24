@@ -100,15 +100,7 @@ export function QuickAccessCards() {
           </div>
         </div>
 
-        <Link
-          to="/landings/desarrollo-web-qaway"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 h-[34px] px-3 text-[13px] font-semibold text-[#34415b] hover:text-white bg-white hover:bg-[#ff4b0b] border border-[#e5ebf4] hover:border-[#ff4b0b] rounded-[8px] transition-all self-start sm:self-auto shadow-2xs"
-        >
-           <span>Ver mi tienda online</span>
-          <ExternalLink size={13} />
-        </Link>
+
       </div>
 
       {/* Grid de 4 tarjetas ergonómicas */}

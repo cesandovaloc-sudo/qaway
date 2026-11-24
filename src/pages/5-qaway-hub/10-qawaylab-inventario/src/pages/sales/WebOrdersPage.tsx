@@ -326,16 +326,18 @@ export default function WebOrdersPage() {
                   <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
                   <span>Actualizar</span>
                 </button>
-                <a
-                  href={storefrontUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pxp-btn primary"
-                  title={storefrontSlug ? `Ver web en vivo: ${storefrontSlug}` : 'Ver tienda demo'}
-                >
-                  <span>{storefrontSlug ? 'Ver mi web en vivo' : 'Ver tienda demo'}</span>
-                  <ExternalLink size={14} />
-                </a>
+                {storefrontSlug && storefrontSlug !== 'demo' ? (
+                  <a
+                    href={storefrontUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pxp-btn primary"
+                    title={`Ver web en vivo: ${storefrontSlug}`}
+                  >
+                    <span>Ver mi web en vivo</span>
+                    <ExternalLink size={14} />
+                  </a>
+                ) : null}
               </div>
             </div>
 

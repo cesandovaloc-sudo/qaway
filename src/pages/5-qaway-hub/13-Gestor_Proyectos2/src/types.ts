@@ -9,7 +9,7 @@ export interface ConfigurableModuleInfo {
 
 // Lista oficial y canónica de módulos sincronizada 1:1 con el panel lateral izquierdo
 export const CONFIGURABLE_MODULES: ConfigurableModuleInfo[] = [
-  { key: 'resumen', name: 'Resumen del proyecto', defaultSubtitle: 'Métricas clave y estado general del proyecto.' },
+  { key: 'resumen', name: 'Resumen', defaultSubtitle: 'Métricas clave y estado general del proyecto.' },
   { key: 'cronograma', name: 'Proyecto', defaultSubtitle: 'Línea de tiempo oficial y calibración de entregables.' },
   { key: 'sedes', name: 'Sedes', defaultSubtitle: 'Seguimiento territorial de DRE y UGEL en tiempo real.' },
   { key: 'usuarios', name: 'Equipo', defaultSubtitle: 'Padrón operativo y frentes territoriales.' },

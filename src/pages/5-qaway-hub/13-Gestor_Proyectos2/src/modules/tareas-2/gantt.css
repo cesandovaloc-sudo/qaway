@@ -2904,6 +2904,7 @@
 }
 
 .gantt-v2 .progress {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;

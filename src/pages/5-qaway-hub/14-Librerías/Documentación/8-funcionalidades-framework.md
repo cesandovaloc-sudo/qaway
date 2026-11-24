@@ -254,6 +254,8 @@ Estos son los adaptadores que existen en las apps actuales. **No se comparten lo
 
 **Nota importante:** Estos adaptadores **no se comparten como código completo**. Solo se comparten los patrones (cómo están estructurados) para que tu app pueda implementar la que necesita o diseñar la suya propia.
 
+**Excepción documentada:** el adaptador GP2 ya existe como módulo real del framework en `services/adapters/gp2Adapter.js` (solo lectura y con identidad inyectada). Su contrato, mapeo y límites están en `10-adaptador-gp2-motor.md`.
+
 ---
 
 ### 4. Preferencias Por Tenant (estructuras opcionales)

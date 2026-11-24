@@ -41,6 +41,7 @@ import { getAppIdCacheado } from '../../../../../config/appCatalogCache';
 export const LLAVES_V1 = [
   'gp.crear_proyecto',
   'gp.editar_proyecto',
+  'gp.eliminar_proyecto',
   'gp.administrar_edt',
   'gp.registrar_personas',
 ] as const;
@@ -68,6 +69,7 @@ export interface PerfilGp {
 export interface CapacidadesGp {
   crearProyecto: boolean;
   editarProyecto: boolean;
+  eliminarProyecto: boolean;
   administrarEdt: boolean;
   registrarPersonas: boolean;
   crearTarea: boolean;
@@ -101,6 +103,7 @@ export function permisosDesdeJsonb(valor: unknown): string[] {
 const CAPACIDADES_VACIAS: CapacidadesGp = {
   crearProyecto: false,
   editarProyecto: false,
+  eliminarProyecto: false,
   administrarEdt: false,
   registrarPersonas: false,
   crearTarea: false,
@@ -112,6 +115,7 @@ const CAPACIDADES_VACIAS: CapacidadesGp = {
 const CAPACIDADES_TOTALES: CapacidadesGp = {
   crearProyecto: true,
   editarProyecto: true,
+  eliminarProyecto: true,
   administrarEdt: true,
   registrarPersonas: true,
   crearTarea: true,
@@ -136,6 +140,7 @@ export function capacidadesDe(
   return {
     crearProyecto: llaves.has('gp.crear_proyecto'),
     editarProyecto: llaves.has('gp.editar_proyecto'),
+    eliminarProyecto: llaves.has('gp.eliminar_proyecto'),
     administrarEdt: llaves.has('gp.administrar_edt'),
     registrarPersonas: llaves.has('gp.registrar_personas'),
     crearTarea: true,

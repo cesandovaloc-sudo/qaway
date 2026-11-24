@@ -6,12 +6,14 @@
  * de alerta y gobernanza de Línea Base.
  */
 
-export type SemanaLaboral = 'lun-vie' | 'lun-sab' | 'lun-dom';
+export type SemanaLaboral = 'lun-vie' | 'lun-sab' | 'lun-dom' | 'personalizado';
 export type MetodoPonderacion = 'duracion' | 'promedio';
 export type FrecuenciaCorte = 'semanal' | 'quincenal' | 'mensual';
 
 export interface ParametrosCronograma {
   semanaLaboral: SemanaLaboral;
+  /** Días activos cuando semanaLaboral === 'personalizado' (0=Dom, 1=Lun ... 6=Sáb). */
+  diasLaboralesCustom: number[];
   metodoPonderacion: MetodoPonderacion;
   frecuenciaCorte: FrecuenciaCorte;
   /** Días hábiles previos al vencimiento para marcar alerta "Por vencer". */
@@ -22,8 +24,19 @@ export interface ParametrosCronograma {
   bloquearResetLineaBase: boolean;
 }
 
+export const DIAS_SEMANA_ORDEN: ReadonlyArray<{ dow: number; short: string; label: string }> = [
+  { dow: 1, short: 'Lun', label: 'Lunes' },
+  { dow: 2, short: 'Mar', label: 'Martes' },
+  { dow: 3, short: 'Mié', label: 'Miércoles' },
+  { dow: 4, short: 'Jue', label: 'Jueves' },
+  { dow: 5, short: 'Vie', label: 'Viernes' },
+  { dow: 6, short: 'Sáb', label: 'Sábado' },
+  { dow: 0, short: 'Dom', label: 'Domingo' },
+];
+
 export const PARAMETROS_CRONOGRAMA_DEFAULT: ParametrosCronograma = {
   semanaLaboral: 'lun-vie',
+  diasLaboralesCustom: [1, 2, 3, 4, 5],
   metodoPonderacion: 'duracion',
   frecuenciaCorte: 'semanal',
   diasAvisoPrevio: 5,
@@ -40,11 +53,16 @@ function sanitizeNumber(val: unknown, fallback: number, min: number, max: number
   return Math.min(max, Math.max(min, Math.round(n)));
 }
 
+function sanitizeCustomDays(val: unknown): number[] {
+  if (!Array.isArray(val)) return [1, 2, 3, 4, 5];
+  const valid = Array.from(new Set(val.map(Number).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6)));
+  return valid.length > 0 ? valid : [1, 2, 3, 4, 5];
+}
+
 export function getParametrosCronograma(): ParametrosCronograma {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // Compatibilidad con legado qaway-tolerance-days-v1
       const legacyTol = localStorage.getItem('qaway-tolerance-days-v1');
       if (legacyTol != null) {
         return {
@@ -55,11 +73,15 @@ export function getParametrosCronograma(): ParametrosCronograma {
       return { ...PARAMETROS_CRONOGRAMA_DEFAULT };
     }
     const parsed = JSON.parse(raw) as Partial<ParametrosCronograma>;
+    const semana: SemanaLaboral =
+      parsed.semanaLaboral === 'lun-sab' ||
+      parsed.semanaLaboral === 'lun-dom' ||
+      parsed.semanaLaboral === 'personalizado'
+        ? parsed.semanaLaboral
+        : 'lun-vie';
     return {
-      semanaLaboral:
-        parsed.semanaLaboral === 'lun-sab' || parsed.semanaLaboral === 'lun-dom'
-          ? parsed.semanaLaboral
-          : 'lun-vie',
+      semanaLaboral: semana,
+      diasLaboralesCustom: sanitizeCustomDays(parsed.diasLaboralesCustom),
       metodoPonderacion: parsed.metodoPonderacion === 'promedio' ? 'promedio' : 'duracion',
       frecuenciaCorte:
         parsed.frecuenciaCorte === 'quincenal' || parsed.frecuenciaCorte === 'mensual'
@@ -77,6 +99,7 @@ export function getParametrosCronograma(): ParametrosCronograma {
 export function saveParametrosCronograma(params: ParametrosCronograma): void {
   const limpio: ParametrosCronograma = {
     semanaLaboral: params.semanaLaboral,
+    diasLaboralesCustom: sanitizeCustomDays(params.diasLaboralesCustom),
     metodoPonderacion: params.metodoPonderacion,
     frecuenciaCorte: params.frecuenciaCorte,
     diasAvisoPrevio: sanitizeNumber(params.diasAvisoPrevio, 5, 0, 30),
@@ -92,11 +115,26 @@ export function saveParametrosCronograma(params: ParametrosCronograma): void {
   window.dispatchEvent(new CustomEvent(EVENTO_PARAMS_CRONOGRAMA, { detail: limpio }));
 }
 
-export function isDiaLaboral(date: Date, semana: SemanaLaboral): boolean {
-  const day = date.getDay(); // 0=Dom, 1=Lun, ..., 6=Sab
+export function isDowLaboral(
+  dow: number,
+  semana: SemanaLaboral,
+  customDays?: number[],
+): boolean {
   if (semana === 'lun-dom') return true;
-  if (semana === 'lun-sab') return day !== 0;
-  return day !== 0 && day !== 6;
+  if (semana === 'lun-sab') return dow !== 0;
+  if (semana === 'personalizado') {
+    const set = customDays && customDays.length > 0 ? customDays : [1, 2, 3, 4, 5];
+    return set.includes(dow);
+  }
+  return dow !== 0 && dow !== 6;
+}
+
+export function isDiaLaboral(
+  date: Date,
+  semana: SemanaLaboral,
+  customDays?: number[],
+): boolean {
+  return isDowLaboral(date.getDay(), semana, customDays);
 }
 
 /**
@@ -107,17 +145,19 @@ export function countWorkingDays(
   startIso: string,
   endIso: string,
   semana: SemanaLaboral = 'lun-vie',
+  customDays?: number[],
 ): number {
   if (!startIso || !endIso) return 1;
   const start = new Date(`${startIso.slice(0, 10)}T12:00:00`);
   const end = new Date(`${endIso.slice(0, 10)}T12:00:00`);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 1;
   if (end < start) return 1;
+  const days = customDays ?? (semana === 'personalizado' ? getParametrosCronograma().diasLaboralesCustom : undefined);
   let count = 0;
   const cur = new Date(start);
   let guard = 0;
   while (cur <= end && guard < 4000) {
-    if (isDiaLaboral(cur, semana)) count += 1;
+    if (isDiaLaboral(cur, semana, days)) count += 1;
     cur.setDate(cur.getDate() + 1);
     guard += 1;
   }
@@ -131,6 +171,7 @@ export function workingDaysBetween(
   aIso: string,
   bIso: string,
   semana: SemanaLaboral = 'lun-vie',
+  customDays?: number[],
 ): number {
   if (!aIso || !bIso) return 0;
   const a = aIso.slice(0, 10);
@@ -140,12 +181,13 @@ export function workingDaysBetween(
   const from = new Date(`${(sign > 0 ? a : b)}T12:00:00`);
   const to = new Date(`${(sign > 0 ? b : a)}T12:00:00`);
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return 0;
+  const days = customDays ?? (semana === 'personalizado' ? getParametrosCronograma().diasLaboralesCustom : undefined);
   let count = 0;
   const cur = new Date(from);
   cur.setDate(cur.getDate() + 1);
   let guard = 0;
   while (cur <= to && guard < 4000) {
-    if (isDiaLaboral(cur, semana)) count += 1;
+    if (isDiaLaboral(cur, semana, days)) count += 1;
     cur.setDate(cur.getDate() + 1);
     guard += 1;
   }

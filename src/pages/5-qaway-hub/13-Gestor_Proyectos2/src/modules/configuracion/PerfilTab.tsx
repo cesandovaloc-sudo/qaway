@@ -35,11 +35,13 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [editando, setEditando] = useState(false);
+  const [editandoClave, setEditandoClave] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const email = visible?.email || '';
   const rol = visible?.rol || perfil?.rol || 'viewer';
+  const esInvitado = ['visor', 'viewer', 'guest', 'invitado'].includes(String(rol || '').toLowerCase());
   const empresa = visible?.tenantNombre || '';
   const fotoMostrada = fotoPendiente ? previewUrl : (fotoEliminada ? '' : avatarUrl);
   const paisTel = PAISES.find((p: any) => p.dial === prefijoTel) || PAISES[0];
@@ -279,7 +281,7 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
             </div>
             <div style={{ flex: 1, minWidth: '180px' }}>
               <div style={{ fontSize: '13.5px', fontWeight: 500, color: '#0f172a' }}>Foto de perfil</div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Se recorta y convierte a WebP (máx. 512 px) y se sincroniza con Hub y Academy.</div>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Formatos admitidos: PNG, JPG o WebP (máx. 15 MB).</div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
@@ -422,9 +424,36 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
           : 'Actualiza la contraseña de tu cuenta cuando lo necesites.'}
         submitLabel={passwordPending ? 'Guardar contraseña' : 'Cambiar contraseña'}
         recoveryEmail={passwordPending ? '' : email}
+        locked={esInvitado || !editandoClave}
+        lockedNote={esInvitado ? 'Los usuarios con rol invitado / solo lectura no pueden modificar la contraseña.' : null}
+        headerAction={
+          esInvitado ? null : (
+            <button
+              type="button"
+              onClick={() => setEditandoClave((v) => !v)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#fff',
+                color: '#334155',
+                fontSize: '12.5px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              {editandoClave ? <X size={13} /> : <Pencil size={13} />}
+              <span>{editandoClave ? 'Cancelar' : 'Editar'}</span>
+            </button>
+          )
+        }
         onSuccess={() => {
           setListo(true);
           setPasswordPending(false);
+          setEditandoClave(false);
           notify?.('Contraseña actualizada correctamente.');
         }}
       />

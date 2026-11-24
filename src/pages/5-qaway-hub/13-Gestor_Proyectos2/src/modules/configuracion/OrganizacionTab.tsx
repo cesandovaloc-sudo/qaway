@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Building, Building2, Check, CheckCircle2, ChevronDown, ChevronRight, CornerDownRight, Globe2, Landmark, Layers, MapPin, Pencil, Plus, ShieldAlert, ShieldCheck, Trash2, X } from 'lucide-react';
+import { Building, Building2, Check, CheckCircle2, ChevronDown, ChevronRight, CornerDownRight, Globe2, Landmark, Layers, MapPin, Pencil, Plus, Search, ShieldAlert, ShieldCheck, Trash2, X } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { construirBorradoresPlantilla, type GestorUnitBorrador, type PlantillaSector } from '../../services/organizacionPlantillas';
@@ -49,7 +49,9 @@ interface ConfigGestionRow {
 
 type ModoSedes = '' | 'una' | 'varias' | 'sin_sede';
 
-export const OrganizacionTab: React.FC = () => {
+export const OrganizacionTab: React.FC<{ onSedePrincipalStatusChange?: (falta: boolean) => void }> = ({
+  onSedePrincipalStatusChange,
+}) => {
   const { perfil } = usePerfilGp();
   const [sector, setSector] = useState<PlantillaSector>('publico');
   const [unidades, setUnidades] = useState<UnidadRow[]>([]);
@@ -95,6 +97,11 @@ export const OrganizacionTab: React.FC = () => {
   const [sedeExternaEditId, setSedeExternaEditId] = useState<string | null>(null);
   const [sedeExternaDraft, setSedeExternaDraft] = useState<DatosUbicacionSede | null>(null);
   const [sedesAbiertas, setSedesAbiertas] = useState<Record<string, boolean>>({});
+  const [editandoPaso4, setEditandoPaso4] = useState<boolean>(false);
+  const [filtroSedeTexto, setFiltroSedeTexto] = useState('');
+  const [filtroSedeDepto, setFiltroSedeDepto] = useState('');
+  const [filtroSedeDistrito, setFiltroSedeDistrito] = useState('');
+  const [limiteSedesVisibles, setLimiteSedesVisibles] = useState(8);
 
   // Pasos 4 y 5: gobernanza de la gestion de proyectos (tabla ya existente).
   const [configGestion, setConfigGestion] = useState<ConfigGestionRow | null>(null);
@@ -294,7 +301,7 @@ export const OrganizacionTab: React.FC = () => {
         const cantidadValida = Number.isFinite(cantidadDb) && cantidadDb >= 0;
         setModoSedes((prev) => prev || modalidadGuardada || (filas.length === 0 ? '' : filas.length === 1 ? 'una' : 'varias'));
         setCantidadSedes(String(cantidadValida ? cantidadDb : filas.length));
-        setCantidadGuardada(cantidadValida ? cantidadDb : null);
+        setCantidadGuardada(cantidadValida ? cantidadDb : filas.length > 0 ? filas.length : null);
         setMapaSedeCentralAbierto(false);
         setOmitirRegistroExternas(false);
       }
@@ -344,7 +351,9 @@ export const OrganizacionTab: React.FC = () => {
         setEditandoSector(false);
         setEditandoSedes(false);
         setEditandoGobernanza(false);
+        setEditandoPaso4(false);
         await cargarEstado();
+        window.dispatchEvent(new CustomEvent('gp:organizacion-actualizada'));
       }
     } catch (e: any) {
       setFeedback({ type: 'err', text: e?.message || 'Error al aplicar la estructura.' });
@@ -415,6 +424,7 @@ export const OrganizacionTab: React.FC = () => {
         setEditandoSector(false);
         setFeedback({ type: 'ok', text: 'Nombres de áreas actualizados.' });
         await cargarEstado();
+        window.dispatchEvent(new CustomEvent('gp:organizacion-actualizada'));
       }
     } finally {
       setSaving(false);
@@ -453,7 +463,9 @@ export const OrganizacionTab: React.FC = () => {
         setEditandoSector(false);
         setEditandoSedes(false);
         setEditandoGobernanza(false);
+        setEditandoPaso4(false);
         await cargarEstado();
+        window.dispatchEvent(new CustomEvent('gp:organizacion-actualizada'));
       }
     } catch (err: any) {
       setFeedback({ type: 'err', text: err?.message || 'No se pudo guardar la configuración de gestión.' });
@@ -542,6 +554,7 @@ export const OrganizacionTab: React.FC = () => {
           setEditandoSedes(false);
         }
         await cargarEstado();
+        window.dispatchEvent(new CustomEvent('gp:organizacion-actualizada'));
       }
     } finally {
       setSaving(false);
@@ -628,6 +641,7 @@ export const OrganizacionTab: React.FC = () => {
         setExternas([]);
         setFeedback({ type: 'ok', text: 'Sucursales registradas correctamente.' });
         await cargarEstado();
+        window.dispatchEvent(new CustomEvent('gp:organizacion-actualizada'));
       }
       } finally {
       setSaving(false);
@@ -665,11 +679,18 @@ export const OrganizacionTab: React.FC = () => {
         setSedeExternaDraft(null);
         setFeedback({ type: 'ok', text: 'Sucursal actualizada correctamente.' });
         await cargarEstado();
+        window.dispatchEvent(new CustomEvent('gp:organizacion-actualizada'));
       }
     } finally {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    if (loading) return;
+    const falta = modoSedes !== 'sin_sede' && !sedePrincipal && (modoSedes === 'una' || modoSedes === 'varias' || sedes.length > 0);
+    onSedePrincipalStatusChange?.(falta);
+  }, [loading, modoSedes, sedePrincipal, sedes.length, onSedePrincipalStatusChange]);
 
   const { sedesRaiz, hijosPorSede } = useMemo(() => {
     const idsExternos = new Set(sedesExternas.map((s) => s.id));
@@ -686,6 +707,135 @@ export const OrganizacionTab: React.FC = () => {
     }
     return { sedesRaiz: raices, hijosPorSede: map };
   }, [sedesExternas]);
+
+  const deptosDisponibles = useMemo(
+    () => Array.from(new Set(sedesExternas.map((s) => (s.departamento || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es')),
+    [sedesExternas],
+  );
+
+  const distritosDisponibles = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          sedesExternas
+            .filter((s) => !filtroSedeDepto || (s.departamento || '').trim() === filtroSedeDepto)
+            .map((s) => (s.distrito || '').trim())
+            .filter(Boolean),
+        ),
+      ).sort((a, b) => a.localeCompare(b, 'es')),
+    [sedesExternas, filtroSedeDepto],
+  );
+
+  const hayFiltroSedeActivo = Boolean(filtroSedeTexto.trim() || filtroSedeDepto || filtroSedeDistrito);
+
+  const coincideSede = (s: SedeRow): boolean => {
+    if (filtroSedeDepto && (s.departamento || '').trim() !== filtroSedeDepto) return false;
+    if (filtroSedeDistrito && (s.distrito || '').trim() !== filtroSedeDistrito) return false;
+    const q = filtroSedeTexto.trim().toLowerCase();
+    if (!q) return true;
+    const texto = [s.nombre, s.departamento, s.provincia, s.distrito, s.direccion, s.referencia_ubicacion]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return texto.includes(q);
+  };
+
+  const tieneDescendienteCoincidente = (id: string): boolean => {
+    const hijos = hijosPorSede.get(id) ?? [];
+    return hijos.some((h) => coincideSede(h) || tieneDescendienteCoincidente(h.id));
+  };
+
+  const sedesRaizFiltradas = useMemo(() => {
+    if (!hayFiltroSedeActivo) return sedesRaiz;
+    return sedesRaiz.filter((r) => coincideSede(r) || tieneDescendienteCoincidente(r.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sedesRaiz, hijosPorSede, filtroSedeTexto, filtroSedeDepto, filtroSedeDistrito]);
+
+  const sedesRaizVisibles = hayFiltroSedeActivo
+    ? sedesRaizFiltradas
+    : sedesRaizFiltradas.slice(0, limiteSedesVisibles);
+
+  const renderBarraFiltroSedes = () => {
+    if (sedesRaiz.length <= 4) return null;
+    return (
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginTop: '4px' }}>
+        <div style={{ position: 'relative', flex: '1 1 220px', minWidth: '180px' }}>
+          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <input
+            type="text"
+            value={filtroSedeTexto}
+            onChange={(e) => setFiltroSedeTexto(e.target.value)}
+            placeholder="Buscar sede, región, distrito o dirección..."
+            style={{ width: '100%', height: '36px', padding: '0 10px 0 32px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '12.5px', color: '#0f172a' }}
+          />
+        </div>
+        {deptosDisponibles.length > 1 && (
+          <div style={{ flex: '0 1 200px', minWidth: '160px' }}>
+            <SelectEstilizado
+              value={filtroSedeDepto}
+              placeholder="Todos los departamentos"
+              options={[{ value: '', label: 'Todos los departamentos' }, ...deptosDisponibles.map((d) => ({ value: d, label: d }))]}
+              onChange={(val) => {
+                setFiltroSedeDepto(val);
+                setFiltroSedeDistrito('');
+              }}
+            />
+          </div>
+        )}
+        {distritosDisponibles.length > 1 && (
+          <div style={{ flex: '0 1 190px', minWidth: '150px' }}>
+            <SelectEstilizado
+              value={filtroSedeDistrito}
+              placeholder="Todos los distritos"
+              options={[{ value: '', label: 'Todos los distritos' }, ...distritosDisponibles.map((d) => ({ value: d, label: d }))]}
+              onChange={(val) => setFiltroSedeDistrito(val)}
+            />
+          </div>
+        )}
+        {hayFiltroSedeActivo && (
+          <button
+            type="button"
+            onClick={() => {
+              setFiltroSedeTexto('');
+              setFiltroSedeDepto('');
+              setFiltroSedeDistrito('');
+            }}
+            style={{ height: '36px', padding: '0 12px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+          >
+            Limpiar
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  const renderPaginadorSedes = () => {
+    const restantes = sedesRaizFiltradas.length - sedesRaizVisibles.length;
+    if (restantes <= 0) return null;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', paddingTop: '4px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '12px', color: '#64748b' }}>
+          Mostrando {sedesRaizVisibles.length} de {sedesRaizFiltradas.length} sedes principales de nivel 1
+        </span>
+        <div style={{ display: 'inline-flex', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={() => setLimiteSedesVisibles((n) => n + 10)}
+            style={{ padding: '6px 12px', borderRadius: '7px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+          >
+            Mostrar más ({Math.min(10, restantes)})
+          </button>
+          <button
+            type="button"
+            onClick={() => setLimiteSedesVisibles(sedesRaizFiltradas.length)}
+            style={{ padding: '6px 12px', borderRadius: '7px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#475569', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+          >
+            Ver todas ({sedesRaizFiltradas.length})
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="cards-grid">
@@ -764,7 +914,7 @@ export const OrganizacionTab: React.FC = () => {
               </span>
             </div>
 
-            {sedePrincipal && (
+            {sedePrincipal ? (
               <div style={{ padding: '12px 14px', borderRadius: '8px', background: '#ffffff', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
                   <Building2 size={15} color="#2563eb" style={{ flexShrink: 0 }} />
@@ -780,13 +930,32 @@ export const OrganizacionTab: React.FC = () => {
                   </span>
                 </div>
               </div>
+            ) : modoSedes !== 'sin_sede' && (
+              <div style={{ padding: '11px 14px', borderRadius: '8px', background: '#fffbeb', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px' }}>
+                  <Building2 size={15} color="#d97706" style={{ flexShrink: 0 }} />
+                  <span style={{ color: '#92400e', fontWeight: 500 }}>Sede Principal: Te hace falta registrar la Sede Principal</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditandoSedes(true)}
+                  style={{ padding: '5px 11px', borderRadius: '7px', border: '1px solid #fcd34d', background: '#ffffff', color: '#b45309', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Registrar ahora
+                </button>
+              </div>
             )}
+
+            {renderBarraFiltroSedes()}
 
             {(() => {
               const renderNodoLectura = (s: SedeRow, idx: number, nivel: number): React.ReactNode => {
-                const hijos = hijosPorSede.get(s.id) ?? [];
+                const hijosRaw = hijosPorSede.get(s.id) ?? [];
+                const hijos = hayFiltroSedeActivo && !coincideSede(s)
+                  ? hijosRaw.filter((h) => coincideSede(h) || tieneDescendienteCoincidente(h.id))
+                  : hijosRaw;
                 const tieneHijos = hijos.length > 0;
-                const abierto = Boolean(sedesAbiertas[s.id]);
+                const abierto = hayFiltroSedeActivo || Boolean(sedesAbiertas[s.id]);
                 const direccionTxt =
                   Array.from(new Set([s.direccion, s.distrito, s.provincia, s.departamento, s.pais].filter(Boolean))).join(' · ') ||
                   'Sin dirección registrada';
@@ -844,7 +1013,15 @@ export const OrganizacionTab: React.FC = () => {
                   </React.Fragment>
                 );
               };
-              return sedesRaiz.map((s, idx) => renderNodoLectura(s, idx, 1));
+              if (sedesRaizVisibles.length === 0 && hayFiltroSedeActivo) {
+                return <div style={{ fontSize: '13px', color: '#64748b', padding: '8px 4px' }}>No hay sedes que coincidan con el filtro.</div>;
+              }
+              return (
+                <>
+                  {sedesRaizVisibles.map((s, idx) => renderNodoLectura(s, idx, 1))}
+                  {renderPaginadorSedes()}
+                </>
+              );
             })()}
           </div>
         ) : (
@@ -880,7 +1057,7 @@ export const OrganizacionTab: React.FC = () => {
               {sedePrincipal ? (
                 <span style={{ color: '#059669', fontWeight: 500 }}>{sedePrincipal.nombre}</span>
               ) : (
-                <span style={{ color: '#d97706', fontWeight: 500 }}>Pendiente de registrar</span>
+                <span style={{ color: '#d97706', fontWeight: 500 }}>Te hace falta registrar la Sede Principal</span>
               )}
             </div>
           </div>
@@ -950,88 +1127,91 @@ export const OrganizacionTab: React.FC = () => {
                 )}
               </div>
 
-              {cantidadGuardada !== null && (
-                sedePrincipal && !mapaSedeCentralAbierto ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px', padding: '14px', borderRadius: '10px', background: '#ffffff', border: '1px solid #bfdbfe' }}>
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Building2 size={16} />
+              {sedePrincipal && !mapaSedeCentralAbierto ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px', padding: '14px', borderRadius: '10px', background: '#ffffff', border: '1px solid #bfdbfe' }}>
+                  <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Building2 size={16} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
+                          Sede Principal · {sedePrincipal.nombre}
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
-                            Sede Principal · {sedePrincipal.nombre}
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12.5px', color: '#64748b' }}>
-                            <MapPin size={12} style={{ flexShrink: 0 }} />
-                            <span>
-                              {Array.from(new Set([sedePrincipal.direccion, sedePrincipal.distrito, sedePrincipal.provincia, sedePrincipal.departamento, sedePrincipal.pais].filter(Boolean)))
-                                .join(' · ') || 'Sin dirección registrada'}
-                            </span>
-                          </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12.5px', color: '#64748b' }}>
+                          <MapPin size={12} style={{ flexShrink: 0 }} />
+                          <span>
+                            {Array.from(new Set([sedePrincipal.direccion, sedePrincipal.distrito, sedePrincipal.provincia, sedePrincipal.departamento, sedePrincipal.pais].filter(Boolean)))
+                              .join(' · ') || 'Sin dirección registrada'}
+                          </span>
                         </div>
                       </div>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: '#ecfdf5', border: '1px solid #a7f3d0', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
-                        <CheckCircle2 size={13} />
-                        <span>Registrada</span>
-                      </span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setMapaSedeCentralAbierto(true)}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
-                    >
-                      <Pencil size={13} />
-                      <span>Editar ubicación</span>
-                    </button>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: '#ecfdf5', border: '1px solid #a7f3d0', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
+                      <CheckCircle2 size={13} />
+                      <span>Registrada</span>
+                    </span>
                   </div>
-                ) : (
-                  <form
-                    onSubmit={handleCrearSedeCentral}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '12px',
-                      padding: '16px',
-                      borderRadius: '10px',
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                    }}
+                  <button
+                    type="button"
+                    onClick={() => setMapaSedeCentralAbierto(true)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
                   >
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
-                      <Building2 size={15} color="#2563eb" />
-                      <span>{sedePrincipal ? 'Sede Principal' : 'Registrar Sede Principal'}</span>
-                    </label>
-                    <SedeUbicacionFields
-                      valor={sedeCentral}
-                      onChange={(patch) => setSedeCentral((prev) => ({ ...prev, ...patch }))}
-                      placeholderNombre="Nombre de la Sede Principal"
-                    />
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
-                        <Plus size={15} />
-                        <span>{saving ? 'Guardando...' : sedePrincipal ? 'Actualizar Sede Principal' : 'Crear Sede Principal'}</span>
+                    <Pencil size={13} />
+                    <span>Editar ubicación</span>
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={handleCrearSedeCentral}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    padding: '16px',
+                    borderRadius: '10px',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                  }}
+                >
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
+                    <Building2 size={15} color="#2563eb" />
+                    <span>{sedePrincipal ? 'Sede Principal' : 'Registrar Sede Principal'}</span>
+                  </label>
+                  <SedeUbicacionFields
+                    valor={sedeCentral}
+                    onChange={(patch) => setSedeCentral((prev) => ({ ...prev, ...patch }))}
+                    placeholderNombre="Nombre de la Sede Principal"
+                  />
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
+                      <Plus size={15} />
+                      <span>{saving ? 'Guardando...' : sedePrincipal ? 'Actualizar Sede Principal' : 'Crear Sede Principal'}</span>
+                    </button>
+                    {sedePrincipal && (
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => setMapaSedeCentralAbierto(false)}
+                        style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
+                      >
+                        Ocultar mapa
                       </button>
-                      {sedePrincipal && (
-                        <button
-                          type="button"
-                          disabled={saving}
-                          onClick={() => setMapaSedeCentralAbierto(false)}
-                          style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
-                        >
-                          Ocultar mapa
-                        </button>
-                      )}
-                    </div>
-                  </form>
-                )
+                    )}
+                  </div>
+                </form>
               )}
+
+              {renderBarraFiltroSedes()}
 
               {(() => {
                 const renderNodoEdicion = (sede: SedeRow, idx: number, nivel: number): React.ReactNode => {
-                  const hijos = hijosPorSede.get(sede.id) ?? [];
+                  const hijosRaw = hijosPorSede.get(sede.id) ?? [];
+                  const hijos = hayFiltroSedeActivo && !coincideSede(sede)
+                    ? hijosRaw.filter((h) => coincideSede(h) || tieneDescendienteCoincidente(h.id))
+                    : hijosRaw;
                   const tieneHijos = hijos.length > 0;
-                  const abierto = Boolean(sedesAbiertas[`edit-${sede.id}`]);
+                  const abierto = hayFiltroSedeActivo || Boolean(sedesAbiertas[`edit-${sede.id}`]);
                   if (sedeExternaEditId === sede.id && sedeExternaDraft) {
                     return (
                       <React.Fragment key={sede.id}>
@@ -1156,7 +1336,12 @@ export const OrganizacionTab: React.FC = () => {
                     </React.Fragment>
                   );
                 };
-                return sedesRaiz.map((sede, idx) => renderNodoEdicion(sede, idx, 1));
+                return (
+                  <>
+                    {sedesRaizVisibles.map((sede, idx) => renderNodoEdicion(sede, idx, 1))}
+                    {renderPaginadorSedes()}
+                  </>
+                );
               })()}
 
               {sedePrincipal && !mapaSedeCentralAbierto && cantidadGuardada !== null && Number(cantidadSedes) === cantidadGuardada && !registrandoExternas && cantidadGuardada > sedes.length && (() => {
@@ -1415,7 +1600,20 @@ export const OrganizacionTab: React.FC = () => {
                         </React.Fragment>
                       );
                     };
-                    return sedesRaiz.map((sede, idx) => renderResumenSede(sede, idx, 1));
+                    return (
+                      <>
+                        {sedesRaiz.slice(0, limiteSedesVisibles).map((sede, idx) => renderResumenSede(sede, idx, 1))}
+                        {sedesRaiz.length > limiteSedesVisibles && (
+                          <button
+                            type="button"
+                            onClick={() => setLimiteSedesVisibles((n) => n + 10)}
+                            style={{ alignSelf: 'flex-start', marginLeft: '24px', padding: '5px 12px', borderRadius: '7px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+                          >
+                            Mostrar más sedes ({sedesRaiz.length - limiteSedesVisibles} restantes)
+                          </button>
+                        )}
+                      </>
+                    );
                   })()}
                 </>
               ) : (
@@ -1718,7 +1916,7 @@ export const OrganizacionTab: React.FC = () => {
         </div>
       )}
 
-      {/* Bloque 3: Pasos 3 y 4: gobernanza de la gestion de proyectos */}
+      {/* Bloque 3: Paso 3 · Unidad Responsable de Proyectos */}
       {unidades.length > 0 && (
         <div className="cfg-card" style={{ gridColumn: '1 / -1' }}>
           <div className="card-header">
@@ -1772,23 +1970,87 @@ export const OrganizacionTab: React.FC = () => {
               </div>
             </div>
           ) : (
-          <form onSubmit={handleGuardarGestion} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              Unidad responsable
-              <SelectEstilizado
-                value={unidadResponsableId}
-                placeholder="Selecciona un área"
-                options={unidades.map((u) => ({
-                  value: u.id,
-                  label: `${u.ruta ? `${u.ruta} · ` : ''}${u.alias || u.nombre_estandar}`,
-                }))}
-                onChange={(val) => setUnidadResponsableId(val)}
-              />
-            </label>
+            <form onSubmit={handleGuardarGestion} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                Unidad responsable
+                <SelectEstilizado
+                  value={unidadResponsableId}
+                  placeholder="Selecciona un área"
+                  options={unidades.map((u) => ({
+                    value: u.id,
+                    label: `${u.ruta ? `${u.ruta} · ` : ''}${u.alias || u.nombre_estandar}`,
+                  }))}
+                  onChange={(val) => setUnidadResponsableId(val)}
+                />
+              </label>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>Paso 4 · Gobernanza y Asignación de Tareas</span>
-              <label style={{ fontSize: '13px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <button type="submit" className="btn-save" disabled={guardandoGestion} style={{ alignSelf: 'flex-start' }}>
+                <Check size={15} />
+                <span>{guardandoGestion ? 'Guardando...' : configGestion?.unidad_responsable_id ? 'Actualizar área responsable' : 'Guardar área responsable'}</span>
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+
+      {/* Bloque 4: Paso 4 · Gobernanza y Asignación de Tareas (tarjeta independiente) */}
+      {unidades.length > 0 && (
+        <div className="cfg-card" style={{ gridColumn: '1 / -1' }}>
+          <div className="card-header">
+            <div className="card-icon" style={{ background: '#eff6ff', color: '#2563eb' }}>
+              <Layers size={18} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h2>Paso 4 · Gobernanza y Asignación de Tareas</h2>
+              <p>Define el alcance del área responsable para asignar tareas y coordinar entre sedes o áreas.</p>
+            </div>
+            {configGestion?.unidad_responsable_id && (
+              <button
+                type="button"
+                onClick={() => setEditandoPaso4((v) => !v)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  fontSize: '12.5px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {editandoPaso4 ? <X size={13} /> : <Pencil size={13} />}
+                <span>{editandoPaso4 ? 'Cancelar' : 'Editar'}</span>
+              </button>
+            )}
+          </div>
+
+          {configGestion?.unidad_responsable_id && !editandoPaso4 ? (
+            <div className="card-body">
+              <div style={{ padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '13.5px', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <div>
+                  <span style={{ color: '#64748b' }}>Alcance: </span>
+                  <span style={{ color: '#0f172a', fontWeight: 500 }}>
+                    {alcanceAsignacion === 'todas'
+                      ? 'A todas las sedes y dependencias'
+                      : alcanceAsignacion === 'autorizadas'
+                        ? 'Solo a sedes y dependencias autorizadas'
+                        : 'No asignar tareas a otras sedes ni dependencias'}
+                  </span>
+                </div>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: '#ecfdf5', border: '1px solid #a7f3d0', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
+                  <CheckCircle2 size={13} />
+                  <span>Guardado</span>
+                </span>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleGuardarGestion} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 Alcance de asignación de tareas a otras dependencias o sedes
                 <SelectEstilizado
                   value={alcanceAsignacion}
@@ -1800,19 +2062,27 @@ export const OrganizacionTab: React.FC = () => {
                   onChange={(val) => setAlcanceAsignacion(val as 'ninguna' | 'autorizadas' | 'todas')}
                 />
               </label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '13px', color: '#475569' }}>
-                <label><input type="checkbox" checked={puedeDarSeguimiento} onChange={(e) => setPuedeDarSeguimiento(e.target.checked)} /> Dar seguimiento</label>
-                <label><input type="checkbox" checked={puedeProgramarReuniones} onChange={(e) => setPuedeProgramarReuniones(e.target.checked)} /> Programar reuniones</label>
-                <label><input type="checkbox" checked={puedeGestionarParticipantes} onChange={(e) => setPuedeGestionarParticipantes(e.target.checked)} /> Gestionar participantes</label>
-                <label><input type="checkbox" checked={puedeSolicitarInformacion} onChange={(e) => setPuedeSolicitarInformacion(e.target.checked)} /> Solicitar información</label>
-              </div>
-            </div>
 
-            <button type="submit" className="btn-save" disabled={guardandoGestion} style={{ alignSelf: 'flex-start' }}>
-              <Check size={15} />
-              <span>{guardandoGestion ? 'Guardando...' : configGestion ? 'Actualizar gobernanza' : 'Guardar gobernanza'}</span>
-            </button>
-          </form>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '13px', color: '#475569' }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={puedeDarSeguimiento} onChange={(e) => setPuedeDarSeguimiento(e.target.checked)} /> Dar seguimiento
+                </label>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={puedeProgramarReuniones} onChange={(e) => setPuedeProgramarReuniones(e.target.checked)} /> Programar reuniones
+                </label>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={puedeGestionarParticipantes} onChange={(e) => setPuedeGestionarParticipantes(e.target.checked)} /> Gestionar participantes
+                </label>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={puedeSolicitarInformacion} onChange={(e) => setPuedeSolicitarInformacion(e.target.checked)} /> Solicitar información
+                </label>
+              </div>
+
+              <button type="submit" className="btn-save" disabled={guardandoGestion} style={{ alignSelf: 'flex-start' }}>
+                <Check size={15} />
+                <span>{guardandoGestion ? 'Guardando...' : 'Actualizar gobernanza'}</span>
+              </button>
+            </form>
           )}
         </div>
       )}

@@ -37,6 +37,7 @@
 
 const MIME_PERMITIDOS = ['image/png', 'image/jpeg', 'image/webp'];
 const EXTENSION_PERMITIDA = /\.(png|jpe?g|webp)$/i;
+const MAX_INPUT_BYTES = 15 * 1024 * 1024;
 
 /** Presets declarativos. `avatar` recorta; `product`/`evidence` conservan proporción. */
 export const IMAGE_PRESETS = Object.freeze({
@@ -138,6 +139,9 @@ export async function optimizarImagen(file, opciones = {}) {
   if (!esImagenPermitida(file)) {
     throw new Error('Formato no permitido. Usa PNG, JPG o WebP.');
   }
+  if ((Number(file?.size) || 0) > MAX_INPUT_BYTES) {
+    throw new Error('La imagen supera el tamaño máximo permitido (15 MB).');
+  }
 
   const preset = IMAGE_PRESETS[opciones?.preset] || IMAGE_PRESETS.product;
   const mode = opciones?.mode === 'avatar' || opciones?.mode === 'general'
@@ -152,7 +156,29 @@ export async function optimizarImagen(file, opciones = {}) {
 
   const dataUrl = await leerDataUrl(file);
   const img = await cargarImagen(dataUrl);
-  const destino = calcularDestino(img.naturalWidth || img.width, img.naturalHeight || img.height, { mode, maxEdge });
+  const origenW = img.naturalWidth || img.width;
+  const origenH = img.naturalHeight || img.height;
+  const destino = calcularDestino(origenW, origenH, { mode, maxEdge });
+
+  const mime = typeof file.type === 'string' ? file.type.toLowerCase() : '';
+  const nombre = typeof file.name === 'string' ? file.name.toLowerCase() : '';
+  const esWebp = mime === 'image/webp' || /\.webp$/i.test(nombre);
+  const sinCambios =
+    destino.width === origenW &&
+    destino.height === origenH &&
+    (destino.mode !== 'avatar' || (destino.sx === 0 && destino.sy === 0 && destino.ladoOrigen === origenW && origenW === origenH));
+
+  if (esWebp && sinCambios) {
+    return {
+      blob: file,
+      fileName: nombreWebp(file.name),
+      width: destino.width,
+      height: destino.height,
+      bytes: Number(file.size) || 0,
+      originalBytes: Number(file.size) || 0,
+      mode: destino.mode,
+    };
+  }
 
   const canvas = document.createElement('canvas');
   canvas.width = destino.width;

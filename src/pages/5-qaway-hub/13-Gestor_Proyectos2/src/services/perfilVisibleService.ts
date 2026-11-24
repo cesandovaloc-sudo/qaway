@@ -44,11 +44,12 @@ export interface PerfilVisible {
   responsable: string;
   /** Contactos del tenant con su teléfono real de public.users, para wa.me. */
   contactos: Array<{ userId: string; nombre: string; email: string; rol: string; phone: string | null }>;
-  /** Fila completa del tenant: la edición de empresa conserva content/features. */
+  /** Fila completa del tenant: la edición de empresa conserva branding/content/features. */
   tenant: {
     id: string;
     name: string;
     legal_name: string | null;
+    branding: Record<string, unknown>;
     content: Record<string, unknown>;
     features: Record<string, unknown>;
   } | null;
@@ -57,6 +58,7 @@ export interface PerfilVisible {
 let cachePerfil: PerfilVisible | null | undefined = undefined;
 let enVuelo: Promise<PerfilVisible | null> | null = null;
 let idPerfilCache: string | null = null;
+let tenantIdCache: string | null = null;
 const suscriptores = new Set<() => void>();
 
 function nombreDe(fila: any, user: { email: string | null; user_metadata: Record<string, unknown> }): string {
@@ -94,13 +96,14 @@ async function resolver(): Promise<PerfilVisible | null> {
   );
 
   const tenantId = uRow?.tenant_id == null ? '' : String(uRow.tenant_id);
+  tenantIdCache = tenantId || null;
   const [{ data: tRow }, { data: usuarios }, { data: membresia }] = await Promise.all([
     tenantId
       ? consultaCacheada(
           `tenant:${tenantId}`,
           () => supabase!
             .from('tenants')
-            .select('id, name, legal_name, status, content, features')
+            .select('id, name, legal_name, status, branding, content, features')
             .eq('id', tenantId)
             .maybeSingle(),
         )
@@ -197,6 +200,7 @@ async function resolver(): Promise<PerfilVisible | null> {
           id: String(tRow.id),
           name: String(tRow.name || ''),
           legal_name: tRow.legal_name == null ? null : String(tRow.legal_name),
+          branding: (tRow.branding && typeof tRow.branding === 'object' ? tRow.branding : {}) as Record<string, unknown>,
           content: (tRow.content && typeof tRow.content === 'object' ? tRow.content : {}) as Record<string, unknown>,
           features: (tRow.features && typeof tRow.features === 'object' ? tRow.features : {}) as Record<string, unknown>,
         }
@@ -220,6 +224,7 @@ export function invalidarPerfilVisible(): void {
   cachePerfil = undefined;
   enVuelo = null;
   if (idPerfilCache) invalidarCacheClave(`user-perfil:${idPerfilCache}`);
+  if (tenantIdCache) invalidarCacheClave(`tenant:${tenantIdCache}`);
   suscriptores.forEach((actualizar) => actualizar());
 }
 

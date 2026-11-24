@@ -60,14 +60,18 @@ export default function StoreProductPage() {
         <div className="qwt-pdp">
           <div>
             <div className="qwt-gallery-main" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-              <img src={product.images[activeImg] || product.images[0]} alt={product.name} />
+              {(product.images[activeImg] || product.images[0]) ? (
+                <img src={product.images[activeImg] || product.images[0]} alt={product.name} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', minHeight: 320, background: '#f1f5f9' }} />
+              )}
               {product.images.length > 1 && (
                 <>
                   <button type="button" className="qwt-gallery-nav prev" onClick={prev} aria-label="Imagen anterior"><ChevronLeft size={20} /></button>
                   <button type="button" className="qwt-gallery-nav next" onClick={next} aria-label="Siguiente imagen"><ChevronRight size={20} /></button>
                 </>
               )}
-              <button type="button" className="qwt-gallery-zoom" onClick={() => setZoom(true)} aria-label="Ampliar imagen"><ZoomIn size={18} /></button>
+              {(product.images[activeImg] || product.images[0]) && <button type="button" className="qwt-gallery-zoom" onClick={() => setZoom(true)} aria-label="Ampliar imagen"><ZoomIn size={18} /></button>}
             </div>
             {product.images.length > 1 && (
               <div className="qwt-gallery-thumbs">
@@ -83,7 +87,7 @@ export default function StoreProductPage() {
             <div className="qwt-pdp-brand">{product.brand || 'Marca'}</div>
             <h1>{product.name}</h1>
             <div className="qwt-pdp-price">
-              <span className="qwt-price">S/ {product.price.toFixed(2)}</span>
+              <span className="qwt-price" style={!product.images?.length && product.price === 0 ? { color: '#94a3b8' } : undefined}>{!product.images?.length && product.price === 0 ? 'S/ —' : `S/ ${product.price.toFixed(2)}`}</span>
               {product.compareAtPrice ? <span className="qwt-compare">S/ {product.compareAtPrice.toFixed(2)}</span> : null}
               {discount > 0 && <span className="qwt-badge">-{discount}%</span>}
             </div>
@@ -115,7 +119,7 @@ export default function StoreProductPage() {
         </section>
       </div>
 
-      {zoom && (
+      {zoom && (product.images[activeImg] || product.images[0]) && (
         <div className="qwt-lightbox" onClick={() => setZoom(false)} role="dialog" aria-modal="true">
           <button type="button" className="qwt-lightbox-close" onClick={() => setZoom(false)} aria-label="Cerrar"><X size={22} /></button>
           <img src={product.images[activeImg] || product.images[0]} alt={product.name} onClick={e => e.stopPropagation()} />

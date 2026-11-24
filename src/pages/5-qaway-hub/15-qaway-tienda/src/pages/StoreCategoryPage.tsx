@@ -75,7 +75,22 @@ export default function StoreCategoryPage() {
                 <option value="name">Nombre</option>
               </select>
             </div>
-            {products.length ? <div className="qwt-grid">{products.map(p => <ProductCard key={p.id} product={p} tenantSlug={tenantSlug} onAdd={onAdd} />)}</div> : <div className="qwt-empty">No hay productos con estos filtros.</div>}
+            {products.length ? (
+              <div className="qwt-grid">{products.map(p => <ProductCard key={p.id} product={p} tenantSlug={tenantSlug} onAdd={onAdd} />)}</div>
+            ) : (data.products.length === 0 ? (
+              <div className="qwt-grid">
+                {Array.from({ length: 4 }, (_, i) => (
+                  <Link key={`ph-${i + 1}`} to={`/tienda/${tenantSlug}/c/${category.slug}`} className="qwt-card" aria-label={`Producto ${i + 1}`}>
+                    <div className="qwt-card-media" style={{ background: '#f1f5f9' }} />
+                    <div className="qwt-card-brand">&nbsp;</div>
+                    <h3 className="qwt-card-name">Producto {i + 1}</h3>
+                    <div className="qwt-price-row"><span className="qwt-price" style={{ color: '#94a3b8' }}>S/ —</span></div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="qwt-empty">No hay productos con estos filtros.</div>
+            ))}
           </div>
         </div>
       </div>

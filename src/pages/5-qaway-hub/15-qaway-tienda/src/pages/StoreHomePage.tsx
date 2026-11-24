@@ -34,7 +34,11 @@ export default function StoreHomePage() {
         <div className="qwt-hero-slider">
           {hero ? (
             <Link to={heroHref} className="qwt-hero-slide" aria-label={hero.title || 'Ver promoción'}>
-              <img className="qwt-hero-bg" src={hero.imageUrl} alt={hero.title || 'Banner principal'} />
+              {hero.imageUrl ? (
+                <img className="qwt-hero-bg" src={hero.imageUrl} alt={hero.title || 'Banner principal'} />
+              ) : (
+                <div className="qwt-hero-bg" style={{ background: '#e5e7eb' }} aria-hidden="true" />
+              )}
               <div className="qwt-hero-overlay" />
               <div className="qwt-container qwt-hero-content">
                 <p className="qwt-hero-eyebrow">{tenant.name}</p>
@@ -71,39 +75,29 @@ export default function StoreHomePage() {
         </div>
       </section>
 
-      {categories.length > 0 && (
-        <section className="qwt-section">
-          <div className="qwt-container">
-            <div className="qwt-section-head"><div><h2>Categorías</h2><p>Encuentra lo que buscas por categoría.</p></div></div>
-            <div className="qwt-cats">
-              {categories.map(c => (
-                <Link key={c.id} to={`/tienda/${tenantSlug}/c/${c.slug}`} className="qwt-cat">
-                  <div className="qwt-cat-img">{c.imageUrl ? <img src={c.imageUrl} alt={c.name} loading="lazy" /> : null}</div>
-                  <span>{c.name}</span>
-                </Link>
-              ))}
-            </div>
+      <section className="qwt-section">
+        <div className="qwt-container">
+          <div className="qwt-section-head"><div><h2>Categorías</h2><p>Encuentra lo que buscas por categoría.</p></div></div>
+          <div className="qwt-cats">
+            {categories.map(c => (
+              <Link key={c.id} to={`/tienda/${tenantSlug}/c/${c.slug}`} className="qwt-cat" aria-label={c.name}>
+                <div className="qwt-cat-img">{c.imageUrl ? <img src={c.imageUrl} alt={c.name} loading="lazy" /> : null}</div>
+                <span>{c.name}</span>
+              </Link>
+            ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {featured.length > 0 ? (
-        <section className="qwt-section" style={{ paddingTop: categories.length ? 0 : undefined }}>
-          <div className="qwt-container">
-            <div className="qwt-section-head"><div><h2>Productos destacados</h2><p>Selección recomendada para ti.</p></div>{categories[0] && <Link className="qwt-link" to={`/tienda/${tenantSlug}/c/${categories[0].slug}`}>Ver todo</Link>}</div>
-            <div className="qwt-grid">{featured.map(p => <ProductCard key={p.id} product={p} tenantSlug={tenantSlug} onAdd={onAdd} />)}</div>
+      <section className="qwt-section" style={{ paddingTop: 0 }}>
+        <div className="qwt-container">
+          <div className="qwt-section-head">
+            <div><h2>Productos destacados</h2><p>Selección recomendada para ti.</p></div>
+            {categories[0] && <Link className="qwt-link" to={`/tienda/${tenantSlug}/c/${categories[0].slug}`}>Ver todo</Link>}
           </div>
-        </section>
-      ) : (
-        <section className="qwt-section" style={{ paddingTop: categories.length ? 0 : undefined }}>
-          <div className="qwt-container">
-            <div className="qwt-section-head"><div><h2>Tu tienda está lista</h2><p>Aún no hay productos publicados para este tenant.</p></div></div>
-            <div style={{ border: '1px dashed #cbd5e1', borderRadius: 16, padding: 24, background: '#fff', color: '#475569' }}>
-              Cuando subas productos en Inventario, aparecerán aquí automáticamente.
-            </div>
-          </div>
-        </section>
-      )}
+          <div className="qwt-grid">{featured.map(p => <ProductCard key={p.id} product={p} tenantSlug={tenantSlug} onAdd={onAdd} />)}</div>
+        </div>
+      </section>
 
       {offers.length > 0 && (
         <section className="qwt-section" style={{ paddingTop: 0 }}>

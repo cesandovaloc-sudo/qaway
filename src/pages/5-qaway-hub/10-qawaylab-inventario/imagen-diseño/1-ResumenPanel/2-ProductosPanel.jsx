@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   FileSpreadsheet,
@@ -39,8 +40,10 @@ import {
 } from "lucide-react";
 
 import { productService } from "../../src/services/productService";
+import { uploadImageToStorage } from "../../src/services/aiSuggestionService";
 import { useTenant } from "../../src/context/TenantContext";
 import { useDismissOnEscapeOrOutside } from "../../../hooks/useDismissOnEscapeOrOutside";
+import ProductImport from "../../src/components/products/ProductImport";
 import PxpPopup from "./PxpPopup";
 
 /**
@@ -84,7 +87,8 @@ function getProductStockImage(product) {
 
 const css = `
 .pxp-root{--blue:#ff4b0b;--ink:#17233b;--muted:#71809e;--line:#e5ebf4;--soft:#f5f8fc;--green:#059669;--red:#e11d48;--amber:#d97706;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7f9fc;min-height:100vh;font-size:14px}
-.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:26px;font-weight:800;letter-spacing:-.6px;color:#0f172a;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,0.03)}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select-wrap{position:relative;display:inline-flex;align-items:center}.pxp-select{height:38px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;padding:0 34px 0 12px;color:#334155;font:inherit;font-size:13px;font-weight:500;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;transition:border-color .15s ease}.pxp-select:hover{border-color:#cbd5e1}.pxp-select:focus{border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.1)}.pxp-select-chevron{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:#64748b}.pxp-dmenu{position:absolute;left:0;top:calc(100% + 8px);min-width:100%;width:100%;box-sizing:border-box;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12),0 4px 12px rgba(15,23,42,0.06);padding:6px;z-index:1200;color-scheme:light}.pxp-dmenu-item{display:flex;width:100%;align-items:center;gap:8px;padding:8px 10px;border:0;background:transparent;border-radius:8px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;text-align:left;transition:background .12s ease}.pxp-dmenu-item:hover{background:#f1f5f9;color:#0f172a}.pxp-dmenu-item.sel{background:#f4f4f5;color:#0f172a;font-weight:600}.pxp-dmenu-dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#e2e8f0}.pxp-dmenu-item.sel .pxp-dmenu-dot{background:#52525b}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px;align-items:center}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:nth-child(even){background:#fafafa}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
+.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:26px;font-weight:800;letter-spacing:-.6px;color:#0f172a;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,0.03)}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select-wrap{position:relative;display:inline-flex;align-items:center}.pxp-select{height:38px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;padding:0 34px 0 12px;color:#334155;font:inherit;font-size:13px;font-weight:500;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;transition:border-color .15s ease}.pxp-select:hover{border-color:#cbd5e1}.pxp-select:focus{border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.1)}.pxp-select-chevron{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:#64748b}.pxp-dmenu{position:absolute;left:0;top:calc(100% + 8px);min-width:100%;width:100%;box-sizing:border-box;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12),0 4px 12px rgba(15,23,42,0.06);padding:6px;z-index:1200;color-scheme:light}.pxp-dmenu-item{display:flex;width:100%;align-items:center;gap:8px;padding:8px 10px;border:0;background:transparent;border-radius:8px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;text-align:left;transition:background .12s ease}.pxp-dmenu-item:hover{background:#f1f5f9;color:#0f172a}.pxp-dmenu-item.sel{background:#f4f4f5;color:#0f172a;font-weight:600}.pxp-dmenu-dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#e2e8f0}.pxp-dmenu-item.sel .pxp-dmenu-dot{background:#52525b}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px;align-items:center}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:nth-child(even){background:#fafafa}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:60;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}
+.pxp-action-menu.up{top:auto;bottom:40px}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
 .pxp-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:14px 0}
 .pxp-product-card{border:1px solid #e2e8f0;border-radius:12px;background:#fff;display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:0 1px 3px rgba(15,23,42,0.03);transition:border-color .15s ease,box-shadow .15s ease}
 .pxp-product-card:hover{border-color:#94a3b8;box-shadow:0 4px 14px rgba(15,23,42,0.06)}
@@ -796,14 +800,48 @@ export default function ProductosPanel() {
   const [view, setView] = useState("list");
   const [gridCols, setGridCols] = useState(5);
   const [menuId, setMenuId] = useState(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
   const [selected, setSelected] = useState([]);
   const [detailProduct, setDetailProduct] = useState(null);
   const [fullProduct, setFullProduct] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [fichaImages, setFichaImages] = useState([]);
+  const [fichaPreviewIndex, setFichaPreviewIndex] = useState(0);
+
+  const normalizeProductImages = (p) => {
+    const raw = Array.isArray(p?.images) ? p.images : [];
+    const fromArray = raw
+      .map((img, idx) => {
+        const url = typeof img === 'string' ? img : (img?.original_url || img?.processed_url || img?.url || '');
+        if (!url) return null;
+        return {
+          id: img?.id || `img-${idx}-${url.slice(-12)}`,
+          original_url: url,
+          processed_url: typeof img === 'string' ? url : (img?.processed_url || url),
+          is_primary: Boolean(img?.is_primary) || idx === 0,
+          sort_order: typeof img?.sort_order === 'number' ? img.sort_order : idx,
+        };
+      })
+      .filter(Boolean);
+    if (fromArray.length > 0) {
+      return fromArray
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map((img, idx) => ({ ...img, sort_order: idx, is_primary: idx === 0 }));
+    }
+    const fallback = p?.imageUrl || p?.image_url;
+    return fallback ? [{ id: `img-fallback-${fallback.slice(-12)}`, original_url: fallback, processed_url: fallback, is_primary: true, sort_order: 0 }] : [];
+  };
+
+  const openFicha = (p) => {
+    const imgs = normalizeProductImages(p);
+    setFichaImages(imgs);
+    setFichaPreviewIndex(0);
+    setFullProduct({ ...p, images: imgs, imageUrl: imgs[0]?.original_url || p?.imageUrl || null });
+    setMenuId(null);
+  };
   const [detailTab, setDetailTab] = useState("Resumen");
   const [modal, setModal] = useState("");
-  const [importStep, setImportStep] = useState(1);
-  const [importFile, setImportFile] = useState(null);
-  const [importOption, setImportOption] = useState("merge");
+  const [refreshKey, setRefreshKey] = useState(0);
   const [toast, setToast] = useState("");
   const [editing, setEditing] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -816,6 +854,7 @@ export default function ProductosPanel() {
   const [openFilter, setOpenFilter] = useState(null);
   const columnPickerRef = useRef(null);
   const actionsMenuRef = useRef(null);
+  const actionMenuPortalRef = useRef(null);
   const bulkMenuRef = useRef(null);
   const filterMenuRef = useRef(null);
 
@@ -824,7 +863,9 @@ export default function ProductosPanel() {
       if (columnPickerRef.current && !columnPickerRef.current.contains(event.target)) {
         setShowColumnPicker(false);
       }
-      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) {
+      const insideActions = actionsMenuRef.current && actionsMenuRef.current.contains(event.target);
+      const insidePortalMenu = actionMenuPortalRef.current && actionMenuPortalRef.current.contains(event.target);
+      if (menuId && !insideActions && !insidePortalMenu) {
         setMenuId(null);
       }
       if (bulkMenuRef.current && !bulkMenuRef.current.contains(event.target)) {
@@ -843,13 +884,18 @@ export default function ProductosPanel() {
         setOpenFilter(null);
       }
     }
+    function handleViewportChange() { setMenuId(null); }
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
+    window.addEventListener("scroll", handleViewportChange, true);
+    window.addEventListener("resize", handleViewportChange);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("scroll", handleViewportChange, true);
+      window.removeEventListener("resize", handleViewportChange);
     };
-  }, []);
+  }, [menuId]);
 
   const handleBulkStatusChange = (newStatus) => {
     setProducts(prev => prev.map(p => selected.includes(p.id) ? { ...p, status: newStatus } : p));
@@ -940,6 +986,8 @@ export default function ProductosPanel() {
             status: Number(p.stock) === 0 ? "Sin stock" : Number(p.stock) <= (p.min_stock || 10) ? "Stock bajo" : "Disponible",
             location: "Almacén Principal",
             image: "📦",
+            imageUrl: p.image_url || p.images?.[0]?.original_url || (typeof p.images?.[0] === 'string' ? p.images[0] : null),
+            images: Array.isArray(p.images) ? p.images : [],
             barcode: p.sku || "",
             brand: p.brand || "—",
             presentation: p.unit || "un.",
@@ -964,7 +1012,7 @@ export default function ProductosPanel() {
     }
     loadSupabaseProducts();
     return () => { isMounted = false; };
-  }, [activeTenantId, isPlatformAdmin]);
+  }, [activeTenantId, isPlatformAdmin, refreshKey]);
 
   const toggleColumn = key => {
     setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
@@ -1188,18 +1236,113 @@ export default function ProductosPanel() {
       }
     } 
   };
-  const handleImportFile = file => { if (!file) return; setImportFile(file); setImportStep(2); };
-  const finishImport = () => { showToast(importFile ? `Archivo "${importFile.name}" listo para procesar (demo)` : "Selecciona un archivo para continuar"); setModal(""); setImportStep(1); setImportFile(null); };
+  const handleImported = () => {
+    setRefreshKey(k => k + 1);
+  };
+
   const toggleSelected = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const selectAll = checked => setSelected(checked ? pageRows.map(p => p.id) : []);
-  const resetImport = () => { setImportStep(1); setImportFile(null); setModal("import"); };
+  const resetImport = () => { setModal("import"); };
+
+  const persistFichaImages = async (productId, nextImages) => {
+    const normalized = nextImages.map((img, idx) => ({
+      ...(typeof img === 'object' && img ? img : {}),
+      original_url: typeof img === 'string' ? img : (img?.original_url || img?.processed_url || img?.url),
+      processed_url: typeof img === 'string' ? img : (img?.processed_url || img?.original_url || img?.url),
+      is_primary: idx === 0,
+      sort_order: idx,
+    })).filter(img => img.original_url);
+    const primaryUrl = normalized[0]?.original_url || null;
+    await productService.updateProduct(productId, {
+      image_url: primaryUrl,
+      images: normalized,
+    });
+    setFichaImages(normalized);
+    setFichaPreviewIndex(prev => (normalized.length === 0 ? 0 : Math.min(prev, normalized.length - 1)));
+    setFullProduct(prev => prev ? { ...prev, images: normalized, imageUrl: primaryUrl } : prev);
+    setProducts(prev => prev.map(x => x.id === productId ? { ...x, imageUrl: primaryUrl, images: normalized } : x));
+    return normalized;
+  };
+
+  const handleFichaPhotoUpload = async (filesLike) => {
+    if (!fullProduct) return;
+    const files = Array.from(filesLike || []).filter(Boolean);
+    if (files.length === 0) return;
+    const imageFiles = files.filter(f => f.type?.startsWith("image/"));
+    if (imageFiles.length === 0) { showToast("Selecciona archivos de imagen"); return; }
+    setUploadingImage(true);
+    try {
+      const uploaded = [];
+      for (const file of imageFiles) {
+        const url = await uploadImageToStorage(file, "products");
+        if (url) uploaded.push({ original_url: url, processed_url: url });
+      }
+      if (uploaded.length === 0) throw new Error("No se pudieron subir las imágenes");
+      const nextImages = [...fichaImages, ...uploaded].map((img, idx) => ({ ...img, is_primary: idx === 0, sort_order: idx }));
+      await persistFichaImages(fullProduct.id, nextImages);
+      showToast(uploaded.length > 1 ? `${uploaded.length} fotos agregadas` : "Foto agregada");
+    } catch (err) {
+      console.error("[Inventi] Error al subir foto:", err);
+      showToast(`Error al subir la foto: ${err.message || "intenta de nuevo"}`);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleFichaImageRemove = async (index) => {
+    if (!fullProduct) return;
+    const nextImages = fichaImages.filter((_, i) => i !== index);
+    try {
+      await persistFichaImages(fullProduct.id, nextImages);
+      setFichaPreviewIndex((prev) => {
+        if (nextImages.length === 0) return 0;
+        if (prev === index) return Math.min(index, nextImages.length - 1);
+        if (index < prev) return prev - 1;
+        return prev;
+      });
+      showToast("Foto eliminada");
+    } catch (err) {
+      console.error("[Inventi] Error al eliminar foto:", err);
+      showToast(`Error al eliminar la foto: ${err.message || "intenta de nuevo"}`);
+    }
+  };
+
+  const handleFichaImageMove = async (index, direction) => {
+    if (!fullProduct) return;
+    const target = index + direction;
+    if (target < 0 || target >= fichaImages.length) return;
+    const nextImages = [...fichaImages];
+    const [moved] = nextImages.splice(index, 1);
+    nextImages.splice(target, 0, moved);
+    try {
+      await persistFichaImages(fullProduct.id, nextImages);
+      setFichaPreviewIndex((prev) => (prev === index ? target : prev === target ? index : prev));
+    } catch (err) {
+      console.error("[Inventi] Error al reordenar fotos:", err);
+      showToast(`Error al reordenar: ${err.message || "intenta de nuevo"}`);
+    }
+  };
+
+  const handleFichaSetPrimary = async (index) => {
+    if (!fullProduct || index <= 0) return;
+    const nextImages = [...fichaImages];
+    const [selectedImg] = nextImages.splice(index, 1);
+    nextImages.unshift(selectedImg);
+    try {
+      await persistFichaImages(fullProduct.id, nextImages);
+      showToast("Foto principal actualizada");
+    } catch (err) {
+      console.error("[Inventi] Error al cambiar foto principal:", err);
+      showToast(`Error al actualizar foto principal: ${err.message || "intenta de nuevo"}`);
+    }
+  };
 
   if (fullProduct) {
     return (
       <div className="pxp-root" style={{ background: "#fff", minHeight: "100vh", padding: "28px 36px" }}>
         <style>{css}</style>
         <button
-          onClick={() => setFullProduct(null)}
+          onClick={() => { setFullProduct(null); setFichaImages([]); setFichaPreviewIndex(0); }}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -1218,29 +1361,73 @@ export default function ProductosPanel() {
         </button>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, maxWidth: 1240, margin: "0 auto" }}>
-          {/* Galería limpia sin iconos genéricos */}
-          <div
-            style={{
-              background: "#f8fafc",
-              borderRadius: 16,
-              border: "1px solid #e2e8f0",
-              aspectRatio: "1/1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-            }}
-          >
-            {fullProduct.imageUrl ? (
-              <img
-                src={fullProduct.imageUrl}
-                alt={fullProduct.name}
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            ) : (
-              <div style={{ textAlign: "center", color: "#94a3b8" }}>
-                <div style={{ fontSize: 52, marginBottom: 8 }}>📷</div>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>Foto del producto</div>
+          {/* Galería de fotos */}
+          <div>
+            <div
+              style={{
+                background: "#f8fafc",
+                borderRadius: 16,
+                border: "1px solid #e2e8f0",
+                aspectRatio: "1/1",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+              }}
+            >
+              {(fichaImages[fichaPreviewIndex]?.original_url || fichaImages[0]?.original_url || fullProduct.imageUrl) ? (
+                <img
+                  src={fichaImages[fichaPreviewIndex]?.original_url || fichaImages[0]?.original_url || fullProduct.imageUrl}
+                  alt={fullProduct.name}
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
+              ) : (
+                <div style={{ textAlign: "center", color: "#94a3b8" }}>
+                  <div style={{ fontSize: 52, marginBottom: 8 }}>📷</div>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>Foto del producto</div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <label className="pxp-btn" style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", margin: 0 }}>
+                <Upload size={15} /> {uploadingImage ? "Subiendo..." : "Agregar fotos"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: "none" }}
+                  disabled={uploadingImage}
+                  onChange={e => { handleFichaPhotoUpload(e.target.files); e.target.value = ""; }}
+                />
+              </label>
+              {fichaImages.length > 0 && (
+                <span style={{ fontSize: 12, color: "#64748b" }}>{fichaImages.length} foto{fichaImages.length === 1 ? "" : "s"}</span>
+              )}
+            </div>
+
+            {fichaImages.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10, marginTop: 12 }}>
+                {fichaImages.map((img, idx) => (
+                  <div key={img.id || `${img.original_url}-${idx}`} style={{ border: fichaPreviewIndex === idx ? "2px solid #2563eb" : "1px solid #e2e8f0", borderRadius: 10, background: "#fff", overflow: "hidden" }}>
+                    <button
+                      type="button"
+                      onClick={() => setFichaPreviewIndex(idx)}
+                      title={idx === 0 ? "Foto principal" : `Ver foto ${idx + 1}`}
+                      style={{ width: "100%", aspectRatio: "1/1", padding: 0, border: 0, background: "#f8fafc", cursor: "pointer", display: "block" }}
+                    >
+                      <img src={img.original_url} alt={`Foto ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </button>
+                    <div style={{ padding: "6px", display: "grid", gap: 4 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: idx === 0 ? "#2563eb" : "#64748b", textAlign: "center" }}>{idx === 0 ? "Principal" : `Foto ${idx + 1}`}</div>
+                      <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
+                        <button type="button" className="pxp-btn small" disabled={idx === 0 || uploadingImage} onClick={() => handleFichaImageMove(idx, -1)} style={{ padding: "2px 6px", minWidth: 0 }}>←</button>
+                        <button type="button" className="pxp-btn small" disabled={idx === fichaImages.length - 1 || uploadingImage} onClick={() => handleFichaImageMove(idx, 1)} style={{ padding: "2px 6px", minWidth: 0 }}>→</button>
+                        <button type="button" className="pxp-btn small" disabled={uploadingImage} onClick={() => handleFichaImageRemove(idx)} style={{ padding: "2px 6px", minWidth: 0, color: "#dc2626", borderColor: "#fecaca" }}>✕</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -1752,7 +1939,7 @@ export default function ProductosPanel() {
                     </tr>
                   )) : pageRows.map(p => <tr key={p.id}>
                     <td><input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} /></td>
-                    {visibleColumns.includes("product") && <td onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><ProductThumb id={p.id} category={p.category} name={p.name} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
+                    {visibleColumns.includes("product") && <td onClick={() => openFicha(p)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><ProductThumb id={p.id} category={p.category} name={p.name} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
                     {visibleColumns.includes("sku") && <td>{p.sku}</td>}
                     {visibleColumns.includes("barcode") && <td>{p.barcode || "—"}</td>}
                     {visibleColumns.includes("category") && <td>{p.category}</td>}
@@ -1761,18 +1948,17 @@ export default function ProductosPanel() {
                     {visibleColumns.includes("wholesale") && <td>{money(p.wholesale || p.price)}</td>}
                     {visibleColumns.includes("status") && <td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td>}
                     {visibleColumns.includes("location") && <td>{p.location}</td>}
-                    <td><div className="pxp-actions" ref={menuId === p.id ? actionsMenuRef : null}><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(p)}>✎</button><button className={`pxp-icon-btn ${menuId === p.id ? "selected" : ""}`} title="Más acciones" onClick={() => setMenuId(menuId === p.id ? null : p.id)}>···</button>
-                      {menuId === p.id && <div className="pxp-action-menu">
-                        <button onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
-                        <button onClick={() => openEdit(p)}>✎　Editar producto</button>
-                        <button onClick={() => { setProducts(prev => [{ ...p, id: Date.now(), name: `${p.name} (copia)`, sku: `${p.sku}-COPY` }, ...prev]); setMenuId(null); showToast("Producto duplicado"); }}>▣　Duplicar</button>
-                        <button onClick={() => { setEditing(p); setForm({ name: p.name, sku: p.sku, category: p.category, stock: p.stock, price: p.price, location: p.location, description: p.description || "" }); setModal("stock"); setMenuId(null); }}>▤　Ajustar stock</button>
-                        <button onClick={() => { setDetailProduct(p); setDetailTab("Movimientos"); setMenuId(null); }}>⇄　Ver movimientos</button>
-                        <button onClick={() => { setDetailProduct(p); setDetailTab("Precios"); setMenuId(null); }}>⌁　Historial de precios</button>
-                        <button onClick={() => { setMenuId(null); showToast("No hay ventas vinculadas en esta demo"); }}>🛒　Ver en ventas</button>
-                        <button onClick={() => { setMenuId(null); showToast("No hay compras vinculadas en esta demo"); }}>▣　Ver en compras</button>
-                        <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar "${p.name}"?`)) { setProducts(prev => prev.filter(x => x.id !== p.id)); setMenuId(null); showToast("Producto eliminado"); } }}>▤　Eliminar</button>
-                      </div>}
+                    <td><div className="pxp-actions" ref={menuId === p.id ? actionsMenuRef : null}><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(p)}>✎</button><button className={`pxp-icon-btn ${menuId === p.id ? "selected" : ""}`} title="Más acciones" onClick={(e) => {
+                      if (menuId === p.id) { setMenuId(null); return; }
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const menuWidth = 190;
+                      const menuHeight = 260;
+                      const openUp = window.innerHeight - rect.bottom < menuHeight + 12;
+                      const top = openUp ? Math.max(8, rect.top - menuHeight - 6) : rect.bottom + 6;
+                      const left = Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8));
+                      setMenuPos({ top, left });
+                      setMenuId(p.id);
+                    }}>···</button>
                     </div></td>
                   </tr>)}
                   {!isLoadingProducts && pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
@@ -1787,7 +1973,7 @@ export default function ProductosPanel() {
                   {pageRows.map(p => {
                     const isSelected = selected.includes(p.id);
                     return (
-                      <article className="pxp-product-card" key={p.id} onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}>
+                      <article className="pxp-product-card" key={p.id} onClick={() => openFicha(p)} style={{ cursor: "pointer" }}>
                         <div className="pxp-card-media">
                           <img
                             src={getProductStockImage(p)}
@@ -2060,7 +2246,7 @@ export default function ProductosPanel() {
                 <div className="pxp-detail-box">
                   <h3>🛒 Historial de Ventas y Salidas</h3>
                   <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin ventas registradas en esta demo</p>
+                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin ventas registradas</p>
                     <p style={{ margin: 0, fontSize: 13 }}>Las órdenes y boletas/facturas generadas en el POS se listarán aquí en tiempo real.</p>
                   </div>
                 </div>
@@ -2072,17 +2258,33 @@ export default function ProductosPanel() {
 
 
 
-      {modal === "import" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" onClick={e => e.stopPropagation()}>
-        <div className="pxp-modal-head"><div className="pxp-heading-icon"><FileSpreadsheet size={20} /></div><div><h2>Importar productos</h2><p>Carga productos desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevos.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
-        <div className="pxp-modal-body">
-          <div className="pxp-stepper">{["Cargar archivo", "Mapear campos", "Validar datos", "Importar"].map((s, i) => <div key={s} className={`pxp-step ${importStep === i + 1 ? "active" : importStep > i + 1 ? "done" : ""}`}><span>{importStep > i + 1 ? "✓" : i + 1}</span><div><b>{s}</b><div className="pxp-muted">{["Selecciona tu archivo", "Relaciona las columnas", "Revisa los registros", "Confirma y procesa"][i]}</div></div></div>)}</div>
-          {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}><Download size={32} /></div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>Información importante</b><ul><li>Puedes importar productos nuevos o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y SKU (o código).</li><li>Si el SKU ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir categorías, precios, stock y ubicaciones.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
-          {importStep === 2 && <div className="pxp-panel"><h3>2. Mapear campos</h3><p className="pxp-muted">Relaciona las columnas de tu archivo con los campos del sistema.</p>{["Código → SKU (obligatorio)", "Nombre del producto → Nombre (obligatorio)", "Categoría → Categoría", "Precio → Precio base", "Stock inicial → Stock", "Ubicación → Ubicación principal", "Descripción → Descripción", "Código de barras → Código de barras"].map(row => <div className="pxp-map-row" key={row}><input value={row.split(" → ")[0]} readOnly /><select defaultValue={row.split(" → ")[1]}><option>{row.split(" → ")[1]}</option><option>Omitir columna</option><option>Descripción</option><option>Stock</option><option>Precio base</option></select></div>)}</div>}
-          {importStep === 3 && <div className="pxp-panel"><h3>3. Vista previa y validación</h3><p className="pxp-muted">{importFile ? `Archivo seleccionado: ${importFile.name}` : "Vista previa de registros de ejemplo."} Revisa los campos antes de continuar.</p><div className="pxp-preview-scroll"><table className="pxp-preview-table"><thead><tr><th>#</th><th>SKU</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead><tbody>{products.slice(0, 5).map((p, i) => <tr key={p.id}><td>{i + 1}</td><td>{p.sku}</td><td>{p.name}</td><td>{p.category}</td><td>{p.price.toFixed(2)}</td><td>{p.stock}</td><td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td></tr>)}</tbody></table></div></div>}
-          {importStep === 4 && <div className="pxp-info"><h3>4. Confirmar importación</h3><p>Revisa el modo de importación. La ejecución real requiere conectar el servicio de importación del backend.</p><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "merge"} onChange={() => setImportOption("merge")} /> Agregar nuevos y actualizar existentes</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "new"} onChange={() => setImportOption("new")} /> Solo agregar nuevos</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "update"} onChange={() => setImportOption("update")} /> Solo actualizar existentes</label></div>}
-        </div>
-        <div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => importStep > 1 ? setImportStep(s => s - 1) : setModal("")}>{importStep > 1 ? "← Anterior" : "Cancelar"}</button><button className="pxp-btn primary" onClick={() => { if (importStep < 4) { if (importStep === 1 && !importFile) { showToast("Selecciona un archivo para continuar"); return; } setImportStep(s => s + 1); } else finishImport(); }}>{importStep === 4 ? "Confirmar e importar" : "Continuar →"}</button></div>
-      </section></div>}
+      {menuId && (() => {
+        const menuProduct = pageRows.find(x => x.id === menuId) || products.find(x => x.id === menuId);
+        if (!menuProduct) return null;
+        const p = menuProduct;
+        return createPortal(
+          <div
+            ref={actionMenuPortalRef}
+            className="pxp-action-menu"
+            style={{ position: "fixed", top: menuPos.top, left: menuPos.left, right: "auto", bottom: "auto", zIndex: 10000 }}
+          >
+            <button onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
+            <button onClick={() => openFicha(p)}>▧　Abrir ficha</button>
+            <button onClick={() => openEdit(p)}>✎　Editar producto</button>
+            <button onClick={() => { setProducts(prev => [{ ...p, id: Date.now(), name: `${p.name} (copia)`, sku: `${p.sku}-COPY` }, ...prev]); setMenuId(null); showToast("Producto duplicado"); }}>▣　Duplicar</button>
+            <button onClick={() => { setEditing(p); setForm({ name: p.name, sku: p.sku, category: p.category, stock: p.stock, price: p.price, location: p.location, description: p.description || "" }); setModal("stock"); setMenuId(null); }}>▤　Ajustar stock</button>
+            <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar "${p.name}"?`)) { setProducts(prev => prev.filter(x => x.id !== p.id)); setMenuId(null); showToast("Producto eliminado"); } }}>▤　Eliminar</button>
+          </div>,
+          document.body
+        );
+      })()}
+
+      {modal === "import" && (
+        <ProductImport
+          onClose={() => setModal("")}
+          onImported={handleImported}
+        />
+      )}
 
       {modal === "product" && (
         <ProductModal

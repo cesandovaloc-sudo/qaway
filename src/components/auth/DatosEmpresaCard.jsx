@@ -54,8 +54,21 @@ export const S = {
   },
 }
 
-export function splitPhone(raw) {
+export function splitPhone(raw, countryName = '') {
   const s = String(raw || '').trim()
+  const conEspacio = s.match(/^(\+\d{1,4})\s+(.+)$/)
+  if (conEspacio) return { prefix: conEspacio[1], digits: conEspacio[2].replace(/\D/g, '') }
+  if (s.startsWith('+')) {
+    const paisPais = countryName ? PAISES.find((p) => p.nombre === countryName) : null
+    if (paisPais?.dial && s.startsWith(paisPais.dial)) {
+      return { prefix: paisPais.dial, digits: s.slice(paisPais.dial.length).replace(/\D/g, '') }
+    }
+    const conocidos = [...PAISES].sort((a, b) => (b.dial?.length || 0) - (a.dial?.length || 0))
+    const matchPais = conocidos.find((p) => p.dial && s.startsWith(p.dial))
+    if (matchPais?.dial) {
+      return { prefix: matchPais.dial, digits: s.slice(matchPais.dial.length).replace(/\D/g, '') }
+    }
+  }
   const m = s.match(/^(\+\d{1,4})\s*(.*)$/)
   if (m) return { prefix: m[1], digits: m[2].replace(/\D/g, '') }
   return { prefix: '', digits: s.replace(/\D/g, '') }
@@ -63,7 +76,7 @@ export function splitPhone(raw) {
 
 export function formDesdeTenant(t) {
   const contacto = t?.content?.contact || {}
-  const telefono = splitPhone(contacto.phone)
+  const telefono = splitPhone(contacto.phone, contacto.country)
   const rubroGuardado = t?.features?.rubro || ''
   const rubroEsStandard = RUBROS.includes(rubroGuardado)
   return {
@@ -105,9 +118,11 @@ export function validarDatosEmpresa(form) {
 }
 
 export function contactoDesdeForm(form, prefix) {
+  const digits = String(form.phone || '').replace(/\D/g, '')
+  const pref = String(prefix || '').trim()
   return {
     email: form.email.trim(),
-    phone: `${prefix}${String(form.phone || '').replace(/\D/g, '')}`.trim(),
+    phone: pref && digits ? `${pref} ${digits}` : `${pref}${digits}`.trim(),
     address: '',
     country: form.country,
   }
@@ -117,7 +132,36 @@ export function rubroDesdeForm(form) {
   return form.rubro === 'Otro' ? form.customRubro.trim() : form.rubro
 }
 
-function Campo({ label, error, children }) {
+function Campo({ label, description, error, horizontal = false, children }) {
+  if (horizontal) {
+    return (
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(180px, 280px) minmax(0, 540px)',
+          gap: '24px',
+          padding: '16px 0',
+          borderBottom: '1px solid #f1f5f9',
+          alignItems: 'flex-start',
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <label style={{ ...S.label, display: 'block', fontSize: '13px', fontWeight: 600, color: '#0f172a', marginBottom: description ? '4px' : 0 }}>
+            {label}
+          </label>
+          {description ? (
+            <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
+              {description}
+            </p>
+          ) : null}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
+          {children}
+          {error ? <span style={S.fieldError}>{error}</span> : null}
+        </div>
+      </div>
+    )
+  }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
       <label style={S.label}>{label}</label>
@@ -144,6 +188,7 @@ export default function DatosEmpresaCard({
   subtitle = 'Solo falta esta información para entrar a tu espacio de trabajo.',
   soloLectura = false,
   encabezadoExtra = null,
+  headerAction = null,
 }) {
   const pais = PAISES.find((p) => p.nombre === form.country) || null
   const input = (extra = {}) => ({ ...S.input, ...(soloLectura ? S.readonly : {}), ...extra })
@@ -152,10 +197,15 @@ export default function DatosEmpresaCard({
     <div style={fullWidth ? { ...S.card, maxWidth: 'none', boxShadow: 'none' } : S.card}>
       <div style={S.header}>
         <div style={S.iconBox}><Building2 size={18} /></div>
-        <div>
+        <div style={{ flex: 1 }}>
           <h1 className="no-qw" style={S.title}>{title}</h1>
           <p style={S.subtitle}>{subtitle}</p>
         </div>
+        {headerAction && (
+          <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
+            {headerAction}
+          </div>
+        )}
       </div>
 
       <form
@@ -178,11 +228,21 @@ export default function DatosEmpresaCard({
 
         {encabezadoExtra}
 
-        <Campo label="Nombre comercial" error={errores.name}>
+        <Campo
+          horizontal={fullWidth}
+          label="Nombre comercial"
+          description="Nombre visible de la organización en reportes y barra lateral."
+          error={errores.name}
+        >
           <input style={input()} value={form.name} onChange={(e) => setField('name', e.target.value)} placeholder="Ej. CoraVet" readOnly={soloLectura} required />
         </Campo>
 
-        <Campo label="País / ubicación" error={errores.country}>
+        <Campo
+          horizontal={fullWidth}
+          label="País / ubicación"
+          description="País principal donde opera la organización."
+          error={errores.country}
+        >
           <SelectEstilizado
             value={form.country}
             placeholder="Selecciona tu país…"
@@ -192,7 +252,12 @@ export default function DatosEmpresaCard({
           />
         </Campo>
 
-        <Campo label="Rubro / actividad" error={errores.rubro}>
+        <Campo
+          horizontal={fullWidth}
+          label="Rubro / actividad"
+          description="Sector o actividad económica principal."
+          error={errores.rubro}
+        >
           <SelectEstilizado
             value={form.rubro}
             placeholder="Selecciona tu rubro…"
@@ -203,22 +268,50 @@ export default function DatosEmpresaCard({
         </Campo>
 
         {form.rubro === 'Otro' ? (
-          <Campo label="Especifica tu rubro" error={errores.customRubro}>
+          <Campo
+            horizontal={fullWidth}
+            label="Especifica tu rubro"
+            description="Describe brevemente la actividad específica de tu empresa."
+            error={errores.customRubro}
+          >
             <input style={input()} value={form.customRubro} onChange={(e) => setField('customRubro', e.target.value)} placeholder="Ej. Consultoría, Arquitectura…" readOnly={soloLectura} required />
           </Campo>
         ) : null}
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#334155' }}>
-          <input type="checkbox" checked={form.constituida} onChange={(e) => setField('constituida', e.target.checked)} disabled={soloLectura} />
-          ¿Es una empresa constituida?
-        </label>
+        {fullWidth ? (
+          <Campo
+            horizontal
+            label="Empresa constituida"
+            description="Habilita los campos legales de razón social y RUC."
+          >
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: soloLectura ? '#64748b' : '#334155', cursor: soloLectura ? 'not-allowed' : 'pointer' }}>
+              <input type="checkbox" checked={form.constituida} onChange={(e) => setField('constituida', e.target.checked)} disabled={soloLectura} />
+              <span>¿Es una empresa constituida?</span>
+            </label>
+          </Campo>
+        ) : (
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#334155' }}>
+            <input type="checkbox" checked={form.constituida} onChange={(e) => setField('constituida', e.target.checked)} disabled={soloLectura} />
+            ¿Es una empresa constituida?
+          </label>
+        )}
 
         {form.constituida ? (
           <>
-            <Campo label="Razón social" error={errores.legal}>
+            <Campo
+              horizontal={fullWidth}
+              label="Razón social"
+              description="Denominación legal registrada ante la autoridad tributaria."
+              error={errores.legal}
+            >
               <input style={input()} value={form.legal} onChange={(e) => setField('legal', e.target.value)} placeholder="Nombre legal de la empresa" readOnly={soloLectura} required />
             </Campo>
-            <Campo label={pais?.nombre === 'Perú' ? 'RUC / identificación fiscal' : 'Identificación fiscal / RUC'} error={errores.ruc}>
+            <Campo
+              horizontal={fullWidth}
+              label={pais?.nombre === 'Perú' ? 'RUC / identificación fiscal' : 'Identificación fiscal / RUC'}
+              description="Número de registro tributario oficial."
+              error={errores.ruc}
+            >
               <input
                 style={input()}
                 value={form.ruc}
@@ -232,7 +325,12 @@ export default function DatosEmpresaCard({
           </>
         ) : null}
 
-        <Campo label="Teléfono / WhatsApp" error={errores.phone}>
+        <Campo
+          horizontal={fullWidth}
+          label="Teléfono / WhatsApp"
+          description="Número de contacto institucional con código de país."
+          error={errores.phone}
+        >
           <div style={{ display: 'flex', gap: '8px' }}>
             <input
               value={prefix}
@@ -244,7 +342,7 @@ export default function DatosEmpresaCard({
             />
             <input
               value={String(form.phone || '').replace(/\D/g, '').replace(/(\d{3})(?=\d)/g, '$1 ')}
-              onChange={(e) => setNumeric('phone', e.target.value, pais?.maxDigitos ? pais.maxDigitos + 2 : 15)}
+              onChange={(e) => setNumeric('phone', e.target.value, pais?.maxDigitos || 15)}
               placeholder="999 999 999"
               inputMode="tel"
               readOnly={soloLectura}
@@ -254,15 +352,32 @@ export default function DatosEmpresaCard({
           </div>
         </Campo>
 
-        <Campo label="Correo de empresa" error={errores.email}>
+        <Campo
+          horizontal={fullWidth}
+          label="Correo de empresa"
+          description="Correo electrónico oficial de contacto de la organización."
+          error={errores.email}
+        >
           <input type="email" style={input()} value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="contacto@empresa.com" readOnly={soloLectura} required />
         </Campo>
 
         {soloLectura ? null : (
-          <button type="submit" disabled={saving} style={{ ...S.button, opacity: saving ? 0.55 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}>
-            <CheckCircle2 size={16} />
-            <span>{saving ? 'Guardando...' : submitLabel}</span>
-          </button>
+          <div style={fullWidth ? { display: 'flex', justifyContent: 'flex-end', paddingTop: '8px' } : undefined}>
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                ...S.button,
+                width: fullWidth ? 'auto' : '100%',
+                padding: fullWidth ? '10px 18px' : S.button.padding,
+                opacity: saving ? 0.55 : 1,
+                cursor: saving ? 'not-allowed' : 'pointer',
+              }}
+            >
+              <CheckCircle2 size={16} />
+              <span>{saving ? 'Guardando...' : submitLabel}</span>
+            </button>
+          </div>
         )}
       </form>
     </div>

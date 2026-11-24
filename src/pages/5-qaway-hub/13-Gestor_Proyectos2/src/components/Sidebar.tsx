@@ -2,8 +2,10 @@
 // Optimizado para altura 100vh sin scroll y con Configuración en la base.
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ModuleKey, UserRole } from '../types';
+import { MODULE_SLUGS } from '../types';
 import { listGestorUnits } from '../services/gestorOrganizacionService';
 import { fetchCronogramaFromSupabase } from '../services/gestorCronogramaService';
+import { usePerfilVisible } from '../services/perfilVisibleService';
 import {
   BarChart3,
   Building2,
@@ -103,15 +105,53 @@ export default function Sidebar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const { perfil: perfilVisible } = usePerfilVisible();
+  const empresaNombre = String(perfilVisible?.tenant?.name || '').trim() || 'qaway';
+  const empresaLogoUrl =
+    typeof perfilVisible?.tenant?.branding?.logo_url === 'string'
+      ? perfilVisible.tenant.branding.logo_url
+      : '';
+  const logoMarcoBlanco = Boolean(perfilVisible?.tenant?.branding?.logo_marco_blanco);
+  const empresaInicial = empresaNombre.charAt(0).toUpperCase() || 'q';
+
+  const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, k: ModuleKey) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    handleModule(k);
+  };
+
   return (
     <aside className="sidebar">
-      <div className="brand">
-        <div className="brand-mark">q</div>
-        <div>
-          <b>qaway</b>
+      <a
+        href={MODULE_SLUGS.resumen}
+        className="brand"
+        title="Ir al inicio (Resumen del proyecto)"
+        onClick={(e) => onLinkClick(e, 'resumen')}
+        style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+      >
+        {empresaLogoUrl ? (
+          <img
+            src={empresaLogoUrl}
+            alt={empresaNombre}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              objectFit: 'contain',
+              ...(logoMarcoBlanco ? { background: '#ffffff', padding: '2px' } : {}),
+              flexShrink: 0,
+            }}
+          />
+        ) : (
+          <div className="brand-mark">{empresaInicial}</div>
+        )}
+        <div style={{ minWidth: 0 }}>
+          <b style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {empresaNombre}
+          </b>
           <small>GESTOR DE PROYECTOS</small>
         </div>
-      </div>
+      </a>
 
       {/* Sección Proyecto Activo */}
       <div style={{ position: 'relative' }} ref={projectDropdownRef}>
@@ -244,68 +284,83 @@ export default function Sidebar({
       </div>
 
       <div className="side-label">PROYECTO</div>
-      <button
+      <a
+        href={MODULE_SLUGS.resumen}
         className={active === 'resumen' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('resumen')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'resumen')}
       >
         <LayoutDashboard size={18} />
-        <span>Resumen del proyecto</span>
-      </button>
+        <span>Resumen</span>
+      </a>
 
-      <button
+      <a
+        href={MODULE_SLUGS.cronograma}
         className={active === 'cronograma' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('cronograma')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'cronograma')}
       >
         <CalendarDays size={18} />
         <span>Proyecto</span>
-      </button>
+      </a>
 
-      <button
+      <a
+        href={MODULE_SLUGS.sedes}
         className={active === 'sedes' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('sedes')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'sedes')}
       >
         <Building2 size={18} />
         <span>Sedes</span>
-      </button>
+      </a>
 
-      <button
+      <a
+        href={MODULE_SLUGS.usuarios}
         className={active === 'usuarios' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('usuarios')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'usuarios')}
       >
         <UserRound size={18} />
         <span>Equipo</span>
-      </button>
-      <button
+      </a>
+      <a
+        href={MODULE_SLUGS.tareas2}
         className={active === 'tareas2' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('tareas2')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'tareas2')}
       >
         <CheckSquare size={18} />
         <span>Tareas</span>
-        
-      </button>
+      </a>
 
-      <button
+      <a
+        href={MODULE_SLUGS.reuniones}
         className={active === 'reuniones' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('reuniones')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'reuniones')}
       >
         <Users size={18} />
         <span>Reuniones</span>
-      </button>
-      <button
+      </a>
+      <a
+        href={MODULE_SLUGS.reuniones2}
         className={active === 'reuniones2' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('reuniones2')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'reuniones2')}
       >
         <CalendarDays size={18} />
         <span>Agenda</span>
-      </button>
+      </a>
 
-      <button
+      <a
+        href={MODULE_SLUGS.reportes2}
         className={active === 'reportes2' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('reportes2')}
+        style={{ textDecoration: 'none' }}
+        onClick={(e) => onLinkClick(e, 'reportes2')}
       >
         <BarChart3 size={18} />
         <span>Reportes</span>
-      </button>
+      </a>
 
       {/* PRUEBAS queda oculto temporalmente para no cargar sus librerías experimentales. */}
 
@@ -314,14 +369,29 @@ export default function Sidebar({
 
       {/* Configuración en la base del sidebar */}
       <div style={{ borderTop: '1px solid #35465a', paddingTop: '10px' }}>
-        <button
+        <a
+          href={MODULE_SLUGS.configuracion}
           className={active === 'configuracion' ? 'side-link active' : 'side-link'}
-          style={{ width: '100%', marginBottom: 0 }}
-          onClick={() => handleModule('configuracion')}
+          style={{ width: '100%', marginBottom: 0, textDecoration: 'none' }}
+          onClick={(e) => onLinkClick(e, 'configuracion')}
         >
           <Settings size={18} />
           <span>Configuración</span>
-        </button>
+        </a>
+        {!collapsed && (
+          <div
+            style={{
+              marginTop: '8px',
+              padding: '4px 6px 0',
+              fontSize: '10px',
+              lineHeight: 1.35,
+              color: '#64748b',
+              textAlign: 'center',
+            }}
+          >
+            Sistema creado por Qaway Lab · Derechos reservados
+          </div>
+        )}
       </div>
     </aside>
   );

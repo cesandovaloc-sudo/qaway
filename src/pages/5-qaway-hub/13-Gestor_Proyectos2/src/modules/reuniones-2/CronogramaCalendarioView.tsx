@@ -1,4 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  EVENTO_PARAMS_CRONOGRAMA,
+  getParametrosCronograma,
+  isDowLaboral,
+} from '../../services/gpCronogramaConfigService';
 import {
   CalendarDays,
   CalendarPlus,
@@ -161,6 +166,14 @@ export default function CronogramaCalendarioView({
   onNotify,
   onCreateMeeting,
 }: CronogramaCalendarioViewProps) {
+  const [cronoParams, setCronoParams] = useState(() => getParametrosCronograma());
+
+  useEffect(() => {
+    const onParams = () => setCronoParams(getParametrosCronograma());
+    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, onParams);
+    return () => window.removeEventListener(EVENTO_PARAMS_CRONOGRAMA, onParams);
+  }, []);
+
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [dayModalDate, setDayModalDate] = useState<string | null>(null);
   const [dayModalTab, setDayModalTab] = useState<'agenda' | 'crear'>('agenda');
@@ -545,16 +558,27 @@ export default function CronogramaCalendarioView({
         </div>
 
         {/* 1. SUB-VISTA: MES (Cuadrícula Dinámica con Selección de Día y Tarjetas Sólidas) */}
-        {calSubView === 'Mes' && (
+        {calSubView === 'Mes' && (() => {
+          const columnasVisibles = WEEK_DAY_LABELS.map((dayLabel, idx) => {
+            const dow = (idx + 1) % 7;
+            const laboral = isDowLaboral(dow, cronoParams.semanaLaboral, cronoParams.diasLaboralesCustom);
+            return { dayLabel, idx, dow, laboral };
+          }).filter((c) => (showWeekends ? true : c.laboral));
+          const colCount = Math.max(1, columnasVisibles.length);
+          const colsStyle = { gridTemplateColumns: `repeat(${colCount}, 1fr)` };
+
+          return (
           <div className="cal-month-canvas">
-            {/* Cabecera de Días de la Semana: L–V o L–D */}
-            <div
-              className="cal-weekdays-header"
-              style={{ gridTemplateColumns: showWeekends ? 'repeat(7, 1fr)' : 'repeat(5, 1fr)' }}
-            >
-              {(showWeekends ? WEEK_DAY_LABELS : WEEK_DAY_LABELS.slice(0, 5)).map((dayLabel) => (
-                <div key={dayLabel} className="cal-weekday-col">
-                  {dayLabel}
+            {/* Cabecera de Días de la Semana */}
+            <div className="cal-weekdays-header" style={colsStyle}>
+              {columnasVisibles.map((col) => (
+                <div
+                  key={col.dayLabel}
+                  className="cal-weekday-col"
+                  style={col.laboral ? undefined : { color: '#94a3b8', background: '#f1f5f9' }}
+                  title={col.laboral ? undefined : 'Día no laboral (Parámetros del Cronograma)'}
+                >
+                  {col.dayLabel}
                 </div>
               ))}
             </div>
@@ -563,11 +587,11 @@ export default function CronogramaCalendarioView({
             <div className="cal-grid-body">
               {monthWeeks.map((week) => {
                 const rawEvs = weekEvents[week.weekIndex] || [];
-                const evs = showWeekends ? rawEvs : rawEvs.filter((e) => e.colStart <= 5);
-                const visibleDays = showWeekends ? week.days : week.days.slice(0, 5);
+                const visibleIdxSet = new Set(columnasVisibles.map((c) => c.idx + 1));
+                const evs = showWeekends ? rawEvs : rawEvs.filter((e) => visibleIdxSet.has(e.colStart));
+                const visibleDays = columnasVisibles.map((c) => ({ day: week.days[c.idx], laboral: c.laboral }));
                 const maxRow = evs.reduce((acc, e) => Math.max(acc, e.row), 0);
                 const dynamicMinHeight = Math.max(126, 42 + maxRow * 32);
-                const colsStyle = { gridTemplateColumns: showWeekends ? 'repeat(7, 1fr)' : 'repeat(5, 1fr)' };
 
                 return (
                 <div
@@ -576,12 +600,13 @@ export default function CronogramaCalendarioView({
                   style={{ ...colsStyle, minHeight: `${dynamicMinHeight}px` }}
                 >
                   {/* Celdas de fondo clicables con selección de día y Drag & Drop */}
-                  {visibleDays.map((day, idx) => (
+                  {visibleDays.map(({ day, laboral }, idx) => (
                     <div
                       key={idx}
                       className={`cal-day-bg-cell r2-day-cell ${!day.isCurrentMonth ? 'outside' : ''} ${
                         day.iso === activeDateIso ? 'is-selected' : ''
                       } ${dragOverDate === day.iso ? 'r2-drag-over' : ''}`}
+                      style={laboral ? undefined : { background: '#f1f5f9' }}
                       onClick={() => {
                         onSelectDate?.(day.iso);
                         openDayModal(day.iso);
@@ -706,7 +731,8 @@ export default function CronogramaCalendarioView({
               })}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* 2. SUB-VISTA: SEMANA (TimeGrid Semanal Real L–V o L–D con cabecera sticky alineada 1:1) */}
         {calSubView === 'Semana' && (() => {

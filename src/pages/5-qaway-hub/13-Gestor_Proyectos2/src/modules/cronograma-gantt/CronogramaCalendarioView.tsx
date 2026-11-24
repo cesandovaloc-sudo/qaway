@@ -1,4 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  EVENTO_PARAMS_CRONOGRAMA,
+  getParametrosCronograma,
+  isDowLaboral,
+} from '../../services/gpCronogramaConfigService';
 import {
   CalendarDays,
   ChevronLeft,
@@ -115,6 +120,13 @@ export default function CronogramaCalendarioView({
   showBaseline = true,
   showBarAvatars = false,
 }: CronogramaCalendarioViewProps) {
+  const [cronoParams, setCronoParams] = useState(() => getParametrosCronograma());
+
+  useEffect(() => {
+    const onParams = () => setCronoParams(getParametrosCronograma());
+    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, onParams);
+    return () => window.removeEventListener(EVENTO_PARAMS_CRONOGRAMA, onParams);
+  }, []);
 
   // Generación dinámica de semanas para el mes/año seleccionado
   const monthWeeks = useMemo(() => {
@@ -424,13 +436,22 @@ export default function CronogramaCalendarioView({
         {/* 1. SUB-VISTA: MES (Cuadrícula Dinámica con Barras de Gantt) */}
         {calSubView === 'Mes' && (
           <div className="cal-month-canvas">
-            {/* Cabecera de Días de la Semana: Lunes a Domingo */}
+            {/* Cabecera de Días de la Semana */}
             <div className="cal-weekdays-header">
-              {WEEK_DAY_LABELS.map((dayLabel) => (
-                <div key={dayLabel} className="cal-weekday-col">
-                  {dayLabel}
-                </div>
-              ))}
+              {WEEK_DAY_LABELS.map((dayLabel, idx) => {
+                const dow = (idx + 1) % 7;
+                const laboral = isDowLaboral(dow, cronoParams.semanaLaboral, cronoParams.diasLaboralesCustom);
+                return (
+                  <div
+                    key={dayLabel}
+                    className="cal-weekday-col"
+                    style={laboral ? undefined : { color: '#94a3b8', background: '#f1f5f9' }}
+                    title={laboral ? undefined : 'Día no laboral (Parámetros del Cronograma)'}
+                  >
+                    {dayLabel}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Rejilla de Semanas calculadas dinámicamente */}
@@ -446,14 +467,21 @@ export default function CronogramaCalendarioView({
                   style={{ minHeight: `${dynamicMinHeight}px` }}
                 >
                   {/* Celdas de fondo con número de día */}
-                  {week.days.map((day, idx) => (
-                    <div
-                      key={idx}
-                      className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''}`}
-                    >
-                      <span className="cal-num">{day.dayNumber}</span>
-                    </div>
-                  ))}
+                  {week.days.map((day, idx) => {
+                    const dow = (idx + 1) % 7;
+                    const laboral = isDowLaboral(dow, cronoParams.semanaLaboral, cronoParams.diasLaboralesCustom);
+                    return (
+                      <div
+                        key={idx}
+                        className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''}`}
+                        style={laboral ? undefined : { background: '#f1f5f9' }}
+                      >
+                        <span className="cal-num" style={laboral ? undefined : { color: '#94a3b8' }}>
+                          {day.dayNumber}
+                        </span>
+                      </div>
+                    );
+                  })}
 
                   {/* Capa de Barras de Calendario con colores oficiales Gantt y sombra de Línea Base */}
                   <div className="cal-week-events-overlay">

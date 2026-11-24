@@ -57,16 +57,18 @@ export default function SettingsPage() {
             Configuración fiscal y general de la aplicación.
           </p>
         </div>
-        <a
-          href={storefrontUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 self-start rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
-          title="Abrir la web pública del tenant"
-        >
-          <ExternalLink size={16} />
-          Ver mi web en vivo
-        </a>
+        {storefrontSlug && storefrontSlug !== 'demo' ? (
+          <a
+            href={storefrontUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 self-start rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
+            title="Abrir la web pública del tenant"
+          >
+            <ExternalLink size={16} />
+            Ver mi web en vivo
+          </a>
+        ) : null}
       </div>
 
       {error && (

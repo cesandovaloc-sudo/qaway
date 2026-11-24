@@ -19,6 +19,9 @@ export default function UpdatePasswordCard({
   subtitle = 'Por seguridad, define una contraseña personal en tu primer ingreso.',
   submitLabel = 'Guardar y continuar',
   recoveryEmail = '',
+  headerAction = null,
+  locked = false,
+  lockedNote = null,
   onSuccess,
 }) {
   const [password, setPassword] = useState('')
@@ -151,7 +154,7 @@ export default function UpdatePasswordCard({
         >
           <Lock size={18} />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <h2 className="no-qw" style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#0f172a', lineHeight: 1.3 }}>
             {title}
           </h2>
@@ -159,9 +162,32 @@ export default function UpdatePasswordCard({
             {subtitle}
           </p>
         </div>
+        {headerAction && (
+          <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
+            {headerAction}
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        {lockedNote && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              color: '#475569',
+              fontSize: '12.5px',
+            }}
+          >
+            <Lock size={14} style={{ flexShrink: 0, color: '#64748b' }} />
+            <span>{lockedNote}</span>
+          </div>
+        )}
         {error && (
           <div
             style={{
@@ -192,19 +218,22 @@ export default function UpdatePasswordCard({
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 8 caracteres"
               required
+              disabled={locked}
               style={{
                 width: '100%',
                 padding: '9px 38px 9px 12px',
                 fontSize: '14px',
-                color: '#0f172a',
-                backgroundColor: '#ffffff',
+                color: locked ? '#64748b' : '#0f172a',
+                backgroundColor: locked ? '#f8fafc' : '#ffffff',
                 borderRadius: '8px',
-                border: `1px solid ${password ? strength.color : '#cbd5e1'}`,
+                border: `1px solid ${locked ? '#e2e8f0' : (password ? strength.color : '#cbd5e1')}`,
                 outline: 'none',
+                cursor: locked ? 'not-allowed' : 'text',
               }}
             />
             <button
               type="button"
+              disabled={locked}
               onClick={() => setShowPwd((v) => !v)}
               style={{
                 position: 'absolute',
@@ -214,7 +243,8 @@ export default function UpdatePasswordCard({
                 background: 'none',
                 border: 'none',
                 color: '#64748b',
-                cursor: 'pointer',
+                cursor: locked ? 'not-allowed' : 'pointer',
+                opacity: locked ? 0.5 : 1,
                 padding: 0,
               }}
             >
@@ -265,15 +295,17 @@ export default function UpdatePasswordCard({
             onChange={(e) => setConfirm(e.target.value)}
             placeholder="Repite tu nueva contraseña"
             required
+            disabled={locked}
             style={{
               width: '100%',
               padding: '9px 12px',
               fontSize: '14px',
-              color: '#0f172a',
-              backgroundColor: '#ffffff',
+              color: locked ? '#64748b' : '#0f172a',
+              backgroundColor: locked ? '#f8fafc' : '#ffffff',
               borderRadius: '8px',
-              border: `1px solid ${confirm ? (passwordsMatch ? '#10b981' : '#ef4444') : '#cbd5e1'}`,
+              border: `1px solid ${locked ? '#e2e8f0' : (confirm ? (passwordsMatch ? '#10b981' : '#ef4444') : '#cbd5e1')}`,
               outline: 'none',
+              cursor: locked ? 'not-allowed' : 'text',
             }}
           />
           {confirm.length > 0 && (
@@ -285,30 +317,30 @@ export default function UpdatePasswordCard({
 
         <button
           type="submit"
-          disabled={loading || !isValidPassword || !passwordsMatch}
+          disabled={locked || loading || !isValidPassword || !passwordsMatch}
           style={{
             marginTop: '6px',
             width: '100%',
             padding: '10px 16px',
             borderRadius: '8px',
             border: 'none',
-            backgroundColor: '#2563eb',
+            backgroundColor: locked ? '#94a3b8' : '#2563eb',
             color: '#ffffff',
             fontSize: '14px',
             fontWeight: 500,
-            cursor: loading || !isValidPassword || !passwordsMatch ? 'not-allowed' : 'pointer',
+            cursor: locked || loading || !isValidPassword || !passwordsMatch ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            opacity: loading || !isValidPassword || !passwordsMatch ? 0.55 : 1,
+            opacity: locked || loading || !isValidPassword || !passwordsMatch ? 0.55 : 1,
           }}
         >
           <CheckCircle2 size={16} />
           <span>{loading ? 'Guardando...' : submitLabel}</span>
         </button>
 
-        {recoveryEmail && (
+        {recoveryEmail && !locked && (
           <div style={{ textAlign: 'center', fontSize: '12.5px', marginTop: '2px' }}>
             {recoverySent ? (
               <span style={{ color: '#059669' }}>

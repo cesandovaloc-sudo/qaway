@@ -11,6 +11,14 @@
   background: #f8fafc;
 }
 
+.cfg-v1.qm-pane {
+  display: none;
+}
+
+.cfg-v1.qm-pane-active {
+  display: flex;
+}
+
 .cfg-v1 *, .cfg-v1 *::before, .cfg-v1 *::after {
   box-sizing: border-box;
 }

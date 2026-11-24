@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Info } from 'lucide-react';
 
 export interface SelectOption {
   value: string;
@@ -7,6 +7,8 @@ export interface SelectOption {
   parentValue?: string | null;
   nivel?: number;
   badge?: string;
+  description?: string;
+  infoTooltip?: string;
 }
 
 interface SelectEstilizadoProps {
@@ -348,26 +350,44 @@ export const SelectEstilizado: React.FC<SelectEstilizadoProps> = ({
                       }}
                       onMouseEnter={() => setHighlightedIdx(idx)}
                     >
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                        {opt.badge && (
-                          <span
-                            style={{
-                              fontSize: '11px',
-                              fontWeight: 600,
-                              color: active ? '#1d4ed8' : '#475569',
-                              background: active ? '#dbeafe' : '#f1f5f9',
-                              borderRadius: '5px',
-                              padding: '2px 7px',
-                              flexShrink: 0,
-                              fontVariantNumeric: 'tabular-nums',
-                            }}
-                          >
-                            {opt.badge}
+                      <span style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0, overflow: 'hidden' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                          {opt.badge && (
+                            <span
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                color: active ? '#1d4ed8' : '#0369a1',
+                                background: active ? '#dbeafe' : '#e0f2fe',
+                                borderRadius: '5px',
+                                padding: '2px 7px',
+                                flexShrink: 0,
+                                fontVariantNumeric: 'tabular-nums',
+                              }}
+                            >
+                              {opt.badge}
+                            </span>
+                          )}
+                        </span>
+                        {opt.description && (
+                          <span style={{ fontSize: '11.5px', fontWeight: 400, color: '#64748b', whiteSpace: 'normal', lineHeight: 1.35 }}>
+                            {opt.description}
                           </span>
                         )}
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
                       </span>
-                      {active && <Check size={14} style={{ flexShrink: 0 }} />}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                        {opt.infoTooltip && (
+                          <span
+                            title={opt.infoTooltip}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ display: 'inline-flex', alignItems: 'center', color: '#64748b', cursor: 'help' }}
+                          >
+                            <Info size={13} />
+                          </span>
+                        )}
+                        {active && <Check size={14} style={{ flexShrink: 0 }} />}
+                      </span>
                     </button>
                   </div>
                   {esOpcionNeutra && (

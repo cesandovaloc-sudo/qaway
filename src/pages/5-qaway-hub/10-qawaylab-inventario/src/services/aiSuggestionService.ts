@@ -1,4 +1,5 @@
 import type { AISuggestion } from '@/types'
+import { optimizarProducto } from '../../../14-Librerías/services/imageOptimization'
 
 // ── AI Analysis Result ──
 export interface AIAnalysisResult {
@@ -240,16 +241,20 @@ export async function uploadImageToStorage(
 ): Promise<string | null> {
   try {
     const { supabase } = await import('@/config/supabase')
-    
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+
+    const esImagen = /^image\/(png|jpe?g|webp)$/i.test(file.type) || /\.(png|jpe?g|webp)$/i.test(file.name)
+    const optimizado = esImagen ? await optimizarProducto(file) : null
+    const archivo = optimizado?.blob ?? file
+    const ext = optimizado ? 'webp' : (file.name.split('.').pop() || 'bin')
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
     const filePath = `original/${fileName}`
 
     const { error } = await supabase.storage
       .from(bucket)
-      .upload(filePath, file, {
+      .upload(filePath, archivo, {
         cacheControl: '3600',
         upsert: false,
+        contentType: optimizado ? 'image/webp' : file.type || undefined,
       })
 
     if (error) {

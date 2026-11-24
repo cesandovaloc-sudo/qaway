@@ -24,6 +24,64 @@ export interface StorefrontService {
 
 type AnyRecord = Record<string, any>;
 
+function buildTemplateCategories(): StoreCategory[] {
+  const mock = getMockCategories();
+  return mock.map((c, i) => ({
+    id: `template-cat-${i + 1}`,
+    slug: `categoria-${i + 1}`,
+    name: `Categoría ${i + 1}`,
+    imageUrl: null,
+    parentId: null,
+  }));
+}
+
+function buildTemplateProducts(): StoreProduct[] {
+  const mockCats = getMockCategories();
+  const catMap = new Map(mockCats.map((c, i) => [c.slug, { slug: `categoria-${i + 1}`, name: `Categoría ${i + 1}` }]));
+  const mockProducts = getMockProducts();
+  return mockProducts.map((p, i) => {
+    const cat = catMap.get(p.categorySlug) || { slug: 'categoria-1', name: 'Categoría 1' };
+    return {
+      id: `template-prod-${i + 1}`,
+      slug: `producto-${i + 1}`,
+      sku: null,
+      name: `Producto ${i + 1}`,
+      brand: null,
+      description: 'Espacio listo para tu producto. Cuando cargues tu catálogo, aquí se mostrará la información real.',
+      categorySlug: cat.slug,
+      categoryName: cat.name,
+      price: 0,
+      compareAtPrice: null,
+      stock: 0,
+      images: [],
+      variants: p.variants || [],
+      tags: [],
+    };
+  });
+}
+
+function buildTemplateHome(tenant: StoreTenant): StoreHomeData {
+  const categories = buildTemplateCategories();
+  const products = buildTemplateProducts();
+  const featured = products.slice(0, 8);
+  return {
+    tenant,
+    banners: [
+      {
+        id: 'template-banner-1',
+        title: 'Banner principal',
+        subtitle: 'Espacio listo para la imagen principal de tu tienda.',
+        imageUrl: '',
+        ctaLabel: 'Ver más',
+        ctaHref: `/tienda/${tenant.slug}/c/${categories[0]?.slug || 'categoria-1'}`,
+      },
+    ],
+    categories,
+    featured,
+    offers: [],
+  };
+}
+
 function slugify(value: string) {
   return String(value || '')
     .toLowerCase()
@@ -101,37 +159,93 @@ function mapCategory(row: AnyRecord): StoreCategory {
   };
 }
 
-async function resolveTenant(tenantSlug: string): Promise<{ tenant: StoreTenant; tenantId: string | null }> {
+async function checkCanManageTenant(tenantId: string): Promise<boolean> {
   try {
-    // Intenta por slug, luego por id; si la columna slug no existe, el error cae al fallback.
-    let row: AnyRecord | null = null;
-    const bySlug = await supabase.from('tenants').select('id,slug,name,branding,content,logo_url,banner_url').eq('slug', tenantSlug).maybeSingle();
-    if (!bySlug.error && bySlug.data) row = bySlug.data;
-    if (!row) {
-      const byId = await supabase.from('tenants').select('id,slug,name,branding,content,logo_url,banner_url').eq('id', tenantSlug).maybeSingle();
-      if (!byId.error && byId.data) row = byId.data;
+    const { data: { session } } = await supabase.auth.getSession();
+    let user = session?.user ?? null;
+    if (!user) {
+      const { data: { user: u } } = await supabase.auth.getUser();
+      user = u ?? null;
     }
-    if (row) return { tenant: mapTenant(row, tenantSlug), tenantId: String(row.id) };
-  } catch {}
-  return { tenant: getMockTenant(tenantSlug), tenantId: null };
+    if (!user) return false;
+    const { data: profile } = await supabase
+      .from('users')
+      .select('tenant_id,role,is_platform_admin')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (!profile) return false;
+    if (profile.is_platform_admin === true) return true;
+    return String(profile.tenant_id || '') === String(tenantId) && String(profile.role || '').toLowerCase() === 'admin';
+  } catch {
+    return false;
+  }
 }
 
-async function fetchCategories(tenantId: string | null): Promise<StoreCategory[]> {
+async function resolveTenant(tenantSlug: string): Promise<{ tenant: StoreTenant; tenantId: string | null; isDemo: boolean }> {
+  try {
+    let row: AnyRecord | null = null;
+    const bySlug = await supabase.from('tenants').select('id,slug,name,branding,content,features').eq('slug', tenantSlug).maybeSingle();
+    if (!bySlug.error && bySlug.data) row = bySlug.data;
+    if (!row) {
+      const byId = await supabase.from('tenants').select('id,slug,name,branding,content,features').eq('id', tenantSlug).maybeSingle();
+      if (!byId.error && byId.data) row = byId.data;
+    }
+    if (row) {
+      const tenantId = String(row.id);
+      const features = (row.features && typeof row.features === 'object') ? row.features : {};
+      const isPublished = features.storefront_published === true;
+      const canManage = await checkCanManageTenant(tenantId);
+      const tenant = mapTenant(row, tenantSlug);
+      tenant.isPublished = isPublished;
+      tenant.canManage = canManage;
+      return { tenant, tenantId, isDemo: false };
+    }
+    if (bySlug.error) console.error('[storefront] resolveTenant error', tenantSlug, bySlug.error.message);
+  } catch (e) {
+    console.error('[storefront] resolveTenant error', tenantSlug, e);
+  }
+  const isDemo = tenantSlug === 'demo';
+  if (isDemo) {
+    const tenant = getMockTenant(tenantSlug);
+    tenant.isPublished = true;
+    tenant.canManage = false;
+    return { tenant, tenantId: null, isDemo: true };
+  }
+  return {
+    tenant: {
+      id: `tenant-${tenantSlug}`,
+      slug: tenantSlug,
+      name: tenantSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+      logoUrl: null,
+      bannerUrl: null,
+      primaryColor: '#1e364b',
+      accentColor: '#16a34a',
+      whatsapp: null,
+      email: null,
+      isPublished: false,
+      canManage: false,
+    },
+    tenantId: null,
+    isDemo: false,
+  };
+}
+
+async function fetchCategories(tenantId: string | null, isDemo: boolean): Promise<StoreCategory[]> {
+  if (!tenantId && !isDemo) return [];
   try {
     let query = supabase.from('categories').select('id,name,slug,image_url,parent_id,tenant_id,sort_order').order('sort_order', { ascending: true }).order('name', { ascending: true });
     if (tenantId) query = query.or(`tenant_id.eq.${tenantId},tenant_id.is.null`);
     const { data, error } = await query;
     if (!error && Array.isArray(data)) {
       if (data.length) return data.map(mapCategory);
-      // Tenant real resuelto pero sin categorías: devolver vacío (no mock).
       if (tenantId) return [];
     }
   } catch {}
-  // Fallback mock solo para demo/tenant no resuelto.
-  return tenantId ? [] : getMockCategories();
+  return isDemo ? getMockCategories() : [];
 }
 
-async function fetchProducts(tenantId: string | null, categories: StoreCategory[]): Promise<StoreProduct[]> {
+async function fetchProducts(tenantId: string | null, categories: StoreCategory[], isDemo: boolean): Promise<StoreProduct[]> {
+  if (!tenantId && !isDemo) return [];
   try {
     let query = supabase
       .from('inv_products')
@@ -149,73 +263,94 @@ async function fetchProducts(tenantId: string | null, categories: StoreCategory[
         })
         .map((p: AnyRecord) => mapProduct(p, categories))
         .filter(Boolean) as StoreProduct[];
-      // Tenant real resuelto: devolver resultado real aunque esté vacío.
       if (tenantId) return mapped;
       if (mapped.length) return mapped;
     }
   } catch {}
-  // Fallback mock solo para demo/tenant no resuelto.
-  return tenantId ? [] : getMockProducts();
+  return isDemo ? getMockProducts() : [];
 }
 
 const supabaseStorefrontService: StorefrontService = {
   async getHome(tenantSlug) {
-    const { tenant, tenantId } = await resolveTenant(tenantSlug);
-    const categories = await fetchCategories(tenantId);
-    const products = await fetchProducts(tenantId, categories);
-    const offers = products.filter(p => p.compareAtPrice && p.compareAtPrice > p.price);
-    const featured = products.slice(0, 8);
-    const fallback = getMockHome(tenantSlug);
-    const isResolvedTenant = Boolean(tenantId);
+    const { tenant, tenantId, isDemo } = await resolveTenant(tenantSlug);
+    const categories = await fetchCategories(tenantId, isDemo);
+    const products = await fetchProducts(tenantId, categories, isDemo);
+    if (isDemo) {
+      const fallback = getMockHome(tenantSlug);
+      return {
+        ...fallback,
+        tenant,
+        banners: fallback.banners.map(b => ({ ...b, ctaHref: `/tienda/${tenant.slug}/c/${categories[0]?.slug || 'mujer'}` })),
+        categories: categories.length ? categories : fallback.categories,
+        featured: products.length ? products.slice(0, 8) : fallback.featured,
+        offers: (products.filter(p => p.compareAtPrice && p.compareAtPrice > p.price).length ? products.filter(p => p.compareAtPrice && p.compareAtPrice > p.price) : fallback.offers).slice(0, 8),
+      };
+    }
+    if (!products.length && !categories.length) return buildTemplateHome(tenant);
+    const displayCategories = categories.length ? categories : buildTemplateCategories();
+    const displayProducts = products.length ? products : buildTemplateProducts();
     return {
       tenant,
-      banners: fallback.banners.map(b => ({ ...b, ctaHref: `/tienda/${tenant.slug}/c/${categories[0]?.slug || 'mujer'}` })),
-      categories: categories.length ? categories : (isResolvedTenant ? [] : fallback.categories),
-      featured: featured.length ? featured : (isResolvedTenant ? [] : fallback.featured),
-      offers: (offers.length ? offers : (isResolvedTenant ? [] : fallback.offers)).slice(0, 8),
+      banners: [{ id: 'template-banner-1', title: 'Banner principal', subtitle: 'Espacio listo para la imagen principal de tu tienda.', imageUrl: '', ctaLabel: 'Ver más', ctaHref: `/tienda/${tenant.slug}/c/${displayCategories[0]?.slug || 'categoria-1'}` }],
+      categories: displayCategories,
+      featured: displayProducts.slice(0, 8),
+      offers: displayProducts.filter(p => p.compareAtPrice && p.compareAtPrice > p.price).slice(0, 8),
     };
   },
 
   async getCategoryPage(tenantSlug, categorySlug) {
-    const { tenant, tenantId } = await resolveTenant(tenantSlug);
-    const categories = await fetchCategories(tenantId);
-    const category = categories.find(c => c.slug === categorySlug) || { id: categorySlug, slug: categorySlug, name: categorySlug };
-    const products = await fetchProducts(tenantId, categories);
+    const { tenant, tenantId, isDemo } = await resolveTenant(tenantSlug);
+    const categories = await fetchCategories(tenantId, isDemo);
+    const products = await fetchProducts(tenantId, categories, isDemo);
+    if (isDemo) {
+      const fallback = getMockCategoryPage(tenantSlug, categorySlug);
+      return { ...fallback, tenant };
+    }
+    if (!products.length && !categories.length) {
+      const tplCategories = buildTemplateCategories();
+      const tplProducts = buildTemplateProducts();
+      const category = tplCategories.find(c => c.slug === categorySlug) || tplCategories[0] || { id: categorySlug, slug: categorySlug, name: categorySlug };
+      const list = tplProducts.filter(p => p.categorySlug === category.slug);
+      return { tenant, categories: tplCategories, category, products: list.length ? list : tplProducts, total: (list.length ? list : tplProducts).length };
+    }
+    const displayCategories = categories.length ? categories : buildTemplateCategories();
+    const category = displayCategories.find(c => c.slug === categorySlug) || { id: categorySlug, slug: categorySlug, name: categorySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
     const filtered = categorySlug ? products.filter(p => p.categorySlug === category.slug) : products;
-    return {
-      tenant,
-      categories: categories.length ? categories : (tenantId ? [] : getMockCategories()),
-      category,
-      products: filtered,
-      total: filtered.length,
-    };
+    return { tenant, categories: displayCategories, category, products: filtered, total: filtered.length };
   },
 
   async getProductPage(tenantSlug, productSlug) {
-    const { tenant, tenantId } = await resolveTenant(tenantSlug);
-    const categories = await fetchCategories(tenantId);
-    const products = await fetchProducts(tenantId, categories);
-    const product = products.find(p => p.slug === productSlug) || products.find(p => p.id === productSlug) || (!tenantId ? products[0] : null);
-    const related = product
-      ? products.filter(p => p.categorySlug === product.categorySlug && p.id !== product.id).slice(0, 4)
-      : [];
-    return {
-      tenant,
-      categories: categories.length ? categories : (tenantId ? [] : getMockCategories()),
-      product: product as StoreProduct,
-      related,
-    };
+    const { tenant, tenantId, isDemo } = await resolveTenant(tenantSlug);
+    const categories = await fetchCategories(tenantId, isDemo);
+    const products = await fetchProducts(tenantId, categories, isDemo);
+    if (isDemo) {
+      const fallback = getMockProductPage(tenantSlug, productSlug);
+      return { ...fallback, tenant };
+    }
+    if (!products.length && !categories.length) {
+      const tplCategories = buildTemplateCategories();
+      const tplProducts = buildTemplateProducts();
+      const product = tplProducts.find(p => p.slug === productSlug) || tplProducts[0] || null;
+      const related = product ? tplProducts.filter(p => p.categorySlug === product.categorySlug && p.id !== product.id).slice(0, 4) : [];
+      return { tenant, categories: tplCategories, product: product as StoreProduct, related };
+    }
+    const displayCategories = categories.length ? categories : buildTemplateCategories();
+    const product = products.find(p => p.slug === productSlug) || products.find(p => p.id === productSlug) || null;
+    const related = product ? products.filter(p => p.categorySlug === product.categorySlug && p.id !== product.id).slice(0, 4) : [];
+    return { tenant, categories: displayCategories, product: product as StoreProduct, related };
   },
 
   async getCategories(tenantSlug) {
-    const { tenantId } = await resolveTenant(tenantSlug);
-    return fetchCategories(tenantId);
+    const { tenantId, isDemo } = await resolveTenant(tenantSlug);
+    const categories = await fetchCategories(tenantId, isDemo);
+    return categories.length ? categories : (isDemo ? getMockCategories() : buildTemplateCategories());
   },
 
   async search(tenantSlug, q) {
-    const { tenant, tenantId } = await resolveTenant(tenantSlug);
-    const categories = await fetchCategories(tenantId);
-    const products = await fetchProducts(tenantId, categories);
+    const { tenant, tenantId, isDemo } = await resolveTenant(tenantSlug);
+    const categories = await fetchCategories(tenantId, isDemo);
+    const products = await fetchProducts(tenantId, categories, isDemo);
+    const displayCategories = categories.length ? categories : (isDemo ? getMockCategories() : buildTemplateCategories());
     const term = q.toLowerCase().trim();
     const filtered = products.filter(p =>
       !term ||
@@ -224,7 +359,7 @@ const supabaseStorefrontService: StorefrontService = {
       (p.categoryName || '').toLowerCase().includes(term) ||
       (p.description || '').toLowerCase().includes(term)
     );
-    return { tenant, categories, products: filtered, total: filtered.length, q };
+    return { tenant, categories: displayCategories, products: filtered, total: filtered.length, q };
   },
 };
 

@@ -41,6 +41,7 @@ interface Borrador {
 const ETIQUETAS_LLAVE: Record<string, string> = {
   'gp.crear_proyecto': 'Crear proyecto',
   'gp.editar_proyecto': 'Editar proyecto',
+  'gp.eliminar_proyecto': 'Eliminar proyecto',
   'gp.administrar_edt': 'Administrar EDT',
   'gp.registrar_personas': 'Registrar / invitar personas',
 };
@@ -70,6 +71,14 @@ const ESQUEMA_PERMISOS: DefinicionPermisoEsquema[] = [
     descripcion: 'Modifica nombre, fechas, sedes y parámetros generales del proyecto.',
     rolesBase: ['admin'],
     llaveCurable: 'gp.editar_proyecto',
+  },
+  {
+    id: 'eliminar_proyecto',
+    grupo: 'Proyectos',
+    nombre: 'Eliminar proyectos',
+    descripcion: 'Permite eliminar permanentemente proyectos y sus datos asociados (permiso especial).',
+    rolesBase: ['admin'],
+    llaveCurable: 'gp.eliminar_proyecto',
   },
   {
     id: 'consultar_proyecto',
@@ -566,18 +575,18 @@ export default function PermisosTab() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
     <div style={estiloPanel}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Users size={17} />
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', color: '#0066ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Users size={20} />
           </div>
           <div>
-            <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>
+            <b style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', display: 'block', marginBottom: '4px' }}>
               Roles de Gestor de Proyectos
             </b>
-            <span style={{ fontSize: '12px', color: '#64748b' }}>
+            <span style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.45, display: 'block' }}>
               Asigna roles, áreas y llaves delicadas a los integrantes de tu empresa.
             </span>
           </div>
@@ -1377,7 +1386,7 @@ export default function PermisosTab() {
           <p style={estiloTexto}>La empresa no tiene usuarios en el directorio (public.users del tenant).</p>
         )}
       </div>
-      <p style={{ ...estiloTexto, marginTop: '12px', fontSize: '11.5px' }}>
+      <p style={{ ...estiloTexto, marginTop: '16px', fontSize: '12px', lineHeight: 1.5 }}>
         El rol <b>admin</b> lo ve todo; <b>editor</b> + llaves = totales; <b>operativo</b> registra lo suyo;
         <b> visor</b> solo consulta. El mando real vive en RLS — aquí se curan las llaves del jsonb.
       </p>
@@ -1385,13 +1394,13 @@ export default function PermisosTab() {
 
       {/* Cápsula independiente: Esquema completo de permisos del Gestor */}
       <div style={{ ...estiloPanel, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <ShieldCheck size={17} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9', marginBottom: '6px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', color: '#0066ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <ShieldCheck size={20} />
           </div>
           <div>
-            <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>Esquema de Permisos de Gestor de Proyectos</b>
-            <span style={{ fontSize: '12px', color: '#64748b' }}>
+            <b style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', display: 'block', marginBottom: '4px' }}>Esquema de Permisos de Gestor de Proyectos</b>
+            <span style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.45, display: 'block' }}>
               Detalle completo de capacidades por módulo. Los permisos con llave curable permiten otorgar acceso puntual a usuarios específicos.
             </span>
           </div>
@@ -1414,7 +1423,7 @@ export default function PermisosTab() {
                 onClick={() => setEsquemaAbierto((prev) => ({ ...prev, [grupo]: !prev[grupo] }))}
                 style={{
                   width: '100%',
-                  padding: '11px 14px',
+                  padding: '13px 16px',
                   background: '#f8fafc',
                   border: 'none',
                   borderRadius: grupoAbierto ? '10px 10px 0 0' : '10px',
@@ -1483,18 +1492,18 @@ export default function PermisosTab() {
                   <div
                     key={item.id}
                     style={{
-                      padding: '12px 14px',
+                      padding: '16px 18px',
                       borderTop: idx === 0 ? 'none' : '1px solid #f1f5f9',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      gap: '16px',
+                      gap: '20px',
                       flexWrap: 'wrap',
                     }}
                   >
                     <div style={{ flex: '1.2 1 230px', minWidth: '200px' }}>
                       <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>{item.nombre}</div>
-                      <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{item.descripcion}</div>
+                      <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '4px', lineHeight: 1.45 }}>{item.descripcion}</div>
                     </div>
                     <div style={{ flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>Otorgado a</span>
@@ -1825,8 +1834,9 @@ function Aviso({ icono, titulo, texto }: { icono: React.ReactNode; titulo: strin
 const estiloPanel: React.CSSProperties = {
   background: '#ffffff',
   border: '1px solid #e2e8f0',
-  borderRadius: '10px',
-  padding: '18px 20px',
+  borderRadius: '12px',
+  padding: '24px',
+  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
 };
 
 const estiloTexto: React.CSSProperties = { fontSize: '12.5px', color: '#475569', margin: 0 };
@@ -1835,7 +1845,7 @@ const estiloFila: React.CSSProperties = {
   display: 'flex',
   gap: '16px',
   alignItems: 'flex-start',
-  padding: '12px 14px',
+  padding: '14px 18px',
   border: '1px solid #e2e8f0',
   borderRadius: '8px',
   background: '#f8fafc',

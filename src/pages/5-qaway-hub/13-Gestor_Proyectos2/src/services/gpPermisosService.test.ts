@@ -27,6 +27,7 @@ function vacias(): CapacidadesGp {
   return {
     crearProyecto: false,
     editarProyecto: false,
+    eliminarProyecto: false,
     administrarEdt: false,
     registrarPersonas: false,
     crearTarea: false,
@@ -70,6 +71,7 @@ describe('capacidadesDe — matriz del modelo del responsable', () => {
     expect(capacidadesDe(null, [], true, true)).toEqual({
       crearProyecto: true,
       editarProyecto: true,
+      eliminarProyecto: true,
       administrarEdt: true,
       registrarPersonas: true,
       crearTarea: true,
@@ -84,6 +86,7 @@ describe('capacidadesDe — matriz del modelo del responsable', () => {
       ...vacias(),
       crearProyecto: true,
       editarProyecto: true,
+      eliminarProyecto: true,
       administrarEdt: true,
       registrarPersonas: true,
       crearTarea: true,
@@ -93,10 +96,11 @@ describe('capacidadesDe — matriz del modelo del responsable', () => {
     });
   });
 
-  it('editor SIN llaves ⇒ solo tareas (proyecto/EDT/personas delicados: NO)', () => {
+  it('editor SIN llaves ⇒ solo tareas (proyecto/eliminar/EDT/personas delicados: NO)', () => {
     const c = capacidadesDe('editor', [], false, true);
     expect(c.crearProyecto).toBe(false);
     expect(c.editarProyecto).toBe(false);
+    expect(c.eliminarProyecto).toBe(false);
     expect(c.administrarEdt).toBe(false);
     expect(c.registrarPersonas).toBe(false);
     expect(c.crearTarea).toBe(true);
@@ -109,6 +113,7 @@ describe('capacidadesDe — matriz del modelo del responsable', () => {
     const c = capacidadesDe('editor', TODAS, false, true);
     expect(c.crearProyecto).toBe(true);
     expect(c.editarProyecto).toBe(true);
+    expect(c.eliminarProyecto).toBe(true);
     expect(c.administrarEdt).toBe(true);
     expect(c.registrarPersonas).toBe(true);
     expect(c.crearTarea).toBe(true);

@@ -19,6 +19,7 @@ import {
   Info,
   Key,
   Layers,
+  Pencil,
   RotateCcw,
   RefreshCw,
   ChevronRight,
@@ -55,6 +56,7 @@ import PreferenciasTab from './PreferenciasTab';
 import EmpresaTab from './EmpresaTab';
 import SelectEstilizado from './SelectEstilizado';
 import {
+  DIAS_SEMANA_ORDEN,
   getParametrosCronograma,
   saveParametrosCronograma,
   type FrecuenciaCorte,
@@ -198,6 +200,36 @@ export default function ConfiguracionView({
   const esAdmin = !perfilGp || Boolean(
     perfilGp.esPlataforma || perfilGp.rol === 'admin' || capGp?.administrarPermisos
   );
+  const puedeEliminarProyecto = !perfilGp || Boolean(capGp?.eliminarProyecto);
+  const puedeEditarProyecto = !perfilGp || Boolean(capGp?.editarProyecto);
+  const puedeVerTab = (tab: TabId): boolean => {
+    switch (tab) {
+      case 'perfil':
+      case 'empresa':
+        return true;
+      case 'preferencias':
+        return Boolean(perfilGp?.esPlataforma);
+      case 'proyectos':
+        return esAdmin || Boolean(capGp?.editarProyecto) || Boolean(capGp?.eliminarProyecto);
+      case 'cronograma':
+        return esAdmin || Boolean(capGp?.administrarEdt);
+      case 'organizacion':
+      case 'permisos':
+      case 'general':
+      case 'auditoria':
+      case 'asistente':
+        return esAdmin;
+      default:
+        return false;
+    }
+  };
+
+  useEffect(() => {
+    if (!puedeVerTab(activeTab)) {
+      selectTab('perfil');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, esAdmin, capGp?.editarProyecto, capGp?.eliminarProyecto, capGp?.administrarEdt, perfilGp?.esPlataforma]);
 
   // Keep-alive: Configuración NO se desmonta al cambiar de módulo. useState(tab)
   // no bastaba: si el usuario estaba en otra pestaña, el clic del Topbar no
@@ -219,6 +251,64 @@ export default function ConfiguracionView({
   });
 
   const [cronoParams, setCronoParams] = useState<ParametrosCronograma>(() => getParametrosCronograma());
+  const [cronoParamsGuardado, setCronoParamsGuardado] = useState<ParametrosCronograma>(() => getParametrosCronograma());
+  const [editandoProyecto, setEditandoProyecto] = useState(false);
+  const [editandoCrono, setEditandoCrono] = useState(false);
+  const [editandoGeneral, setEditandoGeneral] = useState(false);
+  const [editandoAsistente, setEditandoAsistente] = useState(false);
+
+  const estiloSoloLectura: React.CSSProperties = {
+    background: '#f8fafc',
+    borderColor: '#e2e8f0',
+    color: '#64748b',
+    cursor: 'not-allowed',
+  };
+
+  const renderBannerSoloLectura = () => (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '10px 14px',
+        borderRadius: '10px',
+        border: '1px solid #bfdbfe',
+        background: '#eff6ff',
+        color: '#1d4ed8',
+        fontSize: '13px',
+        fontWeight: 500,
+        marginBottom: '14px',
+      }}
+    >
+      <Info size={16} style={{ flexShrink: 0 }} />
+      <span>Solo lectura: estos datos los administra un administrador de la empresa.</span>
+    </div>
+  );
+
+  const renderBotonEditar = (editando: boolean, onToggle: () => void) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      style={{
+        marginLeft: 'auto',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '6px 12px',
+        borderRadius: '8px',
+        border: '1px solid #cbd5e1',
+        background: '#ffffff',
+        color: '#0f172a',
+        fontSize: '12.5px',
+        fontWeight: 500,
+        cursor: 'pointer',
+        flexShrink: 0,
+      }}
+    >
+      {editando ? <X size={13} /> : <Pencil size={13} />}
+      <span>{editando ? 'Cancelar' : 'Editar'}</span>
+    </button>
+  );
 
   // Proyecto activo en configuración
   const currentProj = useMemo(() => {
@@ -235,10 +325,12 @@ export default function ConfiguracionView({
   const [editName, setEditName] = useState(currentProj.name);
   const [editCode, setEditCode] = useState(currentProj.code);
   const [showCodeInfo, setShowCodeInfo] = useState(false);
+  const [showPonderacionInfo, setShowPonderacionInfo] = useState(false);
   const [editBudget, setEditBudget] = useState(currentProj.budget || '');
   const { perfil: perfilVisible } = usePerfilVisible();
   const nombreEntidad = String(perfilVisible?.tenant?.name || '').trim() || 'Sin configurar en Datos de la Empresa';
   const [nombreAreaResponsable, setNombreAreaResponsable] = useState<string>('Cargando...');
+  const [faltaSedePrincipal, setFaltaSedePrincipal] = useState<boolean>(false);
   const [selectedModuleKey, setSelectedModuleKey] = useState<string>(CONFIGURABLE_MODULES[0]?.key || 'cronograma');
   const [moduleDescriptions, setModuleDescriptions] = useState<Record<string, string>>(() => {
     return {
@@ -287,6 +379,10 @@ export default function ConfiguracionView({
   const [deleteError, setDeleteError] = useState('');
 
   const openDeleteFlow = () => {
+    if (!puedeEliminarProyecto) {
+      notify('No tienes permiso para eliminar proyectos (requiere rol admin o la llave especial gp.eliminar_proyecto).');
+      return;
+    }
     setDeleteStep(1);
     setTypedProjectName('');
     setAdminPassword('');
@@ -315,28 +411,52 @@ export default function ConfiguracionView({
     const tenantId = perfilGp?.tenantId;
     if (!tenantId || !supabase) {
       setNombreAreaResponsable('Sin definir en Organización y Sedes');
+      setFaltaSedePrincipal(false);
       return;
     }
     let vigente = true;
-    Promise.all([
-      listarUnidadesParaJerarquia({ tenantId }).catch(() => []),
-      supabase
-        .from('gp_config_gestion_proyectos')
-        .select('unidad_responsable_id')
-        .eq('empresa_id', tenantId)
-        .maybeSingle()
-        .then((res) => (res.data?.unidad_responsable_id ? String(res.data.unidad_responsable_id) : null), () => null),
-    ]).then(([unidades, respId]) => {
-      if (!vigente) return;
-      if (!respId) {
-        setNombreAreaResponsable('Sin definir en Organización y Sedes');
-        return;
-      }
-      const u = unidades.find((item) => item.id === respId);
-      setNombreAreaResponsable(u?.name || 'Sin definir en Organización y Sedes');
-    });
+    const cargarEstadoOrganizacion = () => {
+      if (!supabase) return;
+      Promise.all([
+        listarUnidadesParaJerarquia({ tenantId }).catch(() => []),
+        supabase
+          .from('gp_config_gestion_proyectos')
+          .select('unidad_responsable_id, metadata')
+          .eq('empresa_id', tenantId)
+          .maybeSingle()
+          .then((res) => res.data ?? null, () => null),
+        supabase
+          .from('gp_sedes')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', tenantId)
+          .eq('es_principal', true)
+          .then((res) => res.count ?? 0, () => 0),
+        supabase
+          .from('gp_sedes')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', tenantId)
+          .then((res) => res.count ?? 0, () => 0),
+      ]).then(([unidades, cfg, countPrincipal, countTotalSedes]) => {
+        if (!vigente) return;
+        const respId = cfg?.unidad_responsable_id ? String(cfg.unidad_responsable_id) : null;
+        if (!respId) {
+          setNombreAreaResponsable('Sin definir en Organización y Sedes');
+        } else {
+          const u = unidades.find((item) => item.id === respId);
+          setNombreAreaResponsable(u?.name || 'Sin definir en Organización y Sedes');
+        }
+        const meta = (cfg?.metadata && typeof cfg.metadata === 'object' ? cfg.metadata : {}) as Record<string, unknown>;
+        const modalidad = String(meta.modalidad_sedes || '');
+        const tienePrincipal = countPrincipal > 0;
+        const tieneSedes = countTotalSedes > 0;
+        setFaltaSedePrincipal(modalidad !== 'sin_sede' && !tienePrincipal && (modalidad === 'una' || modalidad === 'varias' || tieneSedes));
+      });
+    };
+    cargarEstadoOrganizacion();
+    window.addEventListener('gp:organizacion-actualizada', cargarEstadoOrganizacion);
     return () => {
       vigente = false;
+      window.removeEventListener('gp:organizacion-actualizada', cargarEstadoOrganizacion);
     };
   }, [perfilGp?.tenantId]);
 
@@ -368,6 +488,7 @@ export default function ConfiguracionView({
         sedes: sedesDesc,
       },
     });
+    setEditandoProyecto(false);
     notify(`Proyecto "${editName}" actualizado correctamente.`);
   };
 
@@ -395,6 +516,10 @@ export default function ConfiguracionView({
   };
 
   const handleConfirmDelete = () => {
+    if (!puedeEliminarProyecto) {
+      setDeleteError('No tienes permiso para eliminar proyectos (requiere rol admin o la llave especial gp.eliminar_proyecto).');
+      return;
+    }
     if (typedProjectName.trim() !== currentProj.name.trim()) {
       setDeleteError('El nombre ingresado no coincide con el proyecto activo.');
       return;
@@ -446,6 +571,7 @@ export default function ConfiguracionView({
     localStorage.setItem('qaway-system-date-mode-v1', dateMode);
     localStorage.setItem('qaway-system-date-v1', customDate);
     saveParametrosCronograma(cronoParams);
+    setCronoParamsGuardado(getParametrosCronograma());
 
     // Guardar configuración del Asistente IA
     saveStoredGeminiConfig(geminiConfig);
@@ -462,6 +588,9 @@ export default function ConfiguracionView({
       })
     );
 
+    setEditandoCrono(false);
+    setEditandoGeneral(false);
+    setEditandoAsistente(false);
     notify('Configuración general y parámetros del Asistente IA guardados con éxito');
   };
 
@@ -502,9 +631,10 @@ export default function ConfiguracionView({
               Ajuste de zona horaria oficial, calibración de fecha operativa para seguimiento territorial y parámetros de tolerancia.
             </p>
           </div>
-          {/* Estas pestañas guardan por sí mismas. El botón global solo aplica
-              a general / cronograma / asistente. */}
-          {!['perfil', 'preferencias', 'empresa', 'organizacion', 'permisos', 'proyectos', 'auditoria'].includes(activeTab) ? (
+          {/* Botón global solo visible cuando la pestaña activa está en modo edición. */}
+          {((activeTab === 'general' && editandoGeneral) ||
+            (activeTab === 'cronograma' && editandoCrono) ||
+            (activeTab === 'asistente' && editandoAsistente)) ? (
             <div className="heading-actions">
               <button type="button" className="btn-save" onClick={handleSave}>
                 <Save size={15} />
@@ -579,7 +709,7 @@ export default function ConfiguracionView({
             ].map((section) => {
               const q = searchQuery.trim().toLowerCase();
               const filtered = section.items.filter(
-                (i: any) => (!i.adminOnly || esAdmin) && (!q || i.label.toLowerCase().includes(q))
+                (i: { id: string; label: string }) => puedeVerTab(i.id as TabId) && (!q || i.label.toLowerCase().includes(q))
               );
               if (filtered.length === 0) return null;
               return (
@@ -588,18 +718,23 @@ export default function ConfiguracionView({
                     {section.group}
                   </div>
                   {filtered.map((item) => (
-                    <button
+                    <a
                       key={item.id}
-                      type="button"
-                      onClick={() => selectTab(item.id as TabId)}
+                      href={`${CONFIG_BASE}/${TAB_TO_SLUG[item.id as TabId]}`}
+                      onClick={(e) => {
+                        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                        e.preventDefault();
+                        selectTab(item.id as TabId);
+                      }}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
                         width: '100%',
+                        boxSizing: 'border-box',
                         padding: '8px 10px',
                         borderRadius: '8px',
-                        border: 'none',
+                        textDecoration: 'none',
                         cursor: 'pointer',
                         textAlign: 'left',
                         background: activeTab === item.id ? '#f1f5f9' : 'transparent',
@@ -608,19 +743,37 @@ export default function ConfiguracionView({
                       }}
                     >
                       {item.icon}
-                      <span style={{ fontSize: '13.5px' }}>{item.label}</span>
-                    </button>
+                      <span style={{ fontSize: '13.5px', flex: 1 }}>{item.label}</span>
+                      {item.id === 'organizacion' && faltaSedePrincipal && (
+                        <span
+                          title="Te hace falta registrar la Sede Principal"
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            lineHeight: 1,
+                            padding: '3px 7px',
+                            borderRadius: '999px',
+                            background: '#fef3c7',
+                            color: '#b45309',
+                            border: '1px solid #fde68a',
+                            flexShrink: 0,
+                          }}
+                        >
+                          1
+                        </span>
+                      )}
+                    </a>
                   ))}
                 </div>
               );
             })}
           </aside>
 
-          <div style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', paddingRight: '4px' }}>
-            {activeTab === 'perfil' && <PerfilTab notify={notifyExterno} />}
-            {activeTab === 'preferencias' && <PreferenciasTab notify={notifyExterno} />}
-            {activeTab === 'empresa' && <EmpresaTab notify={notifyExterno} />}
-            {activeTab === 'organizacion' && <OrganizacionTab />}
+          <div style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', paddingRight: '4px', paddingBottom: '120px' }}>
+            {activeTab === 'perfil' && <PerfilTab notify={notifyExterno || notify} />}
+            {activeTab === 'preferencias' && <PreferenciasTab notify={notifyExterno || notify} />}
+            {activeTab === 'empresa' && <EmpresaTab notify={notifyExterno || notify} />}
+            {activeTab === 'organizacion' && <OrganizacionTab onSedePrincipalStatusChange={setFaltaSedePrincipal} />}
 
         {activeTab === 'general' && (
           <div className="cards-grid">
@@ -629,13 +782,15 @@ export default function ConfiguracionView({
                 <div className="card-icon-wrap">
                   <Globe2 size={20} />
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <h2>Zona Horaria del Proyecto</h2>
                   <p>
                     Define el huso horario oficial para el cómputo de plazos, alertas de cierre de hitos y sincronización territorial.
                   </p>
                 </div>
+                {esAdmin && renderBotonEditar(editandoGeneral, () => setEditandoGeneral((v) => !v))}
               </div>
+              {!esAdmin && renderBannerSoloLectura()}
 
               <div className="form-row">
                 <div className="field-info">
@@ -646,6 +801,8 @@ export default function ConfiguracionView({
                   <select
                     id="cfg-timezone"
                     className="select-input"
+                    disabled={!editandoGeneral}
+                    style={!editandoGeneral ? estiloSoloLectura : undefined}
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
                   >
@@ -669,6 +826,7 @@ export default function ConfiguracionView({
                       <input
                         type="radio"
                         name="dateMode"
+                        disabled={!editandoGeneral}
                         checked={dateMode === 'custom'}
                         onChange={() => setDateMode('custom')}
                       />
@@ -682,6 +840,8 @@ export default function ConfiguracionView({
                             <input
                               type="date"
                               className="date-input"
+                              disabled={!editandoGeneral}
+                              style={!editandoGeneral ? estiloSoloLectura : undefined}
                               value={customDate}
                               min="2026-09-01"
                               max="2027-04-30"
@@ -699,6 +859,7 @@ export default function ConfiguracionView({
                       <input
                         type="radio"
                         name="dateMode"
+                        disabled={!editandoGeneral}
                         checked={dateMode === 'real'}
                         onChange={() => setDateMode('real')}
                       />
@@ -732,13 +893,23 @@ export default function ConfiguracionView({
                 <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#2563eb' }}>
                   <FolderKanban size={20} />
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <h2>Configuración y Datos del Proyecto Activo</h2>
                   <p>
                     Edita el nombre oficial, código identificador y ficha general del proyecto activo.
                   </p>
                 </div>
+                {puedeEditarProyecto && renderBotonEditar(editandoProyecto, () => {
+                  if (editandoProyecto) {
+                    setEditName(currentProj.name);
+                    setEditCode(currentProj.code);
+                    setEditBudget(currentProj.budget || '');
+                    setEditTipo(currentProj.tipoProyectoCodigo ?? null);
+                  }
+                  setEditandoProyecto((v) => !v);
+                })}
               </div>
+              {!puedeEditarProyecto && renderBannerSoloLectura()}
 
               {/* Selector de proyecto si hay múltiples */}
               {(projects || []).length > 1 && (
@@ -783,6 +954,7 @@ export default function ConfiguracionView({
                       id="cfg-proj-name"
                       type="text"
                       required
+                      disabled={!editandoProyecto}
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       style={{
@@ -792,6 +964,7 @@ export default function ConfiguracionView({
                         border: '1px solid #cbd5e1',
                         fontSize: '13px',
                         color: '#0f172a',
+                        ...(!editandoProyecto ? estiloSoloLectura : {}),
                       }}
                     />
                   </div>
@@ -807,6 +980,7 @@ export default function ConfiguracionView({
                       <input
                         id="cfg-proj-code"
                         type="text"
+                        disabled={!editandoProyecto}
                         value={editCode}
                         onChange={(e) => setEditCode(e.target.value.toUpperCase())}
                         placeholder={`Sugerencia: ${sugerirCodigoProyecto(editName)}`}
@@ -817,6 +991,7 @@ export default function ConfiguracionView({
                           border: '1px solid #cbd5e1',
                           fontSize: '13px',
                           color: '#0f172a',
+                          ...(!editandoProyecto ? estiloSoloLectura : {}),
                         }}
                       />
                       <button
@@ -866,6 +1041,7 @@ export default function ConfiguracionView({
                   </div>
                 </div>
 
+                {esAdmin && (
                 <div className="form-row">
                   <div className="field-info">
                     <label htmlFor="cfg-proj-budget">Presupuesto Estimado</label>
@@ -875,6 +1051,7 @@ export default function ConfiguracionView({
                     <input
                       id="cfg-proj-budget"
                       type="text"
+                      disabled={!editandoProyecto}
                       value={editBudget}
                       onChange={(e) => setEditBudget(e.target.value)}
                       placeholder="Ej. S/ 350,000"
@@ -885,10 +1062,12 @@ export default function ConfiguracionView({
                         border: '1px solid #cbd5e1',
                         fontSize: '13px',
                         color: '#0f172a',
+                        ...(!editandoProyecto ? estiloSoloLectura : {}),
                       }}
                     />
                   </div>
                 </div>
+                )}
 
                 <div className="form-row">
                   <div className="field-info">
@@ -925,6 +1104,7 @@ export default function ConfiguracionView({
                   <div className="field-control">
                     <TipoProyectoCatalogoSelect
                       value={editTipo || null}
+                      disabled={!editandoProyecto}
                       onChange={(codigo) => setEditTipo(codigo)}
                     />
                   </div>
@@ -957,6 +1137,7 @@ export default function ConfiguracionView({
                   </div>
                 </div>
 
+                {editandoProyecto && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '18px', justifyContent: 'flex-end' }}>
                   <button
                     type="submit"
@@ -980,80 +1161,83 @@ export default function ConfiguracionView({
                     <span>Guardar Cambios</span>
                   </button>
                 </div>
+                )}
               </form>
             </div>
 
             {/* Tarjeta 2: Zona de Peligro (Danger Zone) */}
-            <div
-              className="cfg-card"
-              style={{
-                border: '1px solid #fecaca',
-                background: '#fffafb',
-              }}
-            >
-              <div className="card-header" style={{ borderBottomColor: '#fee2e2' }}>
-                <div
-                  className="card-icon-wrap"
-                  style={{
-                    background: '#fee2e2',
-                    color: '#dc2626',
-                  }}
-                >
-                  <AlertTriangle size={20} />
-                </div>
-                <div>
-                  <h2 style={{ color: '#991b1b' }}>Zona de Peligro · Gestión del Proyecto</h2>
-                  <p style={{ color: '#7f1d1d' }}>
-                    Acciones irreversibles que impactan la disponibilidad del proyecto y sus datos asociados.
-                  </p>
-                </div>
-              </div>
-
+            {puedeEliminarProyecto && (
               <div
+                className="cfg-card"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '16px',
-                  padding: '14px 16px',
-                  borderRadius: '8px',
-                  background: '#ffffff',
                   border: '1px solid #fecaca',
+                  background: '#fffafb',
                 }}
               >
-                <div>
-                  <b style={{ fontSize: '13px', color: '#991b1b', display: 'block' }}>
-                    Eliminar permanentemente este proyecto
-                  </b>
-                  <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
-                    Se borrará el proyecto "{currentProj.name}", su cronograma Gantt, tareas y sedes asignadas.
-                  </span>
+                <div className="card-header" style={{ borderBottomColor: '#fee2e2' }}>
+                  <div
+                    className="card-icon-wrap"
+                    style={{
+                      background: '#fee2e2',
+                      color: '#dc2626',
+                    }}
+                  >
+                    <AlertTriangle size={20} />
+                  </div>
+                  <div>
+                    <h2 style={{ color: '#991b1b' }}>Zona de Peligro · Gestión del Proyecto</h2>
+                    <p style={{ color: '#7f1d1d' }}>
+                      Acciones irreversibles que impactan la disponibilidad del proyecto y sus datos asociados.
+                    </p>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={openDeleteFlow}
+
+                <div
                   style={{
-                    display: 'inline-flex',
+                    display: 'flex',
                     alignItems: 'center',
-                    gap: '7px',
-                    padding: '9px 16px',
+                    justifyContent: 'space-between',
+                    gap: '16px',
+                    padding: '14px 16px',
                     borderRadius: '8px',
-                    border: '1px solid #f87171',
-                    background: '#ef4444',
-                    color: '#ffffff',
-                    fontSize: '12.5px',
-                    fontWeight: 650,
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                    boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
-                    transition: 'all 0.15s ease',
+                    background: '#ffffff',
+                    border: '1px solid #fecaca',
                   }}
                 >
-                  <Trash2 size={14} />
-                  <span>Eliminar Proyecto</span>
-                </button>
+                  <div>
+                    <b style={{ fontSize: '13px', color: '#991b1b', display: 'block' }}>
+                      Eliminar permanentemente este proyecto
+                    </b>
+                    <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
+                      Se borrará el proyecto "{currentProj.name}", su cronograma Gantt, tareas y sedes asignadas.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openDeleteFlow}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '9px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #f87171',
+                      background: '#ef4444',
+                      color: '#ffffff',
+                      fontSize: '12.5px',
+                      fontWeight: 650,
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Trash2 size={14} />
+                    <span>Eliminar Proyecto</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -1064,11 +1248,16 @@ export default function ConfiguracionView({
                 <div className="card-icon-wrap">
                   <Calendar size={20} />
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <h2>Calendario Laboral y Avance (Curva S)</h2>
                   <p>Reglas de días hábiles y ponderación del avance en el Cronograma.</p>
                 </div>
+                {esAdmin && renderBotonEditar(editandoCrono, () => {
+                  if (editandoCrono) setCronoParams(cronoParamsGuardado);
+                  setEditandoCrono((v) => !v);
+                })}
               </div>
+              {!esAdmin && renderBannerSoloLectura()}
 
               <div className="form-row">
                 <div className="field-info">
@@ -1078,13 +1267,57 @@ export default function ConfiguracionView({
                 <div className="field-control">
                   <SelectEstilizado
                     value={cronoParams.semanaLaboral}
+                    disabled={!editandoCrono}
+                    saved={
+                      !editandoCrono &&
+                      cronoParams.semanaLaboral === cronoParamsGuardado.semanaLaboral &&
+                      (cronoParams.semanaLaboral !== 'personalizado' ||
+                        cronoParams.diasLaboralesCustom.join(',') === cronoParamsGuardado.diasLaboralesCustom.join(','))
+                    }
                     options={[
                       { value: 'lun-vie', label: 'Lunes a Viernes (5 días hábiles)' },
                       { value: 'lun-sab', label: 'Lunes a Sábado (6 días hábiles)' },
                       { value: 'lun-dom', label: 'Lunes a Domingo (7 días calendario)' },
+                      { value: 'personalizado', label: 'Personalizado (elegir días)' },
                     ]}
                     onChange={(val) => setCronoParams((p) => ({ ...p, semanaLaboral: val as SemanaLaboral }))}
                   />
+                  {cronoParams.semanaLaboral === 'personalizado' && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
+                      {DIAS_SEMANA_ORDEN.map((d) => {
+                        const activo = cronoParams.diasLaboralesCustom.includes(d.dow);
+                        return (
+                          <button
+                            key={d.dow}
+                            type="button"
+                            disabled={!editandoCrono}
+                            onClick={() => {
+                              setCronoParams((p) => {
+                                const existe = p.diasLaboralesCustom.includes(d.dow);
+                                if (existe && p.diasLaboralesCustom.length <= 1) return p;
+                                const next = existe
+                                  ? p.diasLaboralesCustom.filter((x) => x !== d.dow)
+                                  : [...p.diasLaboralesCustom, d.dow];
+                                return { ...p, diasLaboralesCustom: next };
+                              });
+                            }}
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '7px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              cursor: !editandoCrono ? 'not-allowed' : 'pointer',
+                              border: activo ? '1px solid #2563eb' : '1px solid #cbd5e1',
+                              background: !editandoCrono ? '#f8fafc' : activo ? '#eff6ff' : '#ffffff',
+                              color: !editandoCrono ? '#64748b' : activo ? '#1d4ed8' : '#64748b',
+                            }}
+                          >
+                            {d.short}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1094,14 +1327,93 @@ export default function ConfiguracionView({
                   <p>Cómo se consolida el porcentaje de avance hacia los componentes padre.</p>
                 </div>
                 <div className="field-control">
-                  <SelectEstilizado
-                    value={cronoParams.metodoPonderacion}
-                    options={[
-                      { value: 'duracion', label: 'Por duración en días hábiles (PMBOK)' },
-                      { value: 'promedio', label: 'Promedio simple entre actividades' },
-                    ]}
-                    onChange={(val) => setCronoParams((p) => ({ ...p, metodoPonderacion: val as MetodoPonderacion }))}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <SelectEstilizado
+                        value={cronoParams.metodoPonderacion}
+                        disabled={!editandoCrono}
+                        saved={!editandoCrono && cronoParams.metodoPonderacion === cronoParamsGuardado.metodoPonderacion}
+                        options={[
+                          {
+                            value: 'duracion',
+                            label: 'Ponderación por duración',
+                            badge: 'Recomendada',
+                            description: 'Días hábiles · Duration-weighted progress',
+                            infoTooltip:
+                              'El avance de cada actividad se pondera según su duración en días hábiles respecto del total de días hábiles de las actividades.',
+                          },
+                          {
+                            value: 'promedio',
+                            label: 'Promedio simple',
+                            description: 'Promedio aritmético · Arithmetic mean',
+                            infoTooltip:
+                              'Todas las actividades tienen el mismo peso, independientemente de su duración.',
+                          },
+                        ]}
+                        onChange={(val) => setCronoParams((p) => ({ ...p, metodoPonderacion: val as MetodoPonderacion }))}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Información sobre criterios de ponderación de avance"
+                      onClick={() => setShowPonderacionInfo((v) => !v)}
+                      onBlur={() => setShowPonderacionInfo(false)}
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        border: showPonderacionInfo ? '1px solid #93c5fd' : '1px solid #cbd5e1',
+                        background: showPonderacionInfo ? '#eff6ff' : '#ffffff',
+                        color: showPonderacionInfo ? '#2563eb' : '#64748b',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Info size={15} />
+                    </button>
+                    {showPonderacionInfo && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 6px)',
+                          right: 0,
+                          width: '320px',
+                          zIndex: 50,
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          color: '#334155',
+                          borderRadius: '10px',
+                          padding: '10px 12px',
+                          boxShadow: '0 10px 24px -6px rgba(15, 23, 42, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.05)',
+                          fontSize: '12px',
+                          lineHeight: 1.45,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                        }}
+                      >
+                        <div>
+                          <strong style={{ display: 'block', marginBottom: '2px', color: '#0f172a' }}>
+                            Ponderación por duración
+                          </strong>
+                          <span>
+                            El avance de cada actividad se pondera según su duración en días hábiles respecto del total de días hábiles de las actividades.
+                          </span>
+                        </div>
+                        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+                          <strong style={{ display: 'block', marginBottom: '2px', color: '#0f172a' }}>
+                            Promedio simple
+                          </strong>
+                          <span>
+                            Todas las actividades tienen el mismo peso, independientemente de su duración.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1113,6 +1425,8 @@ export default function ConfiguracionView({
                 <div className="field-control">
                   <SelectEstilizado
                     value={cronoParams.frecuenciaCorte}
+                    disabled={!editandoCrono}
+                    saved={!editandoCrono && cronoParams.frecuenciaCorte === cronoParamsGuardado.frecuenciaCorte}
                     options={[
                       { value: 'semanal', label: 'Semanal' },
                       { value: 'quincenal', label: 'Quincenal' },
@@ -1129,11 +1443,16 @@ export default function ConfiguracionView({
                 <div className="card-icon-wrap">
                   <Layers size={20} />
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <h2>Umbrales de Control y Línea Base</h2>
                   <p>Criterios de alerta temprana, hitos y protección de la Línea Base oficial.</p>
                 </div>
+                {esAdmin && renderBotonEditar(editandoCrono, () => {
+                  if (editandoCrono) setCronoParams(cronoParamsGuardado);
+                  setEditandoCrono((v) => !v);
+                })}
               </div>
+              {!esAdmin && renderBannerSoloLectura()}
 
               <div className="form-row">
                 <div className="field-info">
@@ -1146,8 +1465,9 @@ export default function ConfiguracionView({
                     type="number"
                     min={0}
                     max={30}
+                    disabled={!editandoCrono}
                     className="select-input"
-                    style={{ maxWidth: 120 }}
+                    style={{ maxWidth: 120, ...(!editandoCrono ? estiloSoloLectura : {}) }}
                     value={cronoParams.diasAvisoPrevio}
                     onChange={(e) => setCronoParams((p) => ({ ...p, diasAvisoPrevio: Number(e.target.value) }))}
                   />
@@ -1165,8 +1485,9 @@ export default function ConfiguracionView({
                     type="number"
                     min={0}
                     max={60}
+                    disabled={!editandoCrono}
                     className="select-input"
-                    style={{ maxWidth: 120 }}
+                    style={{ maxWidth: 120, ...(!editandoCrono ? estiloSoloLectura : {}) }}
                     value={cronoParams.umbralDesvioCritico}
                     onChange={(e) => setCronoParams((p) => ({ ...p, umbralDesvioCritico: Number(e.target.value) }))}
                   />
@@ -1206,10 +1527,11 @@ export default function ConfiguracionView({
                   <p>Restringe el restablecimiento de la Línea Base en el Gantt solo a administradores.</p>
                 </div>
                 <div className="field-control">
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#0f172a', cursor: 'pointer' }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: !editandoCrono ? '#64748b' : '#0f172a', cursor: !editandoCrono ? 'not-allowed' : 'pointer' }}>
                     <input
                       id="cfg-proteger-baseline"
                       type="checkbox"
+                      disabled={!editandoCrono}
                       checked={cronoParams.bloquearResetLineaBase}
                       onChange={(e) => setCronoParams((p) => ({ ...p, bloquearResetLineaBase: e.target.checked }))}
                     />
@@ -1344,12 +1666,13 @@ export default function ConfiguracionView({
                 <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#0066ff' }}>
                   <Key size={20} />
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <h2>Conexión con Google Gemini (BYOK)</h2>
                   <p>
                     Configura tu propia clave de API de Google Gemini para habilitar razonamiento generativo real, análisis de documentos y proyecciones de cronograma.
                   </p>
                 </div>
+                {renderBotonEditar(editandoAsistente, () => setEditandoAsistente((v) => !v))}
               </div>
 
               {/* Fila: API Key */}
@@ -1365,8 +1688,9 @@ export default function ConfiguracionView({
                         id="cfg-gemini-key"
                         type={showApiKey ? 'text' : 'password'}
                         placeholder="AIzaSy..."
+                        disabled={!editandoAsistente}
                         className="select-input"
-                        style={{ width: '100%', paddingRight: 36, fontFamily: showApiKey ? 'monospace' : 'inherit' }}
+                        style={{ width: '100%', paddingRight: 36, fontFamily: showApiKey ? 'monospace' : 'inherit', ...(!editandoAsistente ? estiloSoloLectura : {}) }}
                         value={geminiConfig.apiKey}
                         onChange={(e) => setGeminiConfig((c) => ({ ...c, apiKey: e.target.value }))}
                       />
@@ -1444,6 +1768,8 @@ export default function ConfiguracionView({
                   <select
                     id="cfg-gemini-model"
                     className="select-input"
+                    disabled={!editandoAsistente}
+                    style={!editandoAsistente ? estiloSoloLectura : undefined}
                     value={geminiConfig.model}
                     onChange={(e) => setGeminiConfig((c) => ({ ...c, model: e.target.value }))}
                   >
@@ -1479,6 +1805,8 @@ export default function ConfiguracionView({
                   <select
                     id="cfg-agent-profile"
                     className="select-input"
+                    disabled={!editandoAsistente}
+                    style={!editandoAsistente ? estiloSoloLectura : undefined}
                     value={geminiConfig.profile}
                     onChange={(e) => setGeminiConfig((c) => ({ ...c, profile: e.target.value as AgentProfileId }))}
                   >
@@ -1504,6 +1832,8 @@ export default function ConfiguracionView({
                   <select
                     id="cfg-agent-tone"
                     className="select-input"
+                    disabled={!editandoAsistente}
+                    style={!editandoAsistente ? estiloSoloLectura : undefined}
                     value={geminiConfig.tone}
                     onChange={(e) => setGeminiConfig((c) => ({ ...c, tone: e.target.value as AgentToneId }))}
                   >
@@ -1530,6 +1860,7 @@ export default function ConfiguracionView({
                       min="0.0"
                       max="1.0"
                       step="0.1"
+                      disabled={!editandoAsistente}
                       style={{ flex: 1, accentColor: '#0066ff' }}
                       value={geminiConfig.temperature}
                       onChange={(e) => setGeminiConfig((c) => ({ ...c, temperature: parseFloat(e.target.value) }))}

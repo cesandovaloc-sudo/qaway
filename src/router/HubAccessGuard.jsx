@@ -167,7 +167,7 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
         `tenant:${user.tenant_id}`,
         () => supabase
           .from('tenants')
-          .select('id, name, legal_name, status, content, features')
+          .select('id, name, legal_name, status, branding, content, features')
           .eq('id', user.tenant_id)
           .maybeSingle(),
       )

@@ -8,6 +8,8 @@ export interface StoreTenant {
   accentColor?: string;
   whatsapp?: string | null;
   email?: string | null;
+  isPublished?: boolean;
+  canManage?: boolean;
 }
 
 export interface StoreCategory {

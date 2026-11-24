@@ -497,6 +497,40 @@ export async function sendNotification(input, options = {}) {
   }
 }
 
+/* ---------------- importación desde adaptadores ----------------
+
+   Puerta de entrada para los adaptadores de las apps (hoy GP2). Es de solo
+   inserción: si el id ya existe no se toca, para no borrar el estado de lectura
+   del usuario ni duplicar la notificación en cada sincronización. No ejecuta
+   transportes ni escribe auditoría de envío: solo proyecta el dato ya existente
+   en la app de origen. */
+
+export function importNotifications(items) {
+  const incoming = (Array.isArray(items) ? items : []).filter((item) => item && item.id)
+  if (!incoming.length) return { ok: true, added: 0, skipped: 0, notifications: [] }
+
+  const { notifications } = ensure()
+  const known = new Set(notifications.map((notification) => notification.id))
+  const accepted = []
+  let skipped = 0
+
+  for (const item of incoming) {
+    if (known.has(item.id) || validateNotificationInput(item).length) {
+      skipped += 1
+      continue
+    }
+    known.add(item.id)
+    accepted.push(item)
+  }
+
+  if (accepted.length) {
+    writeJSON(KEY_NOTIFICATIONS, [...accepted, ...notifications])
+    emitChange({ kind: 'notification', imported: accepted.length, app: accepted[0].app_slug })
+  }
+
+  return { ok: true, added: accepted.length, skipped, notifications: accepted }
+}
+
 export async function retryDelivery(notificationId, channels, options = {}) {
   const { notifications } = ensure()
   const index = notifications.findIndex((n) => n.id === notificationId)
