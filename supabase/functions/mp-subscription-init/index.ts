@@ -138,7 +138,6 @@ Deno.serve(async (req) => {
         frequency_type: 'months',
         transaction_amount: total,
         currency_id: currency,
-        free_trial: { frequency: 30, frequency_type: 'days' },
       },
     }),
   })
