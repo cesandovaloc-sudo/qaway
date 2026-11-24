@@ -11,6 +11,13 @@
  * Este archivo reemplaza esas copias; sortWbsHierarchy sigue viviendo en edtPmbokModel.
  */
 
+import {
+  countWorkingDays,
+  getParametrosCronograma,
+  type MetodoPonderacion,
+  type SemanaLaboral,
+} from '../../services/gpCronogramaConfigService';
+
 // Re-export del plano de tipos principales para que otros módulos puedan importarlos sin
 // levantar runtime de cero. Sólo los tipos (íconos, etiquetas, orden) son tão re-exportados;
 // el motor (getLinkedTasksSummary, computeWbsHierarchy) se importa explícitamente cuando lo usa.
@@ -72,12 +79,24 @@ export function getLinkedTasksSummary(
   return { total: linked.length, completed, progress };
 }
 
+export interface ComputeWbsOptions {
+  metodoPonderacion?: MetodoPonderacion;
+  semanaLaboral?: SemanaLaboral;
+}
+
 /**
  * Motor central de gobernanza WBS / EDT conforme al estándar PMI/PMBOK.
  * Devuelve una copia de los items con `wbsNodeType`, avance, fechas y estado recalculados.
  */
-export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] {
+export function computeWbsHierarchy(
+  rawItems: Item[],
+  rawTasks?: any[],
+  options?: ComputeWbsOptions,
+): Item[] {
   if (!Array.isArray(rawItems) || rawItems.length === 0) return [];
+  const params = getParametrosCronograma();
+  const metodo = options?.metodoPonderacion ?? params.metodoPonderacion;
+  const semana = options?.semanaLaboral ?? params.semanaLaboral;
 
   const items = rawItems.map((it) => ({ ...it }));
   const itemsById = new Map<string, Item>();
@@ -128,11 +147,26 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
   containers.forEach((parent) => {
     const children = parentToChildren.get(parent.id) ?? [];
     if (children.length > 0) {
-      const totalProgress = children.reduce(
-        (sum, c) => sum + (typeof c.progress === 'number' ? c.progress : 0),
-        0
-      );
-      parent.progress = Math.min(100, Math.max(0, Math.round(totalProgress / children.length)));
+      if (metodo === 'duracion') {
+        let weightedSum = 0;
+        let totalWeight = 0;
+        for (const c of children) {
+          const prog = typeof c.progress === 'number' ? c.progress : 0;
+          const w = countWorkingDays(c.start, c.end, semana);
+          weightedSum += prog * w;
+          totalWeight += w;
+        }
+        parent.progress =
+          totalWeight > 0
+            ? Math.min(100, Math.max(0, Math.round(weightedSum / totalWeight)))
+            : 0;
+      } else {
+        const totalProgress = children.reduce(
+          (sum, c) => sum + (typeof c.progress === 'number' ? c.progress : 0),
+          0,
+        );
+        parent.progress = Math.min(100, Math.max(0, Math.round(totalProgress / children.length)));
+      }
 
       const validStarts = children
         .map((c) => c.start)

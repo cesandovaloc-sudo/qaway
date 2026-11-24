@@ -12,6 +12,13 @@
  *    Positivo = retraso, 0 = en plazo, negativo = adelanto. Sin línea base no hay desviación (undefined).
  */
 
+import {
+  getParametrosCronograma,
+  workingDaysBetween,
+  type ParametrosCronograma,
+  type SemanaLaboral,
+} from '../../services/gpCronogramaConfigService';
+
 export interface ScheduleFields {
   start: string;
   end: string;
@@ -62,6 +69,66 @@ export const getDeviationDays = (it: ScheduleFields, today: string): number | un
 };
 
 export type DeviationTone = 'late' | 'ontime' | 'early' | 'none';
+export type ScheduleAlertLevel = 'cumplido' | 'desvio_critico' | 'retraso' | 'por_vencer' | 'en_plazo';
+
+/**
+ * Desviación en días hábiles según la semana laboral configurada.
+ */
+export const getWorkingDeviationDays = (
+  it: ScheduleFields,
+  today: string,
+  semanaLaboral?: SemanaLaboral,
+): number | undefined => {
+  const semana = semanaLaboral ?? getParametrosCronograma().semanaLaboral;
+  if (it.baselineEnd) {
+    return workingDaysBetween(it.baselineEnd, getForecastEnd(it, today), semana);
+  }
+  if (!it.end) return undefined;
+  if (isDone(it)) return 0;
+  if (today > it.end) {
+    return workingDaysBetween(it.end, today, semana);
+  }
+  return 0;
+};
+
+/**
+ * Evalúa el estado de alerta PMBOK usando los Parámetros del Cronograma:
+ * - Hitos (duración 0 días): vencen sin días de gracia (`today > end` => `retraso`).
+ * - Actividades: `desvio_critico` si exceden `umbralDesvioCritico` sobre Línea Base;
+ *   `por_vencer` si faltan `<= diasAvisoPrevio` días hábiles para `end`.
+ */
+export const getScheduleAlertState = (
+  it: ScheduleFields & { kind?: string; wbsNodeType?: string },
+  today: string,
+  params: ParametrosCronograma = getParametrosCronograma(),
+): ScheduleAlertLevel => {
+  if (isDone(it)) return 'cumplido';
+  const esHito =
+    it.kind === 'Hito' ||
+    it.wbsNodeType === 'hito' ||
+    (Boolean(it.start) && Boolean(it.end) && it.start === it.end);
+
+  const dev = getWorkingDeviationDays(it, today, params.semanaLaboral);
+  if (dev !== undefined && dev > params.umbralDesvioCritico) {
+    return 'desvio_critico';
+  }
+  if (it.end && today > it.end) {
+    return 'retraso';
+  }
+  if (it.end && !esHito) {
+    const restantes = workingDaysBetween(today, it.end, params.semanaLaboral);
+    if (restantes >= 0 && restantes <= params.diasAvisoPrevio) {
+      return 'por_vencer';
+    }
+  }
+  if (it.end && esHito) {
+    const restantes = workingDaysBetween(today, it.end, params.semanaLaboral);
+    if (restantes === 0 || (restantes > 0 && restantes <= params.diasAvisoPrevio)) {
+      return 'por_vencer';
+    }
+  }
+  return 'en_plazo';
+};
 
 export const getDeviationTone = (dev: number | undefined): DeviationTone => {
   if (dev === undefined) return 'none';

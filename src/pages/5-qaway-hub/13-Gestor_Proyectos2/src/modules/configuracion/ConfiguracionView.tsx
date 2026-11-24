@@ -16,6 +16,7 @@ import {
   EyeOff,
   FolderKanban,
   Globe2,
+  Info,
   Key,
   Layers,
   RotateCcw,
@@ -52,7 +53,19 @@ import OrganizacionTab from './OrganizacionTab';
 import PerfilTab from './PerfilTab';
 import PreferenciasTab from './PreferenciasTab';
 import EmpresaTab from './EmpresaTab';
+import SelectEstilizado from './SelectEstilizado';
+import {
+  getParametrosCronograma,
+  saveParametrosCronograma,
+  type FrecuenciaCorte,
+  type MetodoPonderacion,
+  type ParametrosCronograma,
+  type SemanaLaboral,
+} from '../../services/gpCronogramaConfigService';
 import { usePerfilGp } from '../../services/gpPermisosService';
+import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { listarUnidadesParaJerarquia } from '../../services/organizacionJerarquiaLectura';
+import { supabase } from '../../services/supabaseClient';
 
 export type ConfigBinds = { notify: (m: string) => void };
 
@@ -93,6 +106,22 @@ const TIMEZONES = [
   { id: 'America/Santiago', label: 'America/Santiago (UTC-04:00) · Chile' },
   { id: 'UTC', label: 'UTC (UTC+00:00) · Tiempo Universal Coordinado' },
 ];
+
+function sugerirCodigoProyecto(nombre: string): string {
+  const limpio = (nombre || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .trim();
+  if (!limpio) return `PRJ-${new Date().getFullYear()}`;
+  const tokens = limpio.split(/\s+/).filter(Boolean);
+  const anio = tokens.find((t) => /^(19|20)\d{2}$/.test(t));
+  const palabras = tokens.filter((t) => t !== anio && !['DE', 'DEL', 'LA', 'LAS', 'EL', 'LOS', 'Y', 'EN', 'PARA'].includes(t));
+  const siglas = palabras.slice(0, 2).map((p) => p.slice(0, 3)).join('-');
+  const sufijo = anio || String(new Date().getFullYear());
+  return siglas ? `${siglas}-${sufijo}` : `PRJ-${sufijo}`;
+}
 
 export default function ConfiguracionView({
   onActions,
@@ -189,9 +218,7 @@ export default function ConfiguracionView({
     return localStorage.getItem('qaway-system-date-v1') || '2026-10-28';
   });
 
-  const [toleranceDays, setToleranceDays] = useState(() => {
-    return localStorage.getItem('qaway-tolerance-days-v1') || '5';
-  });
+  const [cronoParams, setCronoParams] = useState<ParametrosCronograma>(() => getParametrosCronograma());
 
   // Proyecto activo en configuración
   const currentProj = useMemo(() => {
@@ -207,8 +234,11 @@ export default function ConfiguracionView({
 
   const [editName, setEditName] = useState(currentProj.name);
   const [editCode, setEditCode] = useState(currentProj.code);
-  const [editRegion, setEditRegion] = useState(currentProj.region || '');
-  const [editSubtext, setEditSubtext] = useState(currentProj.subtext || '');
+  const [showCodeInfo, setShowCodeInfo] = useState(false);
+  const [editBudget, setEditBudget] = useState(currentProj.budget || '');
+  const { perfil: perfilVisible } = usePerfilVisible();
+  const nombreEntidad = String(perfilVisible?.tenant?.name || '').trim() || 'Sin configurar en Datos de la Empresa';
+  const [nombreAreaResponsable, setNombreAreaResponsable] = useState<string>('Cargando...');
   const [selectedModuleKey, setSelectedModuleKey] = useState<string>(CONFIGURABLE_MODULES[0]?.key || 'cronograma');
   const [moduleDescriptions, setModuleDescriptions] = useState<Record<string, string>>(() => {
     return {
@@ -273,14 +303,42 @@ export default function ConfiguracionView({
   useEffect(() => {
     setEditName(currentProj.name);
     setEditCode(currentProj.code);
-    setEditRegion(currentProj.region || '');
-    setEditSubtext(currentProj.subtext || '');
+    setEditBudget(currentProj.budget || '');
     setModuleDescriptions({
       cronograma: currentProj.moduleDescriptions?.['cronograma'] || currentProj.descProyecto || '',
       sedes: currentProj.moduleDescriptions?.['sedes'] || currentProj.descSedes || '',
       ...(currentProj.moduleDescriptions || {}),
     });
   }, [currentProj]);
+
+  useEffect(() => {
+    const tenantId = perfilGp?.tenantId;
+    if (!tenantId || !supabase) {
+      setNombreAreaResponsable('Sin definir en Organización y Sedes');
+      return;
+    }
+    let vigente = true;
+    Promise.all([
+      listarUnidadesParaJerarquia({ tenantId }).catch(() => []),
+      supabase
+        .from('gp_config_gestion_proyectos')
+        .select('unidad_responsable_id')
+        .eq('empresa_id', tenantId)
+        .maybeSingle()
+        .then((res) => (res.data?.unidad_responsable_id ? String(res.data.unidad_responsable_id) : null), () => null),
+    ]).then(([unidades, respId]) => {
+      if (!vigente) return;
+      if (!respId) {
+        setNombreAreaResponsable('Sin definir en Organización y Sedes');
+        return;
+      }
+      const u = unidades.find((item) => item.id === respId);
+      setNombreAreaResponsable(u?.name || 'Sin definir en Organización y Sedes');
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [perfilGp?.tenantId]);
 
   const handleSaveCurrentProject = (e: React.FormEvent) => {
     e.preventDefault();
@@ -299,8 +357,7 @@ export default function ConfiguracionView({
       ...currentProj,
       name: editName.trim(),
       code: editCode.trim() || currentProj.code,
-      region: editRegion.trim(),
-      subtext: editSubtext.trim(),
+      budget: editBudget.trim(),
       descProyecto: cronoDesc,
       descSedes: sedesDesc,
       // Etapa 6.3: la clasificación se conserva (se edita desde su tarjeta).
@@ -388,7 +445,7 @@ export default function ConfiguracionView({
     localStorage.setItem('qaway-system-timezone-v1', timezone);
     localStorage.setItem('qaway-system-date-mode-v1', dateMode);
     localStorage.setItem('qaway-system-date-v1', customDate);
-    localStorage.setItem('qaway-tolerance-days-v1', toleranceDays);
+    saveParametrosCronograma(cronoParams);
 
     // Guardar configuración del Asistente IA
     saveStoredGeminiConfig(geminiConfig);
@@ -446,8 +503,8 @@ export default function ConfiguracionView({
             </p>
           </div>
           {/* Estas pestañas guardan por sí mismas. El botón global solo aplica
-              a general / proyectos / cronograma / asistente. */}
-          {!['perfil', 'preferencias', 'empresa', 'organizacion', 'permisos', 'auditoria'].includes(activeTab) ? (
+              a general / cronograma / asistente. */}
+          {!['perfil', 'preferencias', 'empresa', 'organizacion', 'permisos', 'proyectos', 'auditoria'].includes(activeTab) ? (
             <div className="heading-actions">
               <button type="button" className="btn-save" onClick={handleSave}>
                 <Save size={15} />
@@ -507,9 +564,9 @@ export default function ConfiguracionView({
               {
                 group: 'Proyecto y Operación',
                 items: [
-                  { id: 'general', label: 'Zona Horaria y Fecha', icon: <Clock3 size={15} /> },
                   { id: 'proyectos', label: 'Gestión del Proyecto', icon: <FolderKanban size={15} /> },
-                  { id: 'cronograma', label: 'Tolerancias Cronograma', icon: <Layers size={15} /> },
+                  { id: 'cronograma', label: 'Parámetros del Cronograma', icon: <Layers size={15} /> },
+                  { id: 'general', label: 'Zona Horaria y Fecha', icon: <Clock3 size={15} /> },
                 ],
               },
               {
@@ -678,7 +735,7 @@ export default function ConfiguracionView({
                 <div>
                   <h2>Configuración y Datos del Proyecto Activo</h2>
                   <p>
-                    Edita el nombre oficial, código identificador y ámbito operativo del proyecto activo.
+                    Edita el nombre oficial, código identificador y ficha general del proyecto activo.
                   </p>
                 </div>
               </div>
@@ -746,139 +803,161 @@ export default function ConfiguracionView({
                     <p>Identificador correlativo del proyecto para reportes y exportaciones.</p>
                   </div>
                   <div className="field-control">
-                    <input
-                      id="cfg-proj-code"
-                      type="text"
-                      value={editCode}
-                      onChange={(e) => setEditCode(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        color: '#0f172a',
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="field-info">
-                    <label htmlFor="cfg-proj-region">Ámbito / Zona Operativa</label>
-                    <p>Zona o territorio donde operan las sedes y supervisores de campo.</p>
-                  </div>
-                  <div className="field-control">
-                    <input
-                      id="cfg-proj-region"
-                      type="text"
-                      value={editRegion}
-                      onChange={(e) => setEditRegion(e.target.value)}
-                      placeholder="Ej. Zona Centro, Lima Norte, Frentes Regionales..."
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        color: '#0f172a',
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Configuración dinámica de cabeceras por módulo */}
-                <div className="form-row">
-                  <div className="field-info">
-                    <label htmlFor="cfg-proj-module-select">Módulo a configurar</label>
-                    <p>Elige el módulo para personalizar el texto que aparece bajo su título principal.</p>
-                  </div>
-                  <div className="field-control">
-                    <select
-                      id="cfg-proj-module-select"
-                      value={selectedModuleKey}
-                      onChange={(e) => setSelectedModuleKey(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        color: '#0f172a',
-                        background: '#ffffff',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {CONFIGURABLE_MODULES.map((mod) => (
-                        <option key={mod.key} value={mod.key}>
-                          {mod.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="field-info">
-                    <label htmlFor="cfg-proj-module-desc">
-                      Subtítulo de Cabecera · {CONFIGURABLE_MODULES.find((m) => m.key === selectedModuleKey)?.name || 'Módulo'}
-                    </label>
-                    <p>Texto corto de una sola línea mostrado a los usuarios en la cabecera de este módulo.</p>
-                  </div>
-                  <div className="field-control">
-                    <input
-                      id="cfg-proj-module-desc"
-                      type="text"
-                      value={moduleDescriptions[selectedModuleKey] ?? ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setModuleDescriptions((prev) => ({
-                          ...prev,
-                          [selectedModuleKey]: val,
-                        }));
-                      }}
-                      placeholder={CONFIGURABLE_MODULES.find((m) => m.key === selectedModuleKey)?.defaultSubtitle || 'Subtítulo del módulo...'}
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '13px',
-                        color: '#0f172a',
-                      }}
-                    />
-                    <div style={{ marginTop: '6px', fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>Vista previa:</span>
-                      <strong style={{ color: '#0284c7', fontWeight: 600 }}>
-                        {moduleDescriptions[selectedModuleKey]?.trim() || CONFIGURABLE_MODULES.find((m) => m.key === selectedModuleKey)?.defaultSubtitle}
-                      </strong>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }}>
+                      <input
+                        id="cfg-proj-code"
+                        type="text"
+                        value={editCode}
+                        onChange={(e) => setEditCode(e.target.value.toUpperCase())}
+                        placeholder={`Sugerencia: ${sugerirCodigoProyecto(editName)}`}
+                        style={{
+                          flex: 1,
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '13px',
+                          color: '#0f172a',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        aria-label="Información sobre formato de Código Oficial"
+                        onClick={() => setShowCodeInfo((v) => !v)}
+                        onBlur={() => setShowCodeInfo(false)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '36px',
+                          flexShrink: 0,
+                          borderRadius: '8px',
+                          border: showCodeInfo ? '1px solid #93c5fd' : '1px solid #cbd5e1',
+                          background: showCodeInfo ? '#eff6ff' : '#ffffff',
+                          color: showCodeInfo ? '#2563eb' : '#64748b',
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                      >
+                        <Info size={15} />
+                      </button>
+                      {showCodeInfo && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 6px)',
+                            right: 0,
+                            width: '280px',
+                            zIndex: 50,
+                            padding: '10px 12px',
+                            borderRadius: '10px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            color: '#334155',
+                            fontSize: '12px',
+                            lineHeight: 1.45,
+                            boxShadow: '0 10px 24px -6px rgba(15, 23, 42, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.05)',
+                          }}
+                        >
+                          Usa siglas en <strong style={{ color: '#0f172a' }}>MAYÚSCULAS</strong> sin espacios (ej. <strong style={{ color: '#2563eb' }}>{sugerirCodigoProyecto(editName)}</strong>). Facilita identificar el proyecto en reportes y respaldos.
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-budget">Presupuesto Estimado</label>
+                    <p>Monto referencial asignado para la ejecución del proyecto.</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-budget"
+                      type="text"
+                      value={editBudget}
+                      onChange={(e) => setEditBudget(e.target.value)}
+                      placeholder="Ej. S/ 350,000"
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        color: '#0f172a',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-entidad">Entidad</label>
+                    <p>Empresa registrada en Datos de la Empresa (resumen cerrado).</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-entidad"
+                      type="text"
+                      value={nombreEntidad}
+                      disabled
+                      readOnly
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        background: '#f8fafc',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        color: '#64748b',
+                        cursor: 'not-allowed',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field-info">
+                    <label>Tipo de proyecto</label>
+                    <p>Categoría administrativa del proyecto.</p>
+                  </div>
+                  <div className="field-control">
+                    <TipoProyectoCatalogoSelect
+                      value={editTipo || null}
+                      onChange={(codigo) => setEditTipo(codigo)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-responsable">Área responsable</label>
+                    <p>Unidad asignada en Organización y Sedes (resumen cerrado).</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-responsable"
+                      type="text"
+                      value={nombreAreaResponsable}
+                      disabled
+                      readOnly
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        background: '#f8fafc',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        color: '#64748b',
+                        cursor: 'not-allowed',
+                      }}
+                    />
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', gap: '10px', marginTop: '18px', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={handleExportProject}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      padding: '9px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      background: '#ffffff',
-                      color: '#334155',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <Download size={14} />
-                    <span>Exportar Copia de Seguridad (JSON)</span>
-                  </button>
                   <button
                     type="submit"
                     style={{
@@ -902,162 +981,6 @@ export default function ConfiguracionView({
                   </button>
                 </div>
               </form>
-            </div>
-
-             {/* Tarjeta: Clasificación del Proyecto (Etapa 6.3 — tipo, catálogo real) */}
-            <div className="cfg-card">
-              <div className="card-header">
-                <div className="card-icon-wrap" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
-                  <Tags size={20} />
-                </div>
-                <div>
-                  <h2>Clasificación del Proyecto</h2>
-                  <p>
-                    Tipo administrativo del proyecto (obra pública, inversión, mantenimiento, servicio, mejora interna u otro).
-                    Es clasificación para filtros y reportes: NO modifica la EDT ni el cronograma.
-                  </p>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="field-info">
-                  <label>Tipo de Proyecto (gp_tipos_proyecto_c)</label>
-                  <p>Persistencia definitiva: <b>gp_proyectos.tipo_proyecto_codigo</b> (0002 · FK por código). "Sin clasificar" = NULL (B-8).</p>
-                </div>
-                <div className="field-control">
-                  <TipoProyectoCatalogoSelect
-                    value={editTipo || null}
-                    onChange={(codigo) => setEditTipo(codigo)}
-                    disabled={capacidadesProy ? !capacidadesProy.capacidades?.editarTipo : false}
-                  />
-                  <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#64748b', lineHeight: 1.45 }}>
-                    {capacidadesProy == null && <span>Verificando permisos con la sesión del Hub…</span>}
-                    {capacidadesProy && capacidadesProy.estado === 'ok' && (capacidadesProy.capacidades?.editarTipo
-                      ? <span style={{ color: '#047857', fontWeight: 600 }}>✓ Tu rol permite editar la clasificación.</span>
-                      : <span>Solo consulta: editar la clasificación requiere gerente del proyecto, admin de empresa o plataforma.</span>)}
-                    {capacidadesProy && capacidadesProy.estado === 'sin_sesion' && (
-                      <span style={{ color: '#b45309', fontWeight: 600 }}>Sin sesión del Hub (fail-closed): inicia sesión para editar la clasificación.</span>
-                    )}
-                    {capacidadesProy && capacidadesProy.estado === 'indisponible' && (
-                      <span style={{ color: '#b45309', fontWeight: 600 }}>No se pudo verificar el rol (fail-closed): {capacidadesProy.mensaje}</span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleGuardarClasificacion}
-                    disabled={capacidadesProy ? !capacidadesProy.capacidades?.editarTipo : true}
-                    style={{
-                      marginTop: '10px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      padding: '8px 14px',
-                      borderRadius: '8px',
-                      border: '1px solid #7c3aed',
-                      background: capacidadesProy?.capacidades?.editarTipo ? '#7c3aed' : '#ede9fe',
-                      color: capacidadesProy?.capacidades?.editarTipo ? '#ffffff' : '#a78bfa',
-                      fontSize: '12.5px',
-                      fontWeight: 700,
-                      cursor: capacidadesProy?.capacidades?.editarTipo ? 'pointer' : 'not-allowed',
-                    }}
-                    title="Guarda el tipo del proyecto activo"
-                  >
-                    <Save size={14} />
-                    <span>Guardar Clasificación</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Tarjeta: Estado y Ciclo de Vida (Etapa 6.3 — SOLO LECTURA aquí) */}
-            <div className="cfg-card">
-              <div className="card-header">
-                <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#2563eb' }}>
-                  <ShieldCheck size={20} />
-                </div>
-                <div>
-                  <h2>Estado y Ciclo de Vida · Solo Lectura</h2>
-                  <p>
-                    El estado general es una condición de DIRECCIÓN: se consulta aquí, pero se cambia desde la ficha del
-                    proyecto (iniciar, pausar, reanudar, completar, cancelar, reabrir — con motivo y auditoría).
-                  </p>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="field-info">
-                  <label>Estado general actual</label>
-                  <p>Persistencia definitiva: <b>gp_proyectos.estado_codigo</b> (0002 · FK a gp_estados_proyecto_c). Cada transición queda en gp_eventos_auditoria.</p>
-                </div>
-                <div className="field-control">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                    <CicloVidaEstadoChip codigo={currentProj.estadoCodigo ?? null} />
-                    {onIrAFicha && (
-                      <button
-                        type="button"
-                        onClick={onIrAFicha}
-                        title="Las acciones de dirección se realizan desde la ficha del proyecto"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '6px 13px',
-                          borderRadius: '8px',
-                          border: '1px solid #cbd5e1',
-                          background: '#ffffff',
-                          color: '#2563eb',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <ChevronRight size={13} />
-                        <span>Acciones en la ficha Resumen</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tarjeta: Equipo y Accesos (Etapa 6.3 — estado del bloqueo honesto) */}
-            <div className="cfg-card">
-              <div className="card-header">
-                <div className="card-icon-wrap" style={{ background: '#fffbeb', color: '#b45309' }}>
-                  <Users size={20} />
-                </div>
-                <div>
-                  <h2>Equipo y Accesos (roles del proyecto)</h2>
-                  <p>
-                    Aquí se administrará el equipo del proyecto con roles (`gp_roles_proyecto_c` + `gp_proyecto_miembros_r`):
-                    permisos asignados a ROLES, nunca a personas sueltas. La pertenencia al proyecto no otorga permisos administrativos.
-                  </p>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '16px',
-                  padding: '14px 16px',
-                  borderRadius: '8px',
-                  background: '#ffffff',
-                  border: '1px solid #fde68a',
-                }}
-              >
-                <div>
-                  <b style={{ fontSize: '13px', color: '#92400e', display: 'block' }}>
-                    ⚠️ Bloqueado por discrepancia estructural · SQL de resolución preparado
-                  </b>
-                  <span style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.5 }}>
-                    La tabla viva tiene 9 columnas frente a las 10 del SQL del repo (`5.4` §3). La resolución ADITIVA y no
-                    destructiva está lista en <b>20261115_0008</b> (completa columnas faltantes + seed de 6 roles con la matriz
-                    de permisos en `permisos jsonb`). Tras aplicarla (y con `0003`), esta sección gestionará integrantes y roles.
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Tarjeta 2: Zona de Peligro (Danger Zone) */}
@@ -1139,30 +1062,159 @@ export default function ConfiguracionView({
             <div className="cfg-card">
               <div className="card-header">
                 <div className="card-icon-wrap">
-                  <Layers size={20} />
+                  <Calendar size={20} />
                 </div>
                 <div>
-                  <h2>Tolerancias de Hitos y Subprocesos</h2>
-                  <p>Reglas de cálculo para categorización de actividades como «En curso», «Con retraso» o «Cumple».</p>
+                  <h2>Calendario Laboral y Avance (Curva S)</h2>
+                  <p>Reglas de días hábiles y ponderación del avance en el Cronograma.</p>
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="field-info">
-                  <label htmlFor="cfg-tolerance">Días de Gracia / Tolerancia Territorial</label>
-                  <p>Número de días hábiles antes de clasificar automáticamente una tarea pendiente como «Con retraso».</p>
+                  <label>Semana laboral</label>
+                  <p>Días hábiles usados para calcular duraciones, desviaciones y avance ponderado.</p>
+                </div>
+                <div className="field-control">
+                  <SelectEstilizado
+                    value={cronoParams.semanaLaboral}
+                    options={[
+                      { value: 'lun-vie', label: 'Lunes a Viernes (5 días hábiles)' },
+                      { value: 'lun-sab', label: 'Lunes a Sábado (6 días hábiles)' },
+                      { value: 'lun-dom', label: 'Lunes a Domingo (7 días calendario)' },
+                    ]}
+                    onChange={(val) => setCronoParams((p) => ({ ...p, semanaLaboral: val as SemanaLaboral }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label>Ponderación de avance</label>
+                  <p>Cómo se consolida el porcentaje de avance hacia los componentes padre.</p>
+                </div>
+                <div className="field-control">
+                  <SelectEstilizado
+                    value={cronoParams.metodoPonderacion}
+                    options={[
+                      { value: 'duracion', label: 'Por duración en días hábiles (PMBOK)' },
+                      { value: 'promedio', label: 'Promedio simple entre actividades' },
+                    ]}
+                    onChange={(val) => setCronoParams((p) => ({ ...p, metodoPonderacion: val as MetodoPonderacion }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label>Frecuencia de corte</label>
+                  <p>Periodicidad de referencia para cortes de avance y seguimiento de Curva S.</p>
+                </div>
+                <div className="field-control">
+                  <SelectEstilizado
+                    value={cronoParams.frecuenciaCorte}
+                    options={[
+                      { value: 'semanal', label: 'Semanal' },
+                      { value: 'quincenal', label: 'Quincenal' },
+                      { value: 'mensual', label: 'Mensual' },
+                    ]}
+                    onChange={(val) => setCronoParams((p) => ({ ...p, frecuenciaCorte: val as FrecuenciaCorte }))}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap">
+                  <Layers size={20} />
+                </div>
+                <div>
+                  <h2>Umbrales de Control y Línea Base</h2>
+                  <p>Criterios de alerta temprana, hitos y protección de la Línea Base oficial.</p>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-aviso-previo">Aviso previo antes de vencer (días hábiles)</label>
+                  <p>Anticipación para marcar una actividad o hito próximo en alerta temprana.</p>
                 </div>
                 <div className="field-control">
                   <input
-                    id="cfg-tolerance"
+                    id="cfg-aviso-previo"
                     type="number"
-                    min="0"
-                    max="30"
+                    min={0}
+                    max={30}
                     className="select-input"
                     style={{ maxWidth: 120 }}
-                    value={toleranceDays}
-                    onChange={(e) => setToleranceDays(e.target.value)}
+                    value={cronoParams.diasAvisoPrevio}
+                    onChange={(e) => setCronoParams((p) => ({ ...p, diasAvisoPrevio: Number(e.target.value) }))}
                   />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-desvio-critico">Umbral de desvío crítico sobre Línea Base</label>
+                  <p>Días hábiles de retraso respecto a la Línea Base para activar alerta crítica.</p>
+                </div>
+                <div className="field-control">
+                  <input
+                    id="cfg-desvio-critico"
+                    type="number"
+                    min={0}
+                    max={60}
+                    className="select-input"
+                    style={{ maxWidth: 120 }}
+                    value={cronoParams.umbralDesvioCritico}
+                    onChange={(e) => setCronoParams((p) => ({ ...p, umbralDesvioCritico: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-hitos-regla">Criterio de Hitos</label>
+                  <p>Regla fija de gestión de proyectos para hitos de control.</p>
+                </div>
+                <div className="field-control">
+                  <input
+                    id="cfg-hitos-regla"
+                    type="text"
+                    value="Duración 0 días · Sin días de gracia al vencer"
+                    disabled
+                    readOnly
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      background: '#f8fafc',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: '#64748b',
+                      cursor: 'not-allowed',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-proteger-baseline">Protección de Línea Base oficial</label>
+                  <p>Restringe el restablecimiento de la Línea Base en el Gantt solo a administradores.</p>
+                </div>
+                <div className="field-control">
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#0f172a', cursor: 'pointer' }}>
+                    <input
+                      id="cfg-proteger-baseline"
+                      type="checkbox"
+                      checked={cronoParams.bloquearResetLineaBase}
+                      onChange={(e) => setCronoParams((p) => ({ ...p, bloquearResetLineaBase: e.target.checked }))}
+                    />
+                    <span>Solo un administrador puede restablecer la Línea Base</span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -1178,15 +1230,15 @@ export default function ConfiguracionView({
                 </div>
                 <div>
                   <h2>Registro de Auditoría Institucional</h2>
-                  <p>Parámetros de trazabilidad para cambios de cronograma por directores regionales y coordinadores UGEL.</p>
+                  <p>Trazabilidad de cambios en cronograma, hitos y configuración por los responsables autorizados.</p>
                 </div>
               </div>
               <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
-                Todas las modificaciones de cronograma, asignaciones de responsables territoriales y fechas de hito se registran con firma digital y marca temporal conforme a los lineamientos institucionales y directivas del proyecto.
+                Todas las modificaciones de cronograma, asignaciones de responsables y fechas de hito se registran con usuario y marca temporal conforme a las políticas de control de la empresa.
               </p>
             </div>
 
-            {/* Tarjeta: Historial de estado del proyecto (Etapa 6.3 — gp_eventos_auditoria) */}
+            {/* Tarjeta: Historial de estado del proyecto */}
             <div className="cfg-card">
               <div className="card-header">
                 <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#2563eb' }}>
@@ -1195,8 +1247,7 @@ export default function ConfiguracionView({
                 <div>
                   <h2>Historial de Estado del Proyecto</h2>
                   <p>
-                    Transiciones de dirección (STATE_CHANGE) registradas en <b>gp_eventos_auditoria</b>: actor, fecha y motivo
-                    de cada iniciar / pausar / reanudar / completar / cancelar / reabrir. Sin tablas nuevas.
+                    Registro de cambios de estado del proyecto (iniciar, pausar, reanudar, completar, cancelar o reabrir), con responsable, fecha y motivo.
                   </p>
                 </div>
               </div>
@@ -1233,8 +1284,7 @@ export default function ConfiguracionView({
 
               {historialProy && historialProy.estado === 'vacio' && (
                 <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0 }}>
-                  Sin registros de cambio de estado todavía. Aparecerán al ejecutar acciones de dirección
-                  (requiere la capa gp_* aplicada: SQL 0008 → 0009 → 0010 + prerrequisitos).
+                  Aún no hay cambios de estado registrados para este proyecto.
                 </p>
               )}
 

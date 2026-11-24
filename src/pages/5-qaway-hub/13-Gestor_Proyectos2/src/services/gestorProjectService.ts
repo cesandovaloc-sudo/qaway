@@ -81,7 +81,36 @@ export async function listGestorProjects(tenantId?: string | null): Promise<Proj
       respuesta.data = (respuesta.data ?? []).filter((row: any) => row.tenant_id === tenantId);
     }
     if (respuesta.error) throw respuesta.error;
-    return (respuesta.data ?? []).map((row) => fromRow(row as ProjectRow));
+    const baseProjects = (respuesta.data ?? []).map((row) => fromRow(row as ProjectRow));
+    if (baseProjects.length === 0) return baseProjects;
+
+    // Enriquecer con tipo_proyecto_codigo y estado_codigo desde gp_proyectos
+    let gpQuery = db
+      .from('gp_proyectos')
+      .select('legacy_source_id,tipo_proyecto_codigo,estado_codigo')
+      .is('is_deleted', false);
+    if (tenantId) gpQuery = gpQuery.eq('empresa_id', tenantId);
+    const { data: gpRows } = await gpQuery;
+    if (!gpRows || gpRows.length === 0) return baseProjects;
+
+    const gpMap = new Map<string, { tipo?: string | undefined; estado?: string | undefined }>();
+    for (const r of gpRows as Array<{ legacy_source_id?: string | null; tipo_proyecto_codigo?: string | null; estado_codigo?: string | null }>) {
+      if (r.legacy_source_id) {
+        gpMap.set(r.legacy_source_id, {
+          tipo: r.tipo_proyecto_codigo || undefined,
+          estado: r.estado_codigo || undefined,
+        });
+      }
+    }
+    return baseProjects.map((p) => {
+      const extra = gpMap.get(p.id);
+      if (!extra) return p;
+      return {
+        ...p,
+        tipoProyectoCodigo: extra.tipo ?? p.tipoProyectoCodigo,
+        estadoCodigo: (extra.estado as ProjectItem['estadoCodigo']) ?? p.estadoCodigo,
+      };
+    });
   })();
   inFlightProjects.set(key, run);
   try {
@@ -107,11 +136,25 @@ async function asegurarGpProyecto(project: ProjectItem, tenantId?: string | null
     .is('is_deleted', false)
     .limit(1)
     .maybeSingle();
-  if (existente) return;
+  if (existente) {
+    const { error: updErr } = await db
+      .from('gp_proyectos')
+      .update({
+        codigo_proyecto: project.code || project.id,
+        nombre: project.name || project.code || project.id,
+        tipo_proyecto_codigo: project.tipoProyectoCodigo ?? null,
+      })
+      .eq('id', existente.id);
+    if (updErr) {
+      console.warn('[Gestor Projects] no se pudo actualizar gp_proyectos:', updErr.message);
+    }
+    return;
+  }
   const { error } = await db.from('gp_proyectos').insert({
     empresa_id: tenantId,
     codigo_proyecto: project.code || project.id,
     nombre: project.name || project.code || project.id,
+    tipo_proyecto_codigo: project.tipoProyectoCodigo ?? null,
     legacy_source_id: project.id,
     metadata: { origen: 'gestor_proyectos' },
   });

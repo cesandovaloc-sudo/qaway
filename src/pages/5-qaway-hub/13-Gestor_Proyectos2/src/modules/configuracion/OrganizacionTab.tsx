@@ -14,6 +14,7 @@ interface SedeRow {
   nombre: string;
   tipo_codigo: string | null;
   es_principal: boolean;
+  sede_padre_id: string | null;
   pais: string | null;
   departamento: string | null;
   provincia: string | null;
@@ -93,6 +94,7 @@ export const OrganizacionTab: React.FC = () => {
   const [omitirRegistroExternas, setOmitirRegistroExternas] = useState(false);
   const [sedeExternaEditId, setSedeExternaEditId] = useState<string | null>(null);
   const [sedeExternaDraft, setSedeExternaDraft] = useState<DatosUbicacionSede | null>(null);
+  const [sedesAbiertas, setSedesAbiertas] = useState<Record<string, boolean>>({});
 
   // Pasos 4 y 5: gobernanza de la gestion de proyectos (tabla ya existente).
   const [configGestion, setConfigGestion] = useState<ConfigGestionRow | null>(null);
@@ -221,9 +223,10 @@ export const OrganizacionTab: React.FC = () => {
       const [sRes, gRes, jerarquia] = await Promise.all([
         supabase
           .from('gp_sedes')
-          .select('id, nombre, tipo_codigo, es_principal, pais, departamento, provincia, distrito, ubigeo, direccion, referencia_ubicacion, latitud, longitud')
+          .select('id, nombre, tipo_codigo, es_principal, sede_padre_id, pais, departamento, provincia, distrito, ubigeo, direccion, referencia_ubicacion, latitud, longitud')
           .eq('empresa_id', perfil.tenantId)
           .order('es_principal', { ascending: false })
+          .order('nombre', { ascending: true })
           .limit(300),
         supabase
           .from('gp_config_gestion_proyectos')
@@ -668,6 +671,22 @@ export const OrganizacionTab: React.FC = () => {
     }
   };
 
+  const { sedesRaiz, hijosPorSede } = useMemo(() => {
+    const idsExternos = new Set(sedesExternas.map((s) => s.id));
+    const map = new Map<string, SedeRow[]>();
+    const raices: SedeRow[] = [];
+    for (const s of sedesExternas) {
+      if (s.sede_padre_id && idsExternos.has(s.sede_padre_id)) {
+        const arr = map.get(s.sede_padre_id) ?? [];
+        arr.push(s);
+        map.set(s.sede_padre_id, arr);
+      } else {
+        raices.push(s);
+      }
+    }
+    return { sedesRaiz: raices, hijosPorSede: map };
+  }, [sedesExternas]);
+
   return (
     <div className="cards-grid">
       {feedback && (
@@ -763,26 +782,70 @@ export const OrganizacionTab: React.FC = () => {
               </div>
             )}
 
-            {sedesExternas.map((s, idx) => (
-              <div
-                key={s.id}
-                style={{ marginLeft: '24px', padding: '12px 14px', borderRadius: '8px', background: '#ffffff', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                  <Building size={15} color="#0284c7" style={{ flexShrink: 0 }} />
-                  <span style={{ color: '#64748b' }}>Sucursal {idx + 1}:</span>
-                  <span style={{ color: '#0f172a', fontWeight: 500 }}>{s.nombre}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', color: '#475569', paddingLeft: '23px' }}>
-                  <MapPin size={14} color="#64748b" style={{ flexShrink: 0 }} />
-                  <span>
-                    {Array.from(new Set([s.direccion, s.distrito, s.provincia, s.departamento, s.pais].filter(Boolean)))
-                      .join(' · ') || 'Sin dirección registrada'}
-                    {s.referencia_ubicacion ? ` · Ref: ${s.referencia_ubicacion}` : ''}
-                  </span>
-                </div>
-              </div>
-            ))}
+            {(() => {
+              const renderNodoLectura = (s: SedeRow, idx: number, nivel: number): React.ReactNode => {
+                const hijos = hijosPorSede.get(s.id) ?? [];
+                const tieneHijos = hijos.length > 0;
+                const abierto = Boolean(sedesAbiertas[s.id]);
+                const direccionTxt =
+                  Array.from(new Set([s.direccion, s.distrito, s.provincia, s.departamento, s.pais].filter(Boolean))).join(' · ') ||
+                  'Sin dirección registrada';
+                return (
+                  <React.Fragment key={s.id}>
+                    <div
+                      style={{
+                        marginLeft: `${nivel * 24}px`,
+                        padding: '10px 14px',
+                        borderRadius: '8px',
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '5px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                          {tieneHijos ? (
+                            <button
+                              type="button"
+                              onClick={() => setSedesAbiertas((p) => ({ ...p, [s.id]: !p[s.id] }))}
+                              style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'inline-flex', color: '#64748b' }}
+                              aria-label={`Expandir ${s.nombre}`}
+                            >
+                              <ChevronRight size={15} style={{ transform: abierto ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                            </button>
+                          ) : (
+                            <span style={{ width: '15px', flexShrink: 0 }} />
+                          )}
+                          <Building size={15} color="#0284c7" style={{ flexShrink: 0 }} />
+                          <span style={{ color: '#64748b' }}>{nivel === 1 ? `Sucursal ${idx + 1}:` : 'Sub-sede:'}</span>
+                          <span style={{ color: '#0f172a', fontWeight: 500 }}>{s.nombre}</span>
+                        </div>
+                        {tieneHijos && (
+                          <button
+                            type="button"
+                            onClick={() => setSedesAbiertas((p) => ({ ...p, [s.id]: !p[s.id] }))}
+                            style={{ fontSize: '11.5px', fontWeight: 600, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '2px 9px', cursor: 'pointer' }}
+                          >
+                            {hijos.length} {hijos.length === 1 ? 'sub-sede' : 'sub-sedes'}
+                          </button>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#475569', paddingLeft: '46px' }}>
+                        <MapPin size={13} color="#64748b" style={{ flexShrink: 0 }} />
+                        <span>
+                          {direccionTxt}
+                          {s.referencia_ubicacion ? ` · Ref: ${s.referencia_ubicacion}` : ''}
+                        </span>
+                      </div>
+                    </div>
+                    {tieneHijos && abierto && hijos.map((h, hi) => renderNodoLectura(h, hi, nivel + 1))}
+                  </React.Fragment>
+                );
+              };
+              return sedesRaiz.map((s, idx) => renderNodoLectura(s, idx, 1));
+            })()}
           </div>
         ) : (
         <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -964,90 +1027,137 @@ export const OrganizacionTab: React.FC = () => {
                 )
               )}
 
-              {sedesExternas.map((sede, idx) => (
-                sedeExternaEditId === sede.id && sedeExternaDraft ? (
-                  <form
-                    key={sede.id}
-                    onSubmit={handleActualizarSedeExterna}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '12px',
-                      padding: '16px',
-                      borderRadius: '10px',
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                    }}
-                  >
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
-                      <Building size={15} color="#0284c7" />
-                      <span>Sucursal: {sede.nombre}</span>
-                    </label>
-                    <SedeUbicacionFields
-                      valor={sedeExternaDraft}
-                      onChange={(patch) => setSedeExternaDraft((prev) => (prev ? { ...prev, ...patch } : prev))}
-                      placeholderNombre="Nombre de la sucursal"
-                    />
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
-                        <Check size={15} />
-                        <span>{saving ? 'Guardando...' : 'Actualizar sucursal'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        disabled={saving}
-                        onClick={() => {
-                          setSedeExternaEditId(null);
-                          setSedeExternaDraft(null);
-                        }}
-                        style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
-                      >
-                        Ocultar mapa
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div
-                    key={sede.id}
-                    style={{ marginLeft: '20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px', padding: '14px', borderRadius: '10px', background: '#ffffff', border: '1px solid #e2e8f0' }}
-                  >
-                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: '#f0f9ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Building size={15} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
-                            Sucursal {idx + 1} · {sede.nombre}
+              {(() => {
+                const renderNodoEdicion = (sede: SedeRow, idx: number, nivel: number): React.ReactNode => {
+                  const hijos = hijosPorSede.get(sede.id) ?? [];
+                  const tieneHijos = hijos.length > 0;
+                  const abierto = Boolean(sedesAbiertas[`edit-${sede.id}`]);
+                  if (sedeExternaEditId === sede.id && sedeExternaDraft) {
+                    return (
+                      <React.Fragment key={sede.id}>
+                        <form
+                          onSubmit={handleActualizarSedeExterna}
+                          style={{
+                            marginLeft: `${nivel * 20}px`,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px',
+                            padding: '16px',
+                            borderRadius: '10px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                          }}
+                        >
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
+                            <Building size={15} color="#0284c7" />
+                            <span>{nivel === 1 ? `Sucursal: ${sede.nombre}` : `Sub-sede: ${sede.nombre}`}</span>
+                          </label>
+                          <SedeUbicacionFields
+                            valor={sedeExternaDraft}
+                            onChange={(patch) => setSedeExternaDraft((prev) => (prev ? { ...prev, ...patch } : prev))}
+                            placeholderNombre="Nombre de la sucursal"
+                          />
+                          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
+                              <Check size={15} />
+                              <span>{saving ? 'Guardando...' : 'Actualizar sucursal'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() => {
+                                setSedeExternaEditId(null);
+                                setSedeExternaDraft(null);
+                              }}
+                              style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
+                            >
+                              Ocultar mapa
+                            </button>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12.5px', color: '#64748b' }}>
-                            <MapPin size={12} style={{ flexShrink: 0 }} />
-                            <span>
-                              {Array.from(new Set([sede.direccion, sede.distrito, sede.provincia, sede.departamento, sede.pais].filter(Boolean)))
-                                .join(' · ') || 'Sin dirección registrada'}
+                        </form>
+                        {tieneHijos && abierto && hijos.map((h, hi) => renderNodoEdicion(h, hi, nivel + 1))}
+                      </React.Fragment>
+                    );
+                  }
+                  return (
+                    <React.Fragment key={sede.id}>
+                      <div
+                        style={{
+                          marginLeft: `${nivel * 20}px`,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          gap: '10px',
+                          padding: '14px',
+                          borderRadius: '10px',
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                        }}
+                      >
+                        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {tieneHijos ? (
+                              <button
+                                type="button"
+                                onClick={() => setSedesAbiertas((p) => ({ ...p, [`edit-${sede.id}`]: !p[`edit-${sede.id}`] }))}
+                                style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'inline-flex', color: '#64748b' }}
+                                aria-label={`Expandir ${sede.nombre}`}
+                              >
+                                <ChevronRight size={15} style={{ transform: abierto ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                              </button>
+                            ) : (
+                              <span style={{ width: '15px', flexShrink: 0 }} />
+                            )}
+                            <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: '#f0f9ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <Building size={15} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>
+                                {nivel === 1 ? `Sucursal ${idx + 1} · ${sede.nombre}` : `Sub-sede · ${sede.nombre}`}
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12.5px', color: '#64748b' }}>
+                                <MapPin size={12} style={{ flexShrink: 0 }} />
+                                <span>
+                                  {Array.from(new Set([sede.direccion, sede.distrito, sede.provincia, sede.departamento, sede.pais].filter(Boolean)))
+                                    .join(' · ') || 'Sin dirección registrada'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                            {tieneHijos && (
+                              <button
+                                type="button"
+                                onClick={() => setSedesAbiertas((p) => ({ ...p, [`edit-${sede.id}`]: !p[`edit-${sede.id}`] }))}
+                                style={{ fontSize: '11.5px', fontWeight: 600, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '999px', padding: '3px 10px', cursor: 'pointer' }}
+                              >
+                                {hijos.length} {hijos.length === 1 ? 'sub-sede' : 'sub-sedes'}
+                              </button>
+                            )}
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: '#ecfdf5', border: '1px solid #a7f3d0', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
+                              <CheckCircle2 size={13} />
+                              <span>Registrada</span>
                             </span>
                           </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSedeExternaEditId(sede.id);
+                            setSedeExternaDraft(sedeADatos(sede));
+                          }}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
+                        >
+                          <Pencil size={13} />
+                          <span>Editar ubicación</span>
+                        </button>
                       </div>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', borderRadius: '999px', background: '#ecfdf5', border: '1px solid #a7f3d0', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
-                        <CheckCircle2 size={13} />
-                        <span>Registrada</span>
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSedeExternaEditId(sede.id);
-                        setSedeExternaDraft(sedeADatos(sede));
-                      }}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}
-                    >
-                      <Pencil size={13} />
-                      <span>Editar ubicación</span>
-                    </button>
-                  </div>
-                )
-              ))}
+                      {tieneHijos && abierto && hijos.map((h, hi) => renderNodoEdicion(h, hi, nivel + 1))}
+                    </React.Fragment>
+                  );
+                };
+                return sedesRaiz.map((sede, idx) => renderNodoEdicion(sede, idx, 1));
+              })()}
 
               {sedePrincipal && !mapaSedeCentralAbierto && cantidadGuardada !== null && Number(cantidadSedes) === cantidadGuardada && !registrandoExternas && cantidadGuardada > sedes.length && (() => {
                 const faltantes = cantidadGuardada - sedes.length;
@@ -1269,13 +1379,44 @@ export const OrganizacionTab: React.FC = () => {
                     </span>
                     <span style={{ color: '#0f172a', fontWeight: 600 }}>{sedePrincipal.nombre}</span>
                   </div>
-                  {sedesExternas.map((sede, idx) => (
-                    <div key={sede.id} style={{ marginLeft: '24px', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#ffffff', fontSize: '13.5px' }}>
-                      <Building size={14} color="#0284c7" style={{ flexShrink: 0 }} />
-                      <span style={{ color: '#64748b', fontWeight: 500, flexShrink: 0 }}>Sucursal {idx + 1}:</span>
-                      <span style={{ color: '#0f172a', fontWeight: 500 }}>{sede.nombre}</span>
-                    </div>
-                  ))}
+                  {(() => {
+                    const renderResumenSede = (sede: SedeRow, idx: number, nivel: number): React.ReactNode => {
+                      const hijos = hijosPorSede.get(sede.id) ?? [];
+                      const tieneHijos = hijos.length > 0;
+                      const abierto = Boolean(sedesAbiertas[`res-${sede.id}`]);
+                      return (
+                        <React.Fragment key={sede.id}>
+                          <div style={{ marginLeft: `${nivel * 24}px`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#ffffff', fontSize: '13.5px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {tieneHijos ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setSedesAbiertas((p) => ({ ...p, [`res-${sede.id}`]: !p[`res-${sede.id}`] }))}
+                                  style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'inline-flex', color: '#64748b' }}
+                                >
+                                  <ChevronRight size={14} style={{ transform: abierto ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                                </button>
+                              ) : (
+                                <span style={{ width: '14px', flexShrink: 0 }} />
+                              )}
+                              <Building size={14} color="#0284c7" style={{ flexShrink: 0 }} />
+                              <span style={{ color: '#64748b', fontWeight: 500, flexShrink: 0 }}>
+                                {nivel === 1 ? `Sucursal ${idx + 1}:` : 'Sub-sede:'}
+                              </span>
+                              <span style={{ color: '#0f172a', fontWeight: 500 }}>{sede.nombre}</span>
+                            </div>
+                            {tieneHijos && (
+                              <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#475569', background: '#f1f5f9', borderRadius: '999px', padding: '1px 8px' }}>
+                                {hijos.length}
+                              </span>
+                            )}
+                          </div>
+                          {tieneHijos && abierto && hijos.map((h, hi) => renderResumenSede(h, hi, nivel + 1))}
+                        </React.Fragment>
+                      );
+                    };
+                    return sedesRaiz.map((sede, idx) => renderResumenSede(sede, idx, 1));
+                  })()}
                 </>
               ) : (
                 <div style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#ffffff', fontSize: '13.5px', color: '#64748b' }}>

@@ -79,6 +79,7 @@ import {
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 import { usePerfilGp } from '../../services/gpPermisosService';
+import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma } from '../../services/gpCronogramaConfigService';
 
 type UnidadRemotaGantt = { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number };
 
@@ -2758,6 +2759,7 @@ export default function CronogramaGanttView({
       }
     };
     window.addEventListener('qaway-date-changed', onDateChanged);
+    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, () => setItems((prev) => computeWbsHierarchy(prev)));
     return () => window.removeEventListener('qaway-date-changed', onDateChanged);
   }, []);
   const [newMenu, setNewMenu] = useState(false);
@@ -4159,6 +4161,11 @@ export default function CronogramaGanttView({
 
   /* Recalibra o limpia la línea base contractual en caso de adenda formal MINEDU */
   const resetBaselines = () => {
+    const params = getParametrosCronograma();
+    if (params.bloquearResetLineaBase && perfilGp && perfilGp.rol !== 'admin' && !perfilGp.esPlataforma) {
+      notify('Línea Base protegida en Configuración: solo un administrador puede restablecerla.');
+      return;
+    }
     const withBaseline = items.filter((x) => hasBaseline(x)).length;
     if (withBaseline === 0) {
       notify('No hay líneas base fijadas para recalibrar');

@@ -21,13 +21,14 @@
  * Etapa 6): puede montarse dentro de formularios que renderizan condicionalmente.
  */
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import {
   listarCatalogo,
   TABLA_TIPOS_PROYECTO,
   type ValorCatalogo,
 } from '../services/gpCatalogosService';
 import { SIN_CLASIFICAR } from '../services/gpCicloVidaService';
+import SelectEstilizado, { type SelectOption } from '../modules/configuracion/SelectEstilizado';
 
 interface Props {
   /** Código persistido (gp_proyectos.tipo_proyecto_codigo). null = "Sin clasificar". */
@@ -37,18 +38,6 @@ interface Props {
   /** Texto del option nulo (por defecto "Sin clasificar"). */
   etiquetaNula?: string;
 }
-
-const ESTILO_SELECT: CSSProperties = {
-  width: '100%',
-  padding: '9px 12px',
-  borderRadius: '9px',
-  border: '1px solid #cbd5e1',
-  fontSize: '13px',
-  color: '#0f172a',
-  boxSizing: 'border-box',
-  outline: 'none',
-  background: '#ffffff',
-};
 
 type Fuente =
   | { estado: 'cargando' }
@@ -78,7 +67,7 @@ export default function TipoProyectoCatalogoSelect({
         }
       })
       .catch(() => {
-        if (vigente) setFuente({ estado: 'error', mensaje: 'Fallo al leer gp_tipos_proyecto_c.' });
+        if (vigente) setFuente({ estado: 'error', mensaje: 'No se pudo cargar el catálogo de tipos.' });
       });
     return () => {
       vigente = false;
@@ -87,45 +76,54 @@ export default function TipoProyectoCatalogoSelect({
 
   if (fuente.estado === 'vacio') {
     return (
-      <select disabled style={{ ...ESTILO_SELECT, color: '#64748b' }} value={value ?? ''} title="gp_tipos_proyecto_c sin valores activos — seed pendiente (SQL 20261115_0009)">
-        <option value={value ?? ''}>{value ? value : `${etiquetaNula} — catálogo de tipos vacío (SQL 0009 pendiente)`}</option>
-      </select>
+      <SelectEstilizado
+        value=""
+        placeholder={`${etiquetaNula} (catálogo vacío)`}
+        options={[{ value: '', label: `${etiquetaNula} (catálogo vacío)` }]}
+        onChange={() => {}}
+        disabled
+      />
     );
   }
 
   if (fuente.estado === 'error') {
     return (
-      <select disabled style={{ ...ESTILO_SELECT, color: '#64748b' }} value={value ?? ''} title={`gp_tipos_proyecto_c no disponible: ${fuente.mensaje}`}>
-        <option value={value ?? ''}>{value ? value : `${etiquetaNula} — catálogo no disponible (ver consola)`}</option>
-      </select>
+      <SelectEstilizado
+        value=""
+        placeholder={`${etiquetaNula} (catálogo no disponible)`}
+        options={[{ value: '', label: `${etiquetaNula} (catálogo no disponible)` }]}
+        onChange={() => {}}
+        disabled
+      />
     );
   }
 
   if (fuente.estado === 'cargando') {
     return (
-      <select style={ESTILO_SELECT} value={value ?? ''} title="Cargando gp_tipos_proyecto_c…" onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}>
-        <option value={value ?? ''}>{value ? `${value} (cargando catálogo…)` : `${etiquetaNula} (cargando catálogo…)`}</option>
-      </select>
+      <SelectEstilizado
+        value=""
+        placeholder="Cargando tipos de proyecto…"
+        options={[{ value: '', label: 'Cargando tipos de proyecto…' }]}
+        onChange={() => {}}
+        disabled
+      />
     );
   }
 
-  // Lista: opción nula + valores activos del catálogo real.
   const valorActualEnCatalogo = value ? fuente.valores.some((v) => v.codigo === value) : true;
+  const opciones: SelectOption[] = [
+    { value: '', label: etiquetaNula },
+    ...(!valorActualEnCatalogo && value ? [{ value, label: value }] : []),
+    ...fuente.valores.map((v) => ({ value: v.codigo, label: v.nombre })),
+  ];
+
   return (
-    <select
-      style={ESTILO_SELECT}
+    <SelectEstilizado
       value={value ?? ''}
-      title="Fuente: gp_tipos_proyecto_c · Supabase (catálogo real)"
+      placeholder={etiquetaNula}
+      options={opciones}
       disabled={disabled}
-      onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
-    >
-      <option value="">{etiquetaNula}</option>
-      {!valorActualEnCatalogo && value && <option value={value}>{value} (valor guardado no activo)</option>}
-      {fuente.valores.map((v) => (
-        <option key={v.codigo} value={v.codigo}>
-          {v.nombre}
-        </option>
-      ))}
-    </select>
+      onChange={(val) => onChange(val === '' ? null : val)}
+    />
   );
 }

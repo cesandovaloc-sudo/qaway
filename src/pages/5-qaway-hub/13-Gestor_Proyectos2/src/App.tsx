@@ -375,6 +375,7 @@ function GestorProyectosApp() {
   // Sincronizar y redirigir a ruta canónica con prefijo /hub/gestor_proyecto
   useEffect(() => {
     const clean = location.pathname.replace(/\/+$/, '') || '/';
+    if (clean.startsWith(`${MODULE_SLUGS.configuracion}/`)) return;
     const matched = SLUG_TO_MODULE[clean];
     const canonicalSlug = MODULE_SLUGS[active];
 

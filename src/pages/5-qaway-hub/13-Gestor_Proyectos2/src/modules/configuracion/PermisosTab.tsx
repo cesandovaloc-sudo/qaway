@@ -153,6 +153,11 @@ export default function PermisosTab() {
   const [busquedaUsuario, setBusquedaUsuario] = useState('');
   const [areasAbiertas, setAreasAbiertas] = useState<Record<string, boolean>>({});
   const [esquemaAbierto, setEsquemaAbierto] = useState<Record<string, boolean>>({});
+  const [unidadResponsableId, setUnidadResponsableId] = useState<string | null>(null);
+  const [llaveUserMenuAbierto, setLlaveUserMenuAbierto] = useState(false);
+  const [llaveUserFiltro, setLlaveUserFiltro] = useState('');
+  const [llaveAreasAbiertas, setLlaveAreasAbiertas] = useState<Record<string, boolean>>({});
+  const [guardandoLoteLlave, setGuardandoLoteLlave] = useState(false);
   const inviteInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [enviandoInvite, setEnviandoInvite] = useState(false);
   const [aviso, setAviso] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
@@ -193,7 +198,16 @@ export default function PermisosTab() {
               .eq('status', 'active')
               .then((res) => (res.data ?? []) as Array<{ user_id: string | null; unit_id: string }>, () => [])
           : Promise.resolve([]),
-      ]).then(([rows, miembros]) => {
+        supabase
+          ? supabase
+              .from('gp_config_gestion_proyectos')
+              .select('unidad_responsable_id')
+              .eq('empresa_id', perfil.tenantId)
+              .maybeSingle()
+              .then((res) => (res.data?.unidad_responsable_id ? String(res.data.unidad_responsable_id) : null), () => null)
+          : Promise.resolve(null),
+      ]).then(([rows, miembros, respId]) => {
+        setUnidadResponsableId(respId);
         const mapa = calcularNumeracion(aNodosJerarquia(rows));
         const ordenarPorRuta = (aId: string, bId: string): number => {
           const pa = (mapa.get(aId)?.ruta ?? '9999').split('.').map(Number);
@@ -211,7 +225,7 @@ export default function PermisosTab() {
           const info = mapa.get(u.id);
           return {
             value: u.id,
-            label: u.name,
+            label: respId && u.id === respId ? `${u.name} · Área responsable` : u.name,
             badge: info?.ruta,
             nivel: info?.nivel ?? 1,
             parentValue: u.parentUnitId,
@@ -236,15 +250,19 @@ export default function PermisosTab() {
   }, [aviso]);
 
   useEffect(() => {
-    if (!llavesMenuAbiertoId) return;
+    if (!llavesMenuAbiertoId && !llaveUserMenuAbierto) return;
     const onDoc = (ev: MouseEvent) => {
       const target = ev.target as HTMLElement | null;
-      if (target?.closest('[data-llaves-menu="true"]')) return;
-      setLlavesMenuAbiertoId(null);
+      if (llavesMenuAbiertoId && !target?.closest('[data-llaves-menu="true"]')) {
+        setLlavesMenuAbiertoId(null);
+      }
+      if (llaveUserMenuAbierto && !target?.closest('[data-llave-user-menu="true"]')) {
+        setLlaveUserMenuAbierto(false);
+      }
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, [llavesMenuAbiertoId]);
+  }, [llavesMenuAbiertoId, llaveUserMenuAbierto]);
 
   const gruposPorArea = useMemo(() => {
     const usuarios = estado.fase === 'lista' ? estado.usuarios : [];
@@ -557,7 +575,7 @@ export default function PermisosTab() {
           </div>
           <div>
             <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>
-              Permisos de Gestor de Proyectos · {estado.usuarios.length} {estado.usuarios.length === 1 ? 'usuario' : 'usuarios'}
+              Roles de Gestor de Proyectos
             </b>
             <span style={{ fontSize: '12px', color: '#64748b' }}>
               Asigna roles, áreas y llaves delicadas a los integrantes de tu empresa.
@@ -1142,6 +1160,11 @@ export default function PermisosTab() {
                   <b style={{ fontSize: '13px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {grupo.label}
                   </b>
+                  {unidadResponsableId && grupo.key === unidadResponsableId && (
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '999px', padding: '1px 8px', flexShrink: 0 }}>
+                      Área responsable
+                    </span>
+                  )}
                 </span>
                 <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#475569', background: '#e2e8f0', borderRadius: '999px', padding: '2px 9px', flexShrink: 0 }}>
                   {grupo.usuarios.length} {grupo.usuarios.length === 1 ? 'usuario' : 'usuarios'}
@@ -1173,9 +1196,25 @@ export default function PermisosTab() {
                     return (
                       <div key={u.id} style={{ ...estiloFila, background: '#ffffff', alignItems: 'flex-end' }}>
                         <div style={{ minWidth: '210px', flex: '1.5 1 210px', alignSelf: 'center' }}>
-                          <b style={{ fontSize: '13px', color: '#0f172a' }}>{nombreLimpio ?? (u.email ?? u.id)}</b>
-                          <div style={{ fontSize: '11.5px', color: nombreLimpio ? '#64748b' : '#94a3b8' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <b style={{ fontSize: '13px', color: '#0f172a' }}>{nombreLimpio ?? (u.email ?? u.id)}</b>
+                            <span
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                background: u.mustChangePassword ? '#fef3c7' : '#ecfdf5',
+                                color: u.mustChangePassword ? '#b45309' : '#059669',
+                                border: `1px solid ${u.mustChangePassword ? '#fde68a' : '#a7f3d0'}`,
+                              }}
+                            >
+                              {u.mustChangePassword ? 'Pendiente de ingreso' : 'Activo'}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '11.5px', color: nombreLimpio ? '#64748b' : '#94a3b8', marginTop: '2px' }}>
                             {nombreLimpio ? (u.email ?? u.id) : 'Pendiente de nombre (invitado)'}
+                            {u.phone ? ` · ${u.phone}` : ''}
                           </div>
                         </div>
                         <div style={{ flex: '0 0 140px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: '#64748b' }}>
@@ -1288,6 +1327,35 @@ export default function PermisosTab() {
                             </div>
                           )}
                         </div>
+                        <a
+                          href={(() => {
+                            const link = `${window.location.origin}/login?redirect=${encodeURIComponent('/hub/gestor_proyectos')}`;
+                            const saludo = nombreLimpio ? `Hola ${nombreLimpio},` : 'Hola,';
+                            const msg = u.mustChangePassword
+                              ? `${saludo} recuerda ingresar al Gestor de Proyectos con tu correo ${u.email ?? ''} y cambiar tu clave provisional en tu primer acceso: ${link}`
+                              : `${saludo} puedes ingresar al Gestor de Proyectos aquí: ${link}`;
+                            const telWa = u.phone ? normalizarTelefonoWa(u.phone) : '';
+                            return telWa
+                              ? `https://wa.me/${telWa}?text=${encodeURIComponent(msg)}`
+                              : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                          })()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={u.phone ? `Enviar mensaje por WhatsApp a ${u.phone}` : 'Enviar mensaje por WhatsApp'}
+                          style={{
+                            ...estiloBotonSecundario,
+                            height: '38px',
+                            padding: '0 12px',
+                            boxSizing: 'border-box',
+                            borderRadius: '8px',
+                            fontSize: '12.5px',
+                            lineHeight: '1',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          <Send size={13} />
+                          <span>WhatsApp</span>
+                        </a>
                         <button
                           type="button"
                           style={{ ...estiloBotonPrimario, height: '38px', padding: '0 14px', boxSizing: 'border-box', borderRadius: '8px', opacity: sucio ? 1 : 0.5, cursor: sucio ? 'pointer' : 'default' }}
@@ -1322,7 +1390,7 @@ export default function PermisosTab() {
             <ShieldCheck size={17} />
           </div>
           <div>
-            <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>Esquema de Permisos del Gestor</b>
+            <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>Esquema de Permisos de Gestor de Proyectos</b>
             <span style={{ fontSize: '12px', color: '#64748b' }}>
               Detalle completo de capacidades por módulo. Los permisos con llave curable permiten otorgar acceso puntual a usuarios específicos.
             </span>
@@ -1340,7 +1408,7 @@ export default function PermisosTab() {
                 ? <CheckSquare size={15} color="#2563eb" />
                 : <Users size={15} color="#2563eb" />;
           return (
-            <div key={grupo} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden', background: '#ffffff' }}>
+            <div key={grupo} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', overflow: grupoAbierto ? 'visible' : 'hidden', background: '#ffffff' }}>
               <button
                 type="button"
                 onClick={() => setEsquemaAbierto((prev) => ({ ...prev, [grupo]: !prev[grupo] }))}
@@ -1349,6 +1417,7 @@ export default function PermisosTab() {
                   padding: '11px 14px',
                   background: '#f8fafc',
                   border: 'none',
+                  borderRadius: grupoAbierto ? '10px 10px 0 0' : '10px',
                   borderBottom: grupoAbierto ? '1px solid #e2e8f0' : 'none',
                   display: 'flex',
                   alignItems: 'center',
@@ -1380,6 +1449,36 @@ export default function PermisosTab() {
                   ? usuariosNoAdmin.filter((u) => u.permisos.includes(item.llaveCurable!))
                   : [];
                 const editandoEstaLlave = Boolean(item.llaveCurable && llaveEditando === item.llaveCurable);
+                const aplicarLlaveLote = async (objetivos: UsuarioEmpresa[], otorgar: boolean, contexto: string) => {
+                  if (!perfil.tenantId || !item.llaveCurable || objetivos.length === 0) return;
+                  setGuardandoLoteLlave(true);
+                  const res = await Promise.all(
+                    objetivos.map((u) => {
+                      const nuevos = otorgar
+                        ? Array.from(new Set([...u.permisos, item.llaveCurable!]))
+                        : u.permisos.filter((k) => k !== item.llaveCurable);
+                      return guardarRolGp({
+                        userId: u.id,
+                        tenantId: perfil.tenantId!,
+                        rol: u.rol ?? 'visor',
+                        permisos: nuevos,
+                      });
+                    }),
+                  );
+                  setGuardandoLoteLlave(false);
+                  const okCount = res.filter((r) => r.ok).length;
+                  if (okCount > 0) {
+                    setAviso({
+                      tipo: 'ok',
+                      texto: otorgar
+                        ? `Llave otorgada a ${okCount} integrante(s) (${contexto}).`
+                        : `Llave retirada de ${okCount} integrante(s) (${contexto}).`,
+                    });
+                    cargar();
+                  } else {
+                    setAviso({ tipo: 'error', texto: res[0]?.mensaje || 'No se pudo actualizar la llave.' });
+                  }
+                };
                 return (
                   <div
                     key={item.id}
@@ -1387,103 +1486,319 @@ export default function PermisosTab() {
                       padding: '12px 14px',
                       borderTop: idx === 0 ? 'none' : '1px solid #f1f5f9',
                       display: 'flex',
-                      flexDirection: 'column',
-                      gap: '10px',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '16px',
+                      flexWrap: 'wrap',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-                      <div style={{ flex: '1.3 1 240px' }}>
-                        <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>{item.nombre}</div>
-                        <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{item.descripcion}</div>
-                      </div>
-                      <div style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>Otorgado a</span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                          {item.rolesBase.map((r) => (
-                            <span key={r} style={{ padding: '2px 8px', borderRadius: '999px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: '11.5px', fontWeight: 600 }}>
-                              Rol: {r}
-                            </span>
-                          ))}
-                          {usuariosConLlave.map((u) => (
-                            <span key={u.id} style={{ padding: '2px 8px', borderRadius: '999px', background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#059669', fontSize: '11.5px', fontWeight: 500 }}>
-                              {u.nombre || u.email}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div style={{ flexShrink: 0 }}>
-                        {item.llaveCurable ? (
-                          <button
-                            type="button"
-                            onClick={() => setLlaveEditando(editandoEstaLlave ? null : item.llaveCurable!)}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
-                          >
-                            <Pencil size={12} color="#2563eb" />
-                            <span>{editandoEstaLlave ? 'Cerrar' : 'Editar'}</span>
-                          </button>
-                        ) : (
-                          <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>Por rol base</span>
-                        )}
+                    <div style={{ flex: '1.2 1 230px', minWidth: '200px' }}>
+                      <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>{item.nombre}</div>
+                      <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{item.descripcion}</div>
+                    </div>
+                    <div style={{ flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>Otorgado a</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {item.rolesBase.map((r) => (
+                          <span key={r} style={{ padding: '2px 8px', borderRadius: '999px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: '11.5px', fontWeight: 600 }}>
+                            Rol: {r}
+                          </span>
+                        ))}
+                        {usuariosConLlave.map((u) => (
+                          <span key={u.id} style={{ padding: '2px 8px', borderRadius: '999px', background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#059669', fontSize: '11.5px', fontWeight: 500 }}>
+                            {u.nombre || u.email}
+                          </span>
+                        ))}
                       </div>
                     </div>
-
-                    {editandoEstaLlave && item.llaveCurable && (
-                      <div style={{ padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#334155' }}>
-                          Otorgar llave "{ETIQUETAS_LLAVE[item.llaveCurable]}" a usuarios adicionales:
-                        </span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                          {estado.usuarios.filter((u) => (u.rol ?? 'visor') !== 'admin').length === 0 ? (
-                            <span style={{ fontSize: '12px', color: '#64748b' }}>
-                              Aún no hay usuarios adicionales en el equipo. Usa <b>Invitar usuario</b> para agregar integrantes.
-                            </span>
-                          ) : estado.usuarios
-                            .filter((u) => (u.rol ?? 'visor') !== 'admin')
-                            .map((u) => {
-                            const tiene = u.permisos.includes(item.llaveCurable!);
-                            return (
-                              <button
-                                key={u.id}
-                                type="button"
-                                disabled={guardandoId === u.id}
-                                onClick={async () => {
-                                  if (!perfil.tenantId) return;
-                                  const nuevosPermisos = tiene
-                                    ? u.permisos.filter((k) => k !== item.llaveCurable)
-                                    : [...u.permisos, item.llaveCurable!];
-                                  setGuardandoId(u.id);
-                                  const r = await guardarRolGp({
-                                    userId: u.id,
-                                    tenantId: perfil.tenantId,
-                                    rol: u.rol ?? 'visor',
-                                    permisos: nuevosPermisos,
-                                  });
-                                  setGuardandoId(null);
-                                  if (r.ok) {
-                                    setAviso({ tipo: 'ok', texto: `Llave actualizada para "${u.nombre ?? u.email}".` });
-                                    cargar();
-                                  } else {
-                                    setAviso({ tipo: 'error', texto: r.mensaje });
-                                  }
-                                }}
+                    <div
+                      data-llave-user-menu={editandoEstaLlave && item.llaveCurable ? 'true' : undefined}
+                      style={{ position: 'relative', flex: '0 0 310px', minHeight: '32px', display: 'flex', alignItems: 'center' }}
+                    >
+                      {item.llaveCurable && (
+                        usuariosNoAdmin.length === 0 ? (
+                          <span style={{ fontSize: '12px', color: editandoEstaLlave ? '#64748b' : '#94a3b8', whiteSpace: 'nowrap' }}>
+                            Sin usuarios adicionales
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              disabled={!editandoEstaLlave || guardandoLoteLlave}
+                              onClick={() => {
+                                if (!editandoEstaLlave) return;
+                                setLlaveUserMenuAbierto((v) => !v);
+                              }}
+                              style={{
+                                width: '100%',
+                                height: '32px',
+                                padding: '0 10px',
+                                boxSizing: 'border-box',
+                                borderRadius: '7px',
+                                border: !editandoEstaLlave
+                                  ? '1px solid #e2e8f0'
+                                  : llaveUserMenuAbierto
+                                    ? '1px solid #2563eb'
+                                    : '1px solid #cbd5e1',
+                                background: !editandoEstaLlave ? '#f8fafc' : '#ffffff',
+                                color: !editandoEstaLlave ? '#94a3b8' : '#0f172a',
+                                fontSize: '12.5px',
+                                fontWeight: 500,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '8px',
+                                cursor: !editandoEstaLlave ? 'not-allowed' : guardandoLoteLlave ? 'wait' : 'pointer',
+                              }}
+                            >
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                Área o persona ({usuariosConLlave.length}/{usuariosNoAdmin.length})
+                              </span>
+                              <ChevronDown
+                                size={14}
                                 style={{
-                                  padding: '5px 10px',
-                                  borderRadius: '7px',
-                                  border: `1px solid ${tiene ? '#a7f3d0' : '#cbd5e1'}`,
-                                  background: tiene ? '#ecfdf5' : '#ffffff',
-                                  color: tiene ? '#059669' : '#334155',
-                                  fontSize: '12px',
-                                  fontWeight: 500,
-                                  cursor: 'pointer',
+                                  color: !editandoEstaLlave ? '#cbd5e1' : '#64748b',
+                                  flexShrink: 0,
+                                  transform: editandoEstaLlave && llaveUserMenuAbierto ? 'rotate(180deg)' : 'none',
+                                  transition: 'transform 0.15s ease',
+                                }}
+                              />
+                            </button>
+                            {editandoEstaLlave && llaveUserMenuAbierto && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: 'calc(100% + 6px)',
+                                  left: 0,
+                                  right: 0,
+                                  width: '100%',
+                                  boxSizing: 'border-box',
+                                  zIndex: 1300,
+                                  background: '#ffffff',
+                                  border: '1px solid #e2e8f0',
+                                  borderRadius: '10px',
+                                  boxShadow: '0 12px 28px -6px rgba(15, 23, 42, 0.14), 0 4px 12px -2px rgba(15, 23, 42, 0.06)',
+                                  padding: '8px',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '6px',
                                 }}
                               >
-                                {tiene ? '✓ ' : '+ '}{u.nombre || u.email}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                                <div style={{ position: 'relative' }}>
+                                  <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                  <input
+                                    type="text"
+                                    value={llaveUserFiltro}
+                                    onChange={(e) => setLlaveUserFiltro(e.target.value)}
+                                    placeholder="Filtrar área o usuario..."
+                                    style={{ width: '100%', height: '32px', padding: '0 10px 0 28px', boxSizing: 'border-box', borderRadius: '7px', border: '1px solid #cbd5e1', fontSize: '12.5px', color: '#0f172a' }}
+                                  />
+                                </div>
+
+                                {(() => {
+                                  const todosMarcados = usuariosNoAdmin.length > 0 && usuariosConLlave.length === usuariosNoAdmin.length;
+                                  const algunoMarcado = usuariosConLlave.length > 0 && !todosMarcados;
+                                  return (
+                                    <label
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: '8px',
+                                        padding: '6px 8px',
+                                        borderRadius: '7px',
+                                        background: '#f8fafc',
+                                        border: '1px solid #f1f5f9',
+                                        cursor: guardandoLoteLlave ? 'wait' : 'pointer',
+                                        fontSize: '12.5px',
+                                        fontWeight: 600,
+                                        color: '#0f172a',
+                                      }}
+                                    >
+                                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                        <input
+                                          type="checkbox"
+                                          checked={todosMarcados}
+                                          ref={(el) => { if (el) el.indeterminate = algunoMarcado; }}
+                                          disabled={guardandoLoteLlave}
+                                          onChange={() => aplicarLlaveLote(usuariosNoAdmin, !todosMarcados, 'todos los usuarios')}
+                                        />
+                                        <span>Todos los usuarios</span>
+                                      </span>
+                                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', background: '#e2e8f0', borderRadius: '999px', padding: '1px 7px' }}>
+                                        {usuariosConLlave.length}/{usuariosNoAdmin.length}
+                                      </span>
+                                    </label>
+                                  );
+                                })()}
+
+                                <div style={{ fontSize: '10.5px', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.05em', padding: '2px 4px 0' }}>
+                                  ÁREAS Y USUARIOS
+                                </div>
+
+                                <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  {(() => {
+                                    const fq = llaveUserFiltro.trim().toLowerCase();
+                                    const lista = usuariosNoAdmin.filter((u) => {
+                                      if (!fq) return true;
+                                      const uArea = unidadesArea.find((a) => a.value === miembrosUnidad[u.id]);
+                                      const areaMatch = uArea ? uArea.label.toLowerCase().includes(fq) : false;
+                                      return areaMatch || (u.nombre ?? '').toLowerCase().includes(fq) || (u.email ?? '').toLowerCase().includes(fq);
+                                    });
+                                    const mapG = new Map<string, UsuarioEmpresa[]>();
+                                    for (const u of lista) {
+                                      const k = miembrosUnidad[u.id] || '__SIN_AREA__';
+                                      const arr = mapG.get(k) ?? [];
+                                      arr.push(u);
+                                      mapG.set(k, arr);
+                                    }
+                                    const gruposMenu: Array<{ key: string; label: string; users: UsuarioEmpresa[] }> = [];
+                                    for (const a of unidadesArea) {
+                                      const us = mapG.get(a.value);
+                                      if (us && us.length > 0) {
+                                        gruposMenu.push({ key: a.value, label: a.badge ? `${a.badge} · ${a.label}` : a.label, users: us });
+                                        mapG.delete(a.value);
+                                      }
+                                    }
+                                    const sinA = mapG.get('__SIN_AREA__');
+                                    if (sinA && sinA.length > 0) gruposMenu.push({ key: '__SIN_AREA__', label: 'Sin área asignada', users: sinA });
+
+                                    if (gruposMenu.length === 0) {
+                                      return <span style={{ padding: '8px', fontSize: '12px', color: '#64748b' }}>Sin coincidencias.</span>;
+                                    }
+                                    return gruposMenu.map((g) => {
+                                      const abiertoG = fq !== '' || Boolean(llaveAreasAbiertas[g.key]);
+                                      const conEnArea = g.users.filter((u) => u.permisos.includes(item.llaveCurable!)).length;
+                                      const areaTodos = conEnArea === g.users.length;
+                                      const areaParcial = conEnArea > 0 && !areaTodos;
+                                      return (
+                                        <div key={g.key} style={{ border: '1px solid #f1f5f9', borderRadius: '7px', overflow: 'hidden' }}>
+                                          <div
+                                            style={{
+                                              width: '100%',
+                                              padding: '6px 8px',
+                                              background: '#f8fafc',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'space-between',
+                                              gap: '6px',
+                                              boxSizing: 'border-box',
+                                            }}
+                                          >
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: 1 }}>
+                                              <button
+                                                type="button"
+                                                aria-label={`Expandir ${g.label}`}
+                                                onClick={() => setLlaveAreasAbiertas((prev) => ({ ...prev, [g.key]: !prev[g.key] }))}
+                                                style={{ border: 'none', background: 'transparent', padding: '2px', cursor: 'pointer', display: 'inline-flex', color: '#64748b', flexShrink: 0 }}
+                                              >
+                                                <ChevronRight size={13} style={{ transform: abiertoG ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                                              </button>
+                                              <input
+                                                type="checkbox"
+                                                checked={areaTodos}
+                                                ref={(el) => { if (el) el.indeterminate = areaParcial; }}
+                                                disabled={guardandoLoteLlave}
+                                                onChange={() => aplicarLlaveLote(g.users, !areaTodos, g.label)}
+                                                style={{ cursor: guardandoLoteLlave ? 'wait' : 'pointer', flexShrink: 0 }}
+                                              />
+                                              <button
+                                                type="button"
+                                                onClick={() => setLlaveAreasAbiertas((prev) => ({ ...prev, [g.key]: !prev[g.key] }))}
+                                                style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}
+                                              >
+                                                {g.label}
+                                              </button>
+                                            </span>
+                                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', background: '#e2e8f0', borderRadius: '999px', padding: '1px 7px', flexShrink: 0 }}>
+                                              {conEnArea}/{g.users.length}
+                                            </span>
+                                          </div>
+                                          {abiertoG && (
+                                            <div style={{ display: 'flex', flexDirection: 'column', padding: '4px 4px 4px 22px', gap: '2px' }}>
+                                              {g.users.map((u) => {
+                                                const tiene = u.permisos.includes(item.llaveCurable!);
+                                                return (
+                                                  <label
+                                                    key={u.id}
+                                                    style={{
+                                                      display: 'flex',
+                                                      alignItems: 'center',
+                                                      gap: '8px',
+                                                      padding: '5px 8px',
+                                                      borderRadius: '6px',
+                                                      cursor: guardandoId === u.id ? 'wait' : 'pointer',
+                                                      fontSize: '12.5px',
+                                                      color: tiene ? '#1d4ed8' : '#334155',
+                                                      background: tiene ? '#eff6ff' : 'transparent',
+                                                    }}
+                                                  >
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={tiene}
+                                                      disabled={guardandoId === u.id || guardandoLoteLlave}
+                                                      onChange={async () => {
+                                                        if (!perfil.tenantId) return;
+                                                        const nuevosPermisos = tiene
+                                                          ? u.permisos.filter((k) => k !== item.llaveCurable)
+                                                          : [...u.permisos, item.llaveCurable!];
+                                                        setGuardandoId(u.id);
+                                                        const r = await guardarRolGp({
+                                                          userId: u.id,
+                                                          tenantId: perfil.tenantId,
+                                                          rol: u.rol ?? 'visor',
+                                                          permisos: nuevosPermisos,
+                                                        });
+                                                        setGuardandoId(null);
+                                                        if (r.ok) {
+                                                          setAviso({ tipo: 'ok', texto: `Llave actualizada para "${u.nombre ?? u.email}".` });
+                                                          cargar();
+                                                        } else {
+                                                          setAviso({ tipo: 'error', texto: r.mensaje });
+                                                        }
+                                                      }}
+                                                    />
+                                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                      {u.nombre || u.email}
+                                                    </span>
+                                                  </label>
+                                                );
+                                              })}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )
+                      )}
+                    </div>
+                    <div style={{ flexShrink: 0, minWidth: '84px', display: 'flex', justifyContent: 'flex-end' }}>
+                      {item.llaveCurable ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (editandoEstaLlave) {
+                              setLlaveEditando(null);
+                              setLlaveUserMenuAbierto(false);
+                            } else {
+                              setLlaveEditando(item.llaveCurable!);
+                              setLlaveUserMenuAbierto(false);
+                            }
+                          }}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#0f172a', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+                        >
+                          <Pencil size={12} color="#2563eb" />
+                          <span>{editandoEstaLlave ? 'Cerrar' : 'Editar'}</span>
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>Según rol asignado</span>
+                      )}
+                    </div>
                   </div>
                 );
               })}

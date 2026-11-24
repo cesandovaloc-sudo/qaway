@@ -262,6 +262,8 @@ export interface UsuarioEmpresa {
   id: string;
   email: string | null;
   nombre: string | null;
+  phone: string | null;
+  mustChangePassword: boolean;
   rol: string | null;
   permisos: string[];
   /** ¿Tiene fila en user_app_roles para esta app? */
@@ -291,7 +293,7 @@ export async function listarUsuariosEmpresa(): Promise<ResultadoUsuarios> {
   if (!appId) return { estado: 'error', mensaje: 'La app gestor-proyectos no tiene id en app_catalog.' };
 
   const [usersRes, rolesRes] = await Promise.all([
-    supabase.from('users').select('id,email,full_name,last_name').eq('tenant_id', perfil.tenantId),
+    supabase.from('users').select('id,email,full_name,last_name,phone,must_change_password').eq('tenant_id', perfil.tenantId),
     supabase.from('user_app_roles').select('user_id,role,permissions').eq('app_id', appId).eq('tenant_id', perfil.tenantId),
   ]);
   if (usersRes.error) {
@@ -324,6 +326,8 @@ export async function listarUsuariosEmpresa(): Promise<ResultadoUsuarios> {
         id,
         email: typeof u.email === 'string' ? u.email : null,
         nombre: nombre || null,
+        phone: typeof u.phone === 'string' && u.phone.trim() !== '' ? u.phone.trim() : null,
+        mustChangePassword: u.must_change_password === true,
         rol: datos?.rol ?? null,
         permisos: datos?.permisos ?? [],
         tieneFila: Boolean(datos),
