@@ -1,64 +1,64 @@
-# 4. Bitácora de ejecución — Storefront Multi-tenant
+# 4. Bitácora de ejecución — Tienda
 
 ## Propósito
-Registro corto para retomar si se corta la sesión. Solo lo vital.
+Registro vivo para retomar la implementación sin perder contexto.
+
+## Estado
+- Fase: ejecución MVP + conexión Supabase frontend.
+- Última actualización: 2026-11-23
 
 ## Sesión 2026-11-23 (planificación)
-
 ### Hecho
-- Revisado estado actual del repo.
-- Confirmado: carrito/checkout/compras viven en `10-qawaylab-inventario` y host los monta en `/carrito`, `/carrito/checkout`, `/carrito/compras` (`src/router/AppRouter.jsx`).
-- Confirmado: página web pública actual es `PublicCatalogPage.tsx` en `/hub/inventario/remates/:slug`; es catálogo básico, no web de marca completa.
-- Decisión: crear carpeta nueva `src/pages/5-qaway-hub/15-qaway-tienda/` para storefront; no mezclar con admin inventario; no crear 15-qaway-ventas.
-- Se creó carpeta de docs: `src/pages/5-qaway-hub/Nueva carpeta (2)/doc/`.
-- Se crearon docs: `1-planificacion.md`, `2-creacion-pagina-referencia.md`, `3-conexiones-integracion.md`, `4-bitacora-ejecucion.md`.
-- Se retiró mock demo temporal agregado antes en `src/pages/5-qaway-hub/10-qawaylab-inventario/src/hooks/useCatalogs.ts`.
-- Se eliminó rastro nominal de referencia externa en docs internos y se renombró doc 2.
-- Se estableció skill obligatoria: `image-to-code` (SKL-028). Flujo: imagen primero -> análisis profundo -> implementación fiel. Prohibido diseñar de memoria.
-- Subdominios: `pepito.qawaylab.com` queda como idea a validar en infra Hostinger/DNS/SSL; MVP por ruta `/tienda/:tenantSlug`.
+- Investigación de estructura hub/rutas y app inventario.
+- Plan creado en docs 1-3; AGENTS creado.
+- Decisión: nueva app `15-qaway-tienda`, `/tienda/:tenantSlug` MVP, subdominio fase 2.
+- Reutilizar carrito/checkout/compras de `10-qawaylab-inventario`.
 
-### Pendiente inmediato (siguiente sesión)
-1. Crear estructura base `src/pages/5-qaway-hub/15-qaway-tienda/`.
-2. Usar skill `image-to-code`: generar imágenes de referencia por sección (home, PLP, PDP) y analizarlas antes de codificar.
-3. Definir tipos TS/adaptador (`storefront.ts`, `storefront.service.ts`) con contrato provisional.
-4. Implementar Home visual fiel a referencias generadas.
-5. Implementar PLP y PDP visuales.
-6. Conectar CTA PDP -> cart existente (shape compatible).
-7. Coordinar con agente BD: tablas/campos tenant branding, banners, categorías públicas, productos publicados.
+## Sesión 2026-11-23 (referencias visuales)
+### Hecho
+- Intentos image-gen fallaron por credenciales (grok/gemini).
+- Se agregó `playwright-cli` a biblioteca: `BIB-019` en `biblioteca.seed.json`, `SKL-039` en `skills-matrix.seed.json`.
+- Capturas reales con Playwright: `ref-home-real.png`, `ref-plp-real.png`, `ref-pdp-real.png`.
+- Extracción DOM/CSS con Playwright para tokens/estructura.
 
-### Decisiones que no se deben revertir sin motivo
-- Carrito/checkout no se reescribe; se reutiliza.
-- Storefront nueva va en `15-qaway-tienda`, separada del admin inventario.
-- Multi-tenant por `tenantSlug` en MVP; subdominio después de validar infra.
-- Creación visual con `image-to-code`, no de memoria.
+## Sesión 2026-11-23 (ejecución scaffold con “aplica”)
+### Hecho
+- Creado scaffold `src/pages/5-qaway-hub/15-qaway-tienda/` (aislado, `.qwt-v1`, lazy).
+- Rutas: `/tienda`, `/tienda/:tenantSlug`, `/tienda/:tenantSlug/c/:categorySlug`, `/tienda/:tenantSlug/p/:productSlug`, `/tienda/:tenantSlug/buscar?q=`.
+- Páginas: Home, PLP/categoría, PDP, búsqueda. Componentes: header, footer, layout, product card.
+- Datos: mock adapter en `src/services/storefront.service.ts`; reemplazable por Supabase.
+- Cart: hook local compatible con `qaway-cart-v1` y shape `CartItem`; checkout reutiliza `/carrito`.
+- Router: lazy import + rutas en `src/router/AppRouter.jsx`. Entrada en `src/config/routesRegistry.js`.
+- `tsc --noEmit` EXIT:0.
+
+## Sesión 2026-11-23 (iteración datos/filtros/galería)
+### Hecho
+- Mock ampliado a 20 productos, 4 categorías, marcas/precios/ofertas/stock, múltiples imágenes por producto.
+- PDP: galería con thumbnails, flechas automáticas cuando >1 imagen, auto-slide 4s, pausa hover/zoom, lightbox zoom.
+- PLP: filtros funcionales (categoría, marca, precio máximo, solo ofertas) + orden.
+- Home: destacados/ofertas con 8 productos.
+- `tsc --noEmit` EXIT:0.
+
+## Sesión 2026-11-23 (preparación y conexión Supabase frontend)
+### Hecho
+- `StorefrontService` tipado e implementado con Supabase real (`@/config/supabase`) en `src/services/storefront.service.ts`.
+- Consultas reales: `tenants`, `categories`, `inv_products`; mapeo defensivo a tipos storefront.
+- Fallback mock defensivo si Supabase falla, RLS bloquea o no hay datos (demo no se rompe).
+- Mapper carrito centralizado: `src/lib/cart.ts` (`productToCartItem`, compatible `qaway-cart-v1` / commerce v1).
+- Tenant resolver MVP: `src/lib/tenant.ts` (ruta; placeholder host/subdominio fase 2).
+- Páginas Home/PLP/PDP/Search usan servicio + mapper + resolver.
+- Docs actualizados: `3-conexiones-integracion.md`, `15-qaway-tienda/README.md`.
+- `tsc --noEmit` EXIT:0.
+
+### Pendiente / validación con datos reales
+- Confirmar `tenants.slug` (o campo equivalente) y RLS anon para lectura pública de `tenants`, `categories`, `inv_products`.
+- Confirmar fuente real de banners/home por tenant (hoy fallback banner + branding).
+- Validar reglas finales: publicado/precio/stock/tenant activo antes de CTA.
+- Resolver tenant por subdominio/Host en fase infra.
 
 ### Archivos clave
-- `src/router/AppRouter.jsx` — monta carrito y rutas host.
-- `src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/PublicCatalogPage.tsx` — web pública actual básica.
-- `src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/CartPage.tsx` — carrito.
-- `src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/CheckoutPage.tsx` — checkout.
-- `src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/PurchasesPage.tsx` — compras.
-- `src/pages/5-qaway-hub/10-qawaylab-inventario/src/services/catalogService.ts` — referencia tenant branding/content.
-
-## Sesión 2026-11-23 (intento ejecución visual)
-
-### Hecho
-- Se leyó `AGENTS.md` raíz y se confirmó alineación.
-- Se espejó AGENTS en raíz y en `Nueva carpeta (2)/doc/AGENTS.md`.
-- Intentos image-gen fallaron (grok: Invalid credential; gemini-nano-banana-2.1: API key not valid).
-- Se agregó `playwright-cli` a biblioteca: `BIB-019` en `biblioteca.seed.json` y `SKL-039` en `skills-matrix.seed.json`.
-- Se capturaron screenshots reales con `playwright-cli` en `doc/`: `ref-home-real.png`, `ref-plp-real.png`, `ref-pdp-real.png`.
-
-### Bloqueo
-- El modelo actual no puede leer/analizar imágenes (input de imagen no soportado). Hay capturas reales, pero el análisis visual profundo image-to-code no puede completarse automáticamente por este modelo.
-
-### Pendiente
-- Obtener análisis visual (usuario/modelo con visión) o usar snapshots DOM/playwright para extracción estructural.
-- Presentar plan estructural y esperar **"aplica"** antes de crear `15-qaway-tienda` (cambio estructural).
-
-### Formato para próximas entradas
-- Fecha/hora
-- Hecho
-- Archivos tocados
-- Pendiente
-- Bloqueos/dependencias BD
+- `src/pages/5-qaway-hub/15-qaway-tienda/src/services/storefront.service.ts` — conexión Supabase + fallback.
+- `src/pages/5-qaway-hub/15-qaway-tienda/src/lib/cart.ts` — mapper cart.
+- `src/pages/5-qaway-hub/15-qaway-tienda/src/lib/tenant.ts` — tenant resolver.
+- `src/router/AppRouter.jsx` — rutas `/tienda`.
+- `src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/CartPage.tsx` / `CheckoutPage.tsx` — checkout reutilizado.
