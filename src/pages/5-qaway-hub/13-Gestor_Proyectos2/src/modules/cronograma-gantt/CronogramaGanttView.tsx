@@ -2861,6 +2861,7 @@ export default function CronogramaGanttView({
   const depHoverTimeoutRef = useRef<any>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
+  const [showMetaInterna, setShowMetaInterna] = useState(false);
   const [calShowBarLabels, setCalShowBarLabels] = useState(true);
   const [calShowBaseline, setCalShowBaseline] = useState(false);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
@@ -8829,6 +8830,22 @@ export default function CronogramaGanttView({
                   )}
                 </button>
 
+                {!ocultarOficialNoAdmin && (
+                  <button
+                    type="button"
+                    className={`tool-btn gantt-tooltip-trigger ${showMetaInterna ? 'active' : ''}`}
+                    onClick={() => {
+                      setShowMetaInterna((v) => !v);
+                      notify(showMetaInterna ? 'Meta interna del equipo oculta' : 'Meta interna del equipo visible');
+                    }}
+                    style={showMetaInterna ? { color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' } : undefined}
+                    data-tooltip={showMetaInterna ? 'Ocultar meta interna del equipo' : 'Mostrar meta interna del equipo'}
+                    aria-label="Conmutar visualización de la meta interna del equipo"
+                  >
+                    <Target size={15} />
+                  </button>
+                )}
+
                 {/* Despliegue suave al pasar el mouse (hover): Fijar Línea Base + Porcentaje + Dependencias + Responsables */}
                 <div className="accordion-expandable-items">
                   {/* [ ⚓ ] Fijar / Congelar fechas actuales como Línea Base Oficial */}
@@ -10477,18 +10494,9 @@ export default function CronogramaGanttView({
                 {viewMode === 'gantt' && (
                   <div className="timeline" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
                     <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
-                      {segments.map((s) => {
-                        const isNonWorking =
-                          zoom === 'Día' &&
-                          typeof s.dow === 'number' &&
-                          !isDowLaboral(s.dow, cronoParams.semanaLaboral, cronoParams.diasLaboralesCustom);
-                        return (
-                          <span
-                            key={s.key}
-                            style={isNonWorking ? { background: 'rgba(241, 245, 249, 0.78)' } : undefined}
-                          />
-                        );
-                      })}
+                      {segments.map((s) => (
+                        <span key={s.key} />
+                      ))}
               <div ref={prefetchSentinelRef} aria-hidden="true" style={{ height: 1, width: '100%' }} />
                     </div>
                     {/* Sombra de Línea Base Desacoplada (solo visible si no está oculta a no-admin) */}
@@ -10510,8 +10518,8 @@ export default function CronogramaGanttView({
                         />
                       );
                     })()}
-                    {/* 3.ª línea exclusiva para Admin: Meta interna asignada al equipo (no contamina end ni baseline) */}
-                    {!ocultarOficialNoAdmin && (x as any).metaInternaEnd && (() => {
+                    {/* 3.ª línea exclusiva para Admin: Meta interna asignada al equipo (botón independiente) */}
+                    {showMetaInterna && !ocultarOficialNoAdmin && (x as any).metaInternaEnd && (() => {
                       const mEnd = (x as any).metaInternaEnd as string;
                       const mLeft = getDatePixelOffset(x.start);
                       const mWidth = Math.max(8, getDatePixelOffset(shiftDays(mEnd, 1)) - mLeft);

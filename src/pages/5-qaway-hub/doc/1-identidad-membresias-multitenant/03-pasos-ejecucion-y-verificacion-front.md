@@ -107,11 +107,8 @@ Se ejecuta en **3 pasos grandes**. Cada paso se cierra solo cuando su verificaci
 - **Deuda pendiente para cerrar**: verificación visible de catálogo Hub por suscripciones del tenant activo; rol por app en rutas reales; bloqueo claro en slug no permitido sin mezclar datos; confirmar onboarding/suscripciones pausado/reusable. No rehacer ni borrar tablas/lógica existente.
 - **Estado**: pausado por decisión del usuario (prioridad en otro frente). Retomar antes de dar Paso 2 por cerrado.
 
-### Paso 3 - EN CURSO (avance base)
+### Paso 3 - PAUSADO (deuda, no cerrado)
 
-- **DB/RPC aplicado**: `admin_assign_user_tenant` ahora también upserta `tenant_memberships` (compatibilidad legacy); creada `remove_tenant_member` (desactiva membresía, revoca `user_app_roles` del tenant, limpia contexto activo/legacy `users.tenant_id`, conserva data; auditoría en metadata). Migración: `20261125160000_identity_memberships_step3_offboarding_rpcs.sql`.
-- **Front/funciones actualizado**:
-  - `UsuariosPage.jsx`: lista desde `tenant_memberships`, “Retirar acceso” no destructivo vía `remove_tenant_member`.
-  - `invite-user`: si el correo ya existe, no duplica identidad; agrega/reactiva membresía y roles de app en tenant destino (Option 1).
-  - `register-brand`: crear tenant adicional con mismo correo bloqueado por defecto; permite solo con `can_create_additional_tenant`/grant; crea `tenant_memberships` + `user_active_context`.
-- **Pendiente para cerrar Paso 3**: UI/flujo de plataforma admin para aprobar/revocar `identity_tenant_creation_grants`; UI de impacto/reasignación antes de offboarding; validación visible front/ruta de retiro de acceso, preservación de data, reasignación y bloqueo/aprobación de tenant adicional. Onboarding/suscripciones siguen como deuda reusable, no rehacer.
+- **Base aplicada**: `admin_assign_user_tenant` upserta `tenant_memberships`; `remove_tenant_member` desactiva membresía, revoca roles de app del tenant, limpia contexto activo/legacy, conserva data y deja auditoría en metadata. `UsuariosPage` retira acceso no destructivo. `invite-user` agrega/reactiva membresía para identidad existente. `register-brand` bloquea tenant adicional por defecto y requiere grant/aprobación de plataforma.
+- **Deuda pendiente para cerrar**: UI de plataforma admin para aprobar/revocar `identity_tenant_creation_grants`; UI de impacto/reasignación antes de offboarding; validación visible front/ruta de retiro de acceso, preservación de data, reasignación y bloqueo/aprobación de tenant adicional. Onboarding/suscripciones siguen como deuda reusable, no rehacer.
+- **Estado**: pausado por decisión del usuario. No rehacer ni borrar; retomar para verificación/cierre.
