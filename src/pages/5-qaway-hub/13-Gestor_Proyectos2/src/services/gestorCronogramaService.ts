@@ -19,6 +19,8 @@ export interface GanttItemData {
   edtType?: EdtNodeType;
   /** Identificador opcional de la Fase del ciclo de vida (nullable) */
   faseId?: string | null;
+  /** Sub-fase operativa opcional vinculada a la Fase (nullable) */
+  subfase?: string;
   parentId?: string;
   children?: GanttItemData[];
   start: string;
@@ -47,6 +49,12 @@ export interface GanttItemData {
   actualEnd?: string;
   /** 3.ª línea exclusiva de meta interna asignada al equipo (no contamina end ni baselineEnd). */
   metaInternaEnd?: string;
+  /** Entidad responsable declarativa (DRE, UGEL, DRE/UGEL, II.EE.). */
+  entidadResponsable?: string;
+  /** Columna de observaciones operativas. */
+  observaciones?: string;
+  /** Valores de columnas dinámicas estilo Notion aisladas por tenant/proyecto. */
+  customFields?: Record<string, any>;
   /** Tipo oficial de tarea (Reunión, Asistencia técnica, Informe, etc.) e icono Lucide */
   taskType?: string;
   icon?: string;
@@ -81,6 +89,11 @@ const toSupabaseRow = (projectId: string, item: GanttItemData, tenantId?: string
   actual_start: item.actualStart || null,
   actual_end: item.actualEnd || null,
   meta_interna_end: item.metaInternaEnd || null,
+  entidad_responsable: item.entidadResponsable || null,
+  observaciones: item.observaciones || '',
+  custom_fields: item.customFields || {},
+  fase_id: item.faseId || null,
+  subfase: item.subfase || null,
   task_type: item.taskType || null,
   icon: item.icon || null,
   edt_type: item.edtType || null,
@@ -117,13 +130,18 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
   actualStart: row.actual_start || undefined,
   actualEnd: row.actual_end || undefined,
   metaInternaEnd: row.meta_interna_end || undefined,
+  entidadResponsable: row.entidad_responsable || undefined,
+  observaciones: typeof row.observaciones === 'string' ? row.observaciones : undefined,
+  customFields: row.custom_fields && typeof row.custom_fields === 'object' ? row.custom_fields : undefined,
+  faseId: row.fase_id || undefined,
+  subfase: row.subfase || undefined,
   taskType: row.task_type || undefined,
   icon: row.icon || undefined,
 });
 
 /* Columnas de la Fase 1 (supabase/02_gestor_cronograma_linea_base.sql) y Tipo/Icono. */
-const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end', 'meta_interna_end', 'task_type', 'icon', 'edt_type', 'dependencies'] as const;
-const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'metaInternaEnd', 'taskType', 'icon', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
+const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end', 'meta_interna_end', 'entidad_responsable', 'observaciones', 'custom_fields', 'fase_id', 'subfase', 'task_type', 'icon', 'edt_type', 'dependencies'] as const;
+const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'metaInternaEnd', 'entidadResponsable', 'observaciones', 'customFields', 'faseId', 'subfase', 'phase', 'taskType', 'icon', 'edtType', 'dependencies'] as const;
 
 /**
  * Estado del esquema del cronograma en esta sesión.
@@ -249,7 +267,7 @@ async function upsertRows(rows: Record<string, any>[]): Promise<{ message: strin
 
 /* P2 (gstack 08): columnas explícitas de la lectura (superset exacto de los campos que mapea fromSupabaseRow). */
 const CRONOGRAMA_SELECT =
-  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end,meta_interna_end,task_type,icon,edt_type,dependencies';
+  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end,meta_interna_end,entidad_responsable,observaciones,custom_fields,fase_id,subfase,task_type,icon,edt_type,dependencies';
 
 /**
  * P1 (gstack 08): dedup de promesas en vuelo por proyecto — evita la doble lectura del gantt
@@ -271,30 +289,42 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 12000);
     try {
-      let respuesta = await db
-        .from('gestor_cronograma_items')
-        .select(CRONOGRAMA_SELECT)
-        .eq('project_id', projectId)
-        .limit(15000)
-        .abortSignal(controller.signal);
-
-      // Tolerante al esquema (mismo criterio de upsertRows): si una columna de la lista explícita
-      // aún no existe en la BD, relee con select=* para no romper la carga del cronograma.
-      if (respuesta.error) {
-        respuesta = await db
+      const PAGE_SIZE = 1000;
+      const allRows: any[] = [];
+      let useSelectAll = false;
+      for (let from = 0; from < 15000; from += PAGE_SIZE) {
+        let respuesta = await db
           .from('gestor_cronograma_items')
-          .select('*')
+          .select(useSelectAll ? '*' : CRONOGRAMA_SELECT)
           .eq('project_id', projectId)
-          .limit(15000)
+          .order('id', { ascending: true })
+          .range(from, from + PAGE_SIZE - 1)
           .abortSignal(controller.signal);
+
+        // Tolerante al esquema (mismo criterio de upsertRows): si una columna de la lista explícita
+        // aún no existe en la BD, relee con select=* para no romper la carga del cronograma.
+        if (respuesta.error && !useSelectAll) {
+          useSelectAll = true;
+          respuesta = await db
+            .from('gestor_cronograma_items')
+            .select('*')
+            .eq('project_id', projectId)
+            .order('id', { ascending: true })
+            .range(from, from + PAGE_SIZE - 1)
+            .abortSignal(controller.signal);
+        }
+
+        if (respuesta.error) {
+          console.warn('[Supabase Cronograma] Aviso al leer (se usará respaldo local):', respuesta.error.message);
+          return null;
+        }
+
+        const page = respuesta.data ?? [];
+        allRows.push(...page);
+        if (page.length < PAGE_SIZE) break;
       }
 
-      if (respuesta.error) {
-        console.warn('[Supabase Cronograma] Aviso al leer (se usará respaldo local):', respuesta.error.message);
-        return null;
-      }
-
-      const data = respuesta.data;
+      const data = allRows;
       if (Array.isArray(data) && data.length > 0) {
         const mapped = sortWbsHierarchy(data.map(fromSupabaseRow));
         // Si la BD aún no guarda línea base/fechas reales, se conservan las del respaldo local.

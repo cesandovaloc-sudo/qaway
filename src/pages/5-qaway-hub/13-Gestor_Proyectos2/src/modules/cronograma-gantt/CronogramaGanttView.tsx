@@ -647,12 +647,14 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'deliverable', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'successors', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'faseId', 'subfase', 'deliverable', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'successors', 'gestor', 'region', 'entidadResponsable', 'observaciones', 'actualEnd', 'reportType', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
   name: 420,
   kind: 145,
+  faseId: 145,
+  subfase: 165,
   deliverable: 240,
   parent: 260,
   start: 135,
@@ -664,6 +666,8 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   successors: 130,
   gestor: 165,
   region: 140,
+  entidadResponsable: 155,
+  observaciones: 220,
   deviation: 120,
   actualEnd: 130,
   reportType: 185,
@@ -676,6 +680,8 @@ const MIN_COLS: Record<ColKey, number> = {
   code: 60,
   name: 260,
   kind: 80,
+  faseId: 100,
+  subfase: 110,
   deliverable: 140,
   parent: 90,
   start: 90,
@@ -687,6 +693,8 @@ const MIN_COLS: Record<ColKey, number> = {
   successors: 90,
   gestor: 110,
   region: 95,
+  entidadResponsable: 90,
+  observaciones: 120,
   deviation: 90,
   actualEnd: 100,
   reportType: 140,
@@ -699,6 +707,8 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'name', label: 'COMPONENTE / PRODUCTO', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
+  { key: 'faseId', label: 'Fase' },
+  { key: 'subfase', label: 'Sub-fase' },
   { key: 'deliverable', label: 'Entregable' },
   { key: 'parent', label: 'Componente padre' },
   { key: 'start', label: 'Inicio' },
@@ -711,6 +721,8 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'successors', label: 'Sucesores' },
   { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Ámbito' },
+  { key: 'entidadResponsable', label: 'Entidad Referencial' },
+  { key: 'observaciones', label: 'Observaciones' },
   { key: 'actualEnd', label: 'Fecha real' },
   { key: 'reportType', label: 'Formato de Reporte' },
   { key: 'actions', label: 'Acción' },
@@ -765,10 +777,23 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
   },
   { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
   { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
+  { id: 'entidadResponsable', label: 'Entidad Referencial', type: 'select', accessor: (r) => r?.entidadResponsable || '' },
+  { id: 'observaciones', label: 'Observaciones', type: 'text', accessor: (r) => (r as any)?.observaciones || '' },
   { id: 'distrito', label: 'Distrito', type: 'select', accessor: (r) => r?.distrito },
   { id: 'sede', label: 'Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
   { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Producto') },
+  {
+    id: 'faseId',
+    label: 'Fase',
+    type: 'select',
+    accessor: (r) => {
+      const f = PROJECT_PHASES_CATALOG.find((p) => p.id === r?.faseId);
+      return f ? f.name : '';
+    },
+    options: PROJECT_PHASES_CATALOG.map((p) => ({ value: p.name, label: p.name })),
+  },
+  { id: 'subfase', label: 'Sub-fase', type: 'select', accessor: (r) => (r as any)?.subfase || '' },
   { id: 'deliverable', label: 'Entregable', type: 'text', accessor: (r) => r?.deliverable || r?.deliverables?.[0]?.name || '' },
   { id: 'parent', label: 'Componente padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
@@ -1478,6 +1503,9 @@ export default function CronogramaGanttView({
             if (cloud.baselineStart) updated.baselineStart = cloud.baselineStart;
             if (cloud.baselineEnd) updated.baselineEnd = cloud.baselineEnd;
             if ((cloud as any).metaInternaEnd) (updated as any).metaInternaEnd = (cloud as any).metaInternaEnd;
+            if ((cloud as any).entidadResponsable) updated.entidadResponsable = (cloud as any).entidadResponsable;
+            if (typeof (cloud as any).observaciones === 'string') (updated as any).observaciones = (cloud as any).observaciones;
+            if ((cloud as any).customFields) (updated as any).customFields = (cloud as any).customFields;
             // Contenido y responsables: la base manda. La plantilla solo cubre filas ausentes en BD.
             if (typeof cloud.name === 'string' && cloud.name.trim()) updated.name = cloud.name;
             if (typeof cloud.deliverable === 'string' && cloud.deliverable.trim()) updated.deliverable = cloud.deliverable;
@@ -1487,6 +1515,8 @@ export default function CronogramaGanttView({
               ? cloud.gestores
               : (updated.gestor ? [updated.gestor] : []);
             if (cloud.edtType) updated.edtType = cloud.edtType;
+            if ((cloud as any).faseId !== undefined) updated.faseId = (cloud as any).faseId;
+            if ((cloud as any).subfase) (updated as any).subfase = (cloud as any).subfase;
             if (Array.isArray(cloud.dependencies)) updated.dependencies = cloud.dependencies;
             return updated;
           });
@@ -1553,11 +1583,17 @@ export default function CronogramaGanttView({
     return () => window.removeEventListener('qaway-gantt-items-updated', onExternalItemsUpdated);
   }, [projectId, perspective, rawTasks]);
 
+  const [cronoParams, setCronoParams] = useState(() => getParametrosCronograma());
+
   // Reconciliación local de alertas de colchón cuando el usuario corrige ítems en el Gantt (0 consultas BD)
   useEffect(() => {
     if (perspective !== 'maestro' || !projectId || items.length === 0) return;
     reconciliarAlertasColchonConItems(projectId, items, cronoParams);
   }, [items, projectId, perspective, cronoParams]);
+
+  const [viewMode, setViewMode] = useState<
+    'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
+  >(() => (perspective === 'equipo' ? 'organigrama' : (perspective === 'territorial' ? 'portada' : 'gantt')));
 
   // Deep-link desde Configuración → Ir al ítem en el Gantt
   useEffect(() => {
@@ -2252,9 +2288,6 @@ export default function CronogramaGanttView({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
-  const [viewMode, setViewMode] = useState<
-    'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
-  >(() => (perspective === 'equipo' ? 'organigrama' : (perspective === 'territorial' ? 'portada' : 'gantt')));
 
   useEffect(() => {
     if (perspective !== 'territorial' && viewMode === 'portada') {
@@ -2950,7 +2983,6 @@ export default function CronogramaGanttView({
       window.removeEventListener(EVENTO_PARAMS_CRONOGRAMA, onParamsChanged);
     };
   }, []);
-  const [cronoParams, setCronoParams] = useState(() => getParametrosCronograma());
   const [newMenu, setNewMenu] = useState(false);
   const [showSecondaryFilters, setShowSecondaryFilters] = useState(false);
   const [kanbanResetSignal, setKanbanResetSignal] = useState(0);
@@ -5256,6 +5288,8 @@ export default function CronogramaGanttView({
       'Estado',
       'Responsable(s)',
       'Región',
+      'Entidad Referencial',
+      'Observaciones',
       'Descripción'
     ];
 
@@ -5273,6 +5307,8 @@ export default function CronogramaGanttView({
         x.status,
         `"${gestoresList.join(', ')}"`,
         `"${x.region || 'Nacional'}"`,
+        `"${(x.entidadResponsable || '').replace(/"/g, '""')}"`,
+        `"${(((x as any).observaciones as string) || '').replace(/"/g, '""')}"`,
         `"${(x.description || '').replace(/"/g, '""')}"`
       ];
     });
@@ -6735,6 +6771,162 @@ export default function CronogramaGanttView({
             />
           ) : (
             <span className="cell-text">{x.actualEnd ? formatDate(x.actualEnd) : '—'}</span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'entidadResponsable') {
+      return (
+        <div
+          key="entidadResponsable"
+          className="region-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'entidadResponsable');
+          }}
+        >
+          {isEditing(x, 'entidadResponsable') ? (
+            <input
+              className="cell-editor"
+              autoFocus
+              defaultValue={x.entidadResponsable || ''}
+              placeholder="DRE / UGEL / II.EE."
+              onClick={(e) => e.stopPropagation()}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                commitChange((old) =>
+                  old.map((it) => (it.id === x.id ? { ...it, entidadResponsable: val || undefined } : it)),
+                );
+                setEdit(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                if (e.key === 'Escape') setEdit(null);
+              }}
+            />
+          ) : (
+            <span className="truncate" style={{ color: x.entidadResponsable ? '#0f172a' : '#94a3b8' }}>
+              {x.entidadResponsable || '—'}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'faseId') {
+      const faseObj = PROJECT_PHASES_CATALOG.find((p) => p.id === x.faseId);
+      return (
+        <div
+          key="faseId"
+          className="region-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'faseId');
+          }}
+        >
+          {isEditing(x, 'faseId') ? (
+            <select
+              className="cell-editor cell-select"
+              autoFocus
+              defaultValue={x.faseId || ''}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                const val = e.target.value || null;
+                commitChange((old) => old.map((it) => (it.id === x.id ? { ...it, faseId: val } : it)));
+                setEdit(null);
+              }}
+              onBlur={() => setEdit(null)}
+            >
+              <option value="">— Sin fase —</option>
+              {PROJECT_PHASES_CATALOG.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="truncate" style={{ color: faseObj ? '#0f172a' : '#94a3b8' }}>
+              {faseObj ? faseObj.name : '—'}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'subfase') {
+      const sfVal = ((x as any).subfase as string) || '';
+      return (
+        <div
+          key="subfase"
+          className="region-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'subfase');
+          }}
+        >
+          {isEditing(x, 'subfase') ? (
+            <input
+              className="cell-editor"
+              autoFocus
+              defaultValue={sfVal}
+              placeholder="Sub-fase (opcional)..."
+              onClick={(e) => e.stopPropagation()}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                commitChange((old) =>
+                  old.map((it) => (it.id === x.id ? ({ ...it, subfase: val || undefined } as Item) : it)),
+                );
+                setEdit(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                if (e.key === 'Escape') setEdit(null);
+              }}
+            />
+          ) : (
+            <span className="truncate" style={{ color: sfVal ? '#0f172a' : '#94a3b8' }} title={sfVal || undefined}>
+              {sfVal || '—'}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'observaciones') {
+      const obsVal = ((x as any).observaciones as string) || '';
+      return (
+        <div
+          key="observaciones"
+          className="region-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'observaciones');
+          }}
+        >
+          {isEditing(x, 'observaciones') ? (
+            <input
+              className="cell-editor"
+              autoFocus
+              defaultValue={obsVal}
+              placeholder="Escribir observación..."
+              onClick={(e) => e.stopPropagation()}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                commitChange((old) =>
+                  old.map((it) => (it.id === x.id ? ({ ...it, observaciones: val } as Item) : it)),
+                );
+                setEdit(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                if (e.key === 'Escape') setEdit(null);
+              }}
+            />
+          ) : (
+            <span className="truncate" style={{ color: obsVal ? '#0f172a' : '#94a3b8' }} title={obsVal || undefined}>
+              {obsVal || '—'}
+            </span>
           )}
         </div>
       );
