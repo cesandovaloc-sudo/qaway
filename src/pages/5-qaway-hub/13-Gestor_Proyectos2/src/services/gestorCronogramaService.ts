@@ -3,6 +3,7 @@
  * Maneja la sincronización bidireccional entre la base de datos Supabase y el estado local.
  */
 import { supabase } from './supabaseClient';
+import { cargarPerfilGp } from './gpPermisosService';
 import { isLegacyCronogramaItem, sortWbsHierarchy } from '../modules/cronograma-gantt/edtPmbokModel';
 
 /** Re-export del catálogo único de tipos de nodo EDT (no redefinir aquí). */
@@ -37,6 +38,8 @@ export interface GanttItemData {
   done?: number;
   unit?: string;
   phase?: string | null;
+  /** Predecesores de la cadena de prelación (ids de otros ítems del proyecto). */
+  dependencies?: string[];
   /** Línea base aprobada y fechas reales (Fase 1 de control de plazos). */
   baselineStart?: string;
   baselineEnd?: string;
@@ -48,9 +51,10 @@ export interface GanttItemData {
 }
 
 // Convertidor de modelo de frontend hacia columnas de base de datos Supabase
-const toSupabaseRow = (projectId: string, item: GanttItemData) => ({
+const toSupabaseRow = (projectId: string, item: GanttItemData, tenantId?: string | null) => ({
   id: item.id,
   project_id: projectId,
+  ...(tenantId ? { tenant_id: tenantId } : {}),
   code: item.code,
   name: item.name,
   kind: item.kind,
@@ -76,6 +80,8 @@ const toSupabaseRow = (projectId: string, item: GanttItemData) => ({
   actual_end: item.actualEnd || null,
   task_type: item.taskType || null,
   icon: item.icon || null,
+  edt_type: item.edtType || null,
+  dependencies: item.dependencies || [],
   updated_at: new Date().toISOString(),
 });
 
@@ -85,6 +91,7 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
   code: row.code,
   name: row.name,
   kind: row.kind,
+  edtType: (row.edt_type as EdtNodeType | null) || undefined,
   parentId: row.parent_id || undefined,
   start: row.start_date,
   end: row.end_date,
@@ -101,6 +108,7 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
   gestores: row.gestores || [],
   tasks: row.tasks || 0,
   done: row.done || 0,
+  dependencies: Array.isArray(row.dependencies) ? row.dependencies : undefined,
   baselineStart: row.baseline_start || undefined,
   baselineEnd: row.baseline_end || undefined,
   actualStart: row.actual_start || undefined,
@@ -110,8 +118,36 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
 });
 
 /* Columnas de la Fase 1 (supabase/02_gestor_cronograma_linea_base.sql) y Tipo/Icono. */
-const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end', 'task_type', 'icon'] as const;
+const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end', 'task_type', 'icon', 'edt_type', 'dependencies'] as const;
 const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'taskType', 'icon', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
+
+/**
+ * Tenant dueño de la fila del cronograma. La RLS de `gestor_cronograma_items` exige
+ * `tenant_id = get_auth_tenant_id()`, y el default de la columna es justamente ese valor:
+ * una cuenta de plataforma sin empresa propia guardaba filas con tenant NULL (huérfanas).
+ *   1. Tenant de la sesión (public.users.tenant_id).
+ *   2. Cuenta plataforma sin empresa: el del proyecto, que es el dueño real de sus ítems.
+ * Si no se resuelve ninguno, se omite la columna y manda el default de la BD (comportamiento previo).
+ */
+async function resolverTenantId(projectId: string): Promise<string | null> {
+  try {
+    const perfil = await cargarPerfilGp();
+    if (perfil?.tenantId) return perfil.tenantId;
+  } catch {
+    /* sin sesión legible: se intenta por proyecto */
+  }
+  if (!supabase || !projectId) return null;
+  try {
+    const { data } = await supabase
+      .from('gestor_proyectos')
+      .select('tenant_id')
+      .eq('id', projectId)
+      .maybeSingle();
+    return (data as { tenant_id?: string | null } | null)?.tenant_id ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Upsert tolerante al esquema: si la BD aún no tiene las columnas de línea base/fechas reales,
@@ -125,7 +161,7 @@ async function upsertRows(rows: Record<string, any>[]): Promise<{ message: strin
     const first = await supabase!.from('gestor_cronograma_items').upsert(chunk);
     if (first.error) {
       if (SCHEDULE_COLUMNS.some((col) => first.error!.message.includes(col))) {
-        console.warn('[Supabase Cronograma] Falta ejecutar supabase/02_gestor_cronograma_linea_base.sql; se sincroniza sin línea base ni fechas reales.');
+        console.warn('[Supabase Cronograma] Faltan columnas opcionales (02_gestor_cronograma_linea_base.sql / 04_gestor_tareas_tipo_icono.sql / 05_gestor_cronograma_edt_dependencias.sql); se sincroniza sin ellas.');
         const stripped = chunk.map((r) => {
           const copy = { ...r };
           SCHEDULE_COLUMNS.forEach((col) => delete copy[col]);
@@ -143,7 +179,7 @@ async function upsertRows(rows: Record<string, any>[]): Promise<{ message: strin
 
 /* P2 (gstack 08): columnas explícitas de la lectura (superset exacto de los campos que mapea fromSupabaseRow). */
 const CRONOGRAMA_SELECT =
-  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end';
+  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end,edt_type,dependencies';
 
 /**
  * P1 (gstack 08): dedup de promesas en vuelo por proyecto — evita la doble lectura del gantt
@@ -247,7 +283,8 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
 export async function upsertCronogramaItemInSupabase(projectId: string, item: GanttItemData): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const row = toSupabaseRow(projectId, item);
+    const tenantId = await resolverTenantId(projectId);
+    const row = toSupabaseRow(projectId, item, tenantId);
     const error = await upsertRows([row]);
 
     if (error) {
@@ -269,7 +306,8 @@ export async function upsertCronogramaItemInSupabase(projectId: string, item: Ga
 export async function syncAllCronogramaItemsToSupabase(projectId: string, items: GanttItemData[]): Promise<boolean> {
   if (!supabase || !items || items.length === 0) return true;
   try {
-    const rows = items.map((it) => toSupabaseRow(projectId, it));
+    const tenantId = await resolverTenantId(projectId);
+    const rows = items.map((it) => toSupabaseRow(projectId, it, tenantId));
     const error = await upsertRows(rows);
 
     if (error) {

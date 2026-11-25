@@ -1307,7 +1307,9 @@ export default function CronogramaGanttView({
               parsed.some((it: Item) => it.id === `comp-${n}`)
             );
             const hasLegacy17 = parsed.some((it: Item) => it.id === 'pt-1.7a' || it.code === '1.7a');
-            if (!hasAllComponents || parsed.length < 50 || hasLegacy17) {
+            // La limpieza de semillas legacy solo aplica al proyecto histórico p1: un cronograma
+            // nuevo y pequeño de otro proyecto no debe vaciarse al recargar.
+            if (pid === 'p1' && (!hasAllComponents || parsed.length < 50 || hasLegacy17)) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
@@ -1348,9 +1350,12 @@ export default function CronogramaGanttView({
           const initialMap = new Map(targetInitialItems.map((x) => [x.id, x]));
           const upgraded = parsed.map((it: Item) => {
             const init = initialMap.get(it.id);
-            const isEntity = it.gestor === 'DRE / UGEL' || it.gestor === 'DRE' || it.gestor === 'UGEL' || it.gestor === 'DRE/UGEL' || !it.gestor;
-            const finalGestor = isEntity ? (init?.gestor || resolveDefaultGestor(it.code, it.name)) : (it.gestor ?? '');
-            const finalGestores = isEntity ? [finalGestor] : (it.gestores && it.gestores.length > 0 ? it.gestores : [finalGestor]);
+            const storedGestor = typeof it.gestor === 'string' ? it.gestor.trim() : '';
+            const isEntityPlaceholder =
+              storedGestor === 'DRE / UGEL' || storedGestor === 'DRE' || storedGestor === 'UGEL' || storedGestor === 'DRE/UGEL';
+            // La plantilla solo rellena filas sin responsable; nunca se inventa uno sobre un valor guardado.
+            const finalGestor = (!storedGestor || isEntityPlaceholder) ? (init?.gestor || '') : storedGestor;
+            const finalGestores = it.gestores && it.gestores.length > 0 ? it.gestores : (finalGestor ? [finalGestor] : []);
             return {
               ...it,
               edtType: it.edtType || init?.edtType || resolveEdtNodeType(it, parsed),
@@ -1460,8 +1465,30 @@ export default function CronogramaGanttView({
             if (cloud.actualEnd) updated.actualEnd = cloud.actualEnd;
             if (cloud.baselineStart) updated.baselineStart = cloud.baselineStart;
             if (cloud.baselineEnd) updated.baselineEnd = cloud.baselineEnd;
+            // Contenido y responsables: la base manda. La plantilla solo cubre filas ausentes en BD.
+            if (typeof cloud.name === 'string' && cloud.name.trim()) updated.name = cloud.name;
+            if (typeof cloud.deliverable === 'string' && cloud.deliverable.trim()) updated.deliverable = cloud.deliverable;
+            if (Array.isArray(cloud.deliverables) && cloud.deliverables.length > 0) updated.deliverables = cloud.deliverables;
+            if (typeof cloud.gestor === 'string' && cloud.gestor.trim()) updated.gestor = cloud.gestor;
+            updated.gestores = Array.isArray(cloud.gestores) && cloud.gestores.length > 0
+              ? cloud.gestores
+              : (updated.gestor ? [updated.gestor] : []);
+            if (cloud.edtType) updated.edtType = cloud.edtType;
+            if (Array.isArray(cloud.dependencies)) updated.dependencies = cloud.dependencies;
             return updated;
           });
+          // Filas creadas por el tenant que no existen en la plantilla: no se descartan.
+          const mergedIds = new Set(merged.map((it) => it.id));
+          const extras: Item[] = [];
+          cloudMap.forEach((cloud, id) => {
+            if (mergedIds.has(id)) return;
+            mergedIds.add(id);
+            extras.push({ ...(cloud as unknown as Item) });
+          });
+          extras.forEach((extra) => {
+            if (extra.parentId && !mergedIds.has(extra.parentId)) extra.parentId = undefined;
+          });
+          merged.push(...extras);
           const recomputed = computeWbsHierarchy(merged, rawTasks);
           setItems(recomputed);
           try {
