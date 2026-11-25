@@ -122,11 +122,17 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
       session: null,
       profile: null,
       loading: false,
+      memberships: [],
+      activeTenantId: null,
+      tenantLoading: false,
+      needsTenantSelection: false,
+      selectTenant: vi.fn(),
+      refreshTenantContext: vi.fn(),
       signIn: vi.fn(),
       signOut: vi.fn(),
       signInWithOAuth: vi.fn(),
       resetPassword: vi.fn(),
-    })
+    } as never)
   })
 
   afterAll(() => {
@@ -257,11 +263,17 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
       session: { user: { id: 'user-123' } } as unknown as Session,
       profile: null,
       loading: false,
+      memberships: [],
+      activeTenantId: null,
+      tenantLoading: false,
+      needsTenantSelection: false,
+      selectTenant: vi.fn(),
+      refreshTenantContext: vi.fn(),
       signIn: vi.fn(),
       signOut: vi.fn(),
       signInWithOAuth: vi.fn(),
       resetPassword: vi.fn(),
-    })
+    } as never)
     storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
     renderPage()
 

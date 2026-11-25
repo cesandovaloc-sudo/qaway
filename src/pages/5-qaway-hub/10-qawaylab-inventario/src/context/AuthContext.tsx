@@ -4,10 +4,28 @@ import { supabase } from '@/config/supabase'
 import { userService } from '@/services/userService'
 import type { User } from '@/types/user'
 
+export interface TenantMembership {
+  membership_id: string
+  tenant_id: string
+  tenant_slug: string | null
+  tenant_name: string | null
+  tenant_status: string | null
+  membership_role: string
+  membership_status: string
+  is_default: boolean
+  is_active_context: boolean
+}
+
 interface AuthContextValue {
   session: Session | null
   profile: User | null
   loading: boolean
+  memberships: TenantMembership[]
+  activeTenantId: string | null
+  tenantLoading: boolean
+  needsTenantSelection: boolean
+  selectTenant: (tenantId: string) => Promise<void>
+  refreshTenantContext: () => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signInWithOAuth: (provider: 'google') => Promise<void>
   resetPassword: (email: string) => Promise<void>
@@ -20,6 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [memberships, setMemberships] = useState<TenantMembership[]>([])
+  const [activeTenantId, setActiveTenantId] = useState<string | null>(null)
+  const [tenantLoading, setTenantLoading] = useState(false)
 
   // Restaurar sesión persistida y suscribirse a cambios de auth
   useEffect(() => {
@@ -64,6 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event === 'SIGNED_OUT' || !nextSession) {
         setSession(null)
         setProfile(null)
+        setMemberships([])
+        setActiveTenantId(null)
       } else {
         setSession(nextSession)
       }
@@ -76,26 +99,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const loadTenantContext = useCallback(async (user: User | null) => {
+    setTenantLoading(true)
+    try {
+      const { data, error } = await supabase.rpc('get_my_tenant_memberships')
+      if (error) throw error
+      const rows = (data ?? []) as TenantMembership[]
+      setMemberships(rows)
+
+      const active = rows.find((m) => m.is_active_context)
+      if (active) {
+        setActiveTenantId(active.tenant_id)
+        return
+      }
+
+      if (rows.length === 1) {
+        const only = rows[0]
+        const { error: setErr } = await supabase.rpc('set_active_tenant', { p_tenant_id: only.tenant_id })
+        if (setErr) throw setErr
+        setActiveTenantId(only.tenant_id)
+        setMemberships(rows.map((m) => ({ ...m, is_active_context: m.tenant_id === only.tenant_id })))
+        return
+      }
+
+      // 0 o múltiples sin contexto activo: fallback al tenant_id legacy si existe
+      setActiveTenantId(user?.tenant_id ?? null)
+    } catch {
+      // Fallback no destructivo: mantener comportamiento previo basado en users.tenant_id
+      setMemberships([])
+      setActiveTenantId(user?.tenant_id ?? null)
+    } finally {
+      setTenantLoading(false)
+    }
+  }, [])
+
+  const refreshTenantContext = useCallback(async () => {
+    await loadTenantContext(profile)
+  }, [loadTenantContext, profile])
+
   // Cargar perfil (rol/permisos) desde la tabla `users` cuando hay sesión
   const userId = session?.user?.id
   useEffect(() => {
     let cancelled = false
     if (!userId) {
       setProfile(null)
+      setMemberships([])
+      setActiveTenantId(null)
+      setTenantLoading(false)
       return
     }
-    userService
-      .getCurrentUser()
-      .then((user) => {
-        if (!cancelled) setProfile(user)
-      })
-      .catch(() => {
-        if (!cancelled) setProfile(null)
-      })
+    ;(async () => {
+      try {
+        const user = await userService.getCurrentUser()
+        if (cancelled) return
+        setProfile(user)
+        await loadTenantContext(user)
+      } catch {
+        if (!cancelled) {
+          setProfile(null)
+          setMemberships([])
+          setActiveTenantId(null)
+        }
+      }
+    })()
     return () => {
       cancelled = true
     }
-  }, [userId])
+  }, [userId, loadTenantContext])
 
   // Auto-refresh: refrescar sesión antes de que expire
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -123,6 +193,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Token no se pudo refrescar → sesión expirada
           setSession(null)
           setProfile(null)
+          setMemberships([])
+          setActiveTenantId(null)
         }
       }
     }
@@ -135,6 +207,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (refreshTimer.current) clearInterval(refreshTimer.current)
     }
   }, [session])
+
+  const selectTenant = useCallback(async (tenantId: string) => {
+    const { error } = await supabase.rpc('set_active_tenant', { p_tenant_id: tenantId })
+    if (error) throw error
+    setActiveTenantId(tenantId)
+    setMemberships((prev) => prev.map((m) => ({ ...m, is_active_context: m.tenant_id === tenantId })))
+    // Compatibilidad: mantener profile.tenant_id alineado con contexto activo
+    setProfile((prev) => (prev ? { ...prev, tenant_id: tenantId } : prev))
+  }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -161,10 +242,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
     setSession(null)
     setProfile(null)
+    setMemberships([])
+    setActiveTenantId(null)
   }, [])
 
+  const needsTenantSelection =
+    !!session &&
+    !tenantLoading &&
+    memberships.length > 1 &&
+    !activeTenantId
+
   return (
-    <AuthContext.Provider value={{ session, profile, loading, signIn, signInWithOAuth, resetPassword, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        profile,
+        loading,
+        memberships,
+        activeTenantId,
+        tenantLoading,
+        needsTenantSelection,
+        selectTenant,
+        refreshTenantContext,
+        signIn,
+        signInWithOAuth,
+        resetPassword,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

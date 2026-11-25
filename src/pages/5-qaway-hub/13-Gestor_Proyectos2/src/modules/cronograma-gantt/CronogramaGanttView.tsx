@@ -5208,7 +5208,7 @@ export default function CronogramaGanttView({
     const draftItem: Item = {
       id,
       code,
-      name: initialName?.trim() || (kind === 'hito' ? 'Nuevo componente' : 'Nuevo paquete de trabajo'),
+      name: initialName?.trim() || (openInline ? (kind === 'hito' ? 'Nuevo componente' : 'Nuevo paquete de trabajo') : ''),
       kind,
       edtType: kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO',
       wbsNodeType: kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO',
@@ -5285,7 +5285,7 @@ export default function CronogramaGanttView({
       return;
     };
 
-    commitChange((old) => [...old, draftItem]);
+    // No insertar en items hasta que el usuario guarde en el panel secundario
     setSelectedId(id);
     setDrawerDraft(draftItem);
     setIsNewDraft(true);
@@ -11416,7 +11416,7 @@ export default function CronogramaGanttView({
         {/* Panel Lateral Editor Aislado y Memoizado (Cero re-renders en el Gantt al escribir) */}
         <GanttEditorDrawer
           panelOpen={panelOpen}
-          selectedItem={selected ?? null}
+          selectedItem={isNewDraft ? (drawerDraft ?? null) : (selected ?? null)}
           isNewDraft={isNewDraft}
           items={items}
           hitos={hitos}
@@ -11438,6 +11438,7 @@ export default function CronogramaGanttView({
           }}
           onClose={() => {
             setPanelOpen(false);
+            setDrawerDraft(null);
             setIsNewDraft(false);
           }}
           onDeleteItem={(item) => {

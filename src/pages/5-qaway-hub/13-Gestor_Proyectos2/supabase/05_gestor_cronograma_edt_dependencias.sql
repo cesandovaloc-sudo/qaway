@@ -12,6 +12,6 @@ alter table public.gestor_cronograma_items
   add column if not exists dependencies text[] default '{}'::text[];
 
 comment on column public.gestor_cronograma_items.edt_type is
-  'Tipo de nodo EDT/WBS (COMPONENTE, PRODUCTO, ENTREGABLE, PAQUETE_TRABAJO). NULL = se deriva del árbol.';
+  'Tipo de nodo EDT/WBS (COMPONENTE, PRODUCTO, ENTREGABLE, PAQUETE_TRABAJO, HITO). NULL = se deriva del árbol (fuente única: cronograma-core/edtPmbokModel.ts).';
 comment on column public.gestor_cronograma_items.dependencies is
   'Predecesores del nodo: ids de otros ítems del mismo proyecto (cadena de prelación).';

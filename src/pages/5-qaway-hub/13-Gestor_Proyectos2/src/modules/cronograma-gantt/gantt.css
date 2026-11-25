@@ -13086,3 +13086,171 @@ body.gantt-resizing {
 .gantt-v2 .drawer-summary-progress > span {
   border-radius: 999px !important;
 }
+
+
+/* ==========================================================================
+   ANIMACIONES DE ENTRADA POR VISTA (Lista, Kanban, Calendario, Árbol, Organigrama)
+   Curva institucional: cubic-bezier(0.16, 1, 0.3, 1) + backwards para preservar hover/drag
+   ========================================================================== */
+
+@keyframes listaRowEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kanbanColEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes kanbanCardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes calBarEntrance {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.35);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes calUpcomingEntrance {
+  0% {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes arbolBranchEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes orgCardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 1. Vista Lista */
+.gantt-v2 .view-lista-fullwidth .row,
+.gantt-v2 .cronograma-lista-table tbody tr.lista-row {
+  animation: listaRowEntrance 0.34s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gantt-v2 .view-lista-fullwidth .row:nth-child(n+1):nth-child(-n+12),
+.gantt-v2 .cronograma-lista-table tbody tr.lista-row:nth-child(n+1):nth-child(-n+12) {
+  animation-delay: calc(var(--row-idx, 0) * 18ms);
+}
+.gantt-v2 .view-lista-fullwidth .row:nth-child(2) { --row-idx: 1; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(3) { --row-idx: 2; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(4) { --row-idx: 3; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(5) { --row-idx: 4; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(6) { --row-idx: 5; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(7) { --row-idx: 6; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(8) { --row-idx: 7; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(9) { --row-idx: 8; }
+.gantt-v2 .view-lista-fullwidth .row:nth-child(10) { --row-idx: 9; }
+
+/* 2. Vista Kanban (columnas + tarjetas sin bloquear hover ni drag) */
+.gantt-v2 .kanban-column {
+  animation: kanbanColEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gantt-v2 .kanban-column:nth-child(2) { animation-delay: 45ms; }
+.gantt-v2 .kanban-column:nth-child(3) { animation-delay: 90ms; }
+.gantt-v2 .kanban-column:nth-child(4) { animation-delay: 135ms; }
+.gantt-v2 .kanban-column:nth-child(5) { animation-delay: 180ms; }
+
+.gantt-v2 .kanban-card {
+  animation: kanbanCardEntrance 0.36s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gantt-v2 .kanban-card:nth-child(1) { animation-delay: 40ms; }
+.gantt-v2 .kanban-card:nth-child(2) { animation-delay: 70ms; }
+.gantt-v2 .kanban-card:nth-child(3) { animation-delay: 100ms; }
+.gantt-v2 .kanban-card:nth-child(4) { animation-delay: 130ms; }
+.gantt-v2 .kanban-card:nth-child(5) { animation-delay: 160ms; }
+.gantt-v2 .kanban-card:nth-child(6) { animation-delay: 190ms; }
+
+/* 3. Vista Calendario */
+.gantt-v2 .cal-gantt-bar {
+  transform-origin: left center;
+  animation: calBarEntrance 0.48s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gantt-v2 .cal-upcoming-card-row {
+  animation: calUpcomingEntrance 0.36s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gantt-v2 .cal-upcoming-card-row:nth-child(2) { animation-delay: 40ms; }
+.gantt-v2 .cal-upcoming-card-row:nth-child(3) { animation-delay: 80ms; }
+.gantt-v2 .cal-upcoming-card-row:nth-child(4) { animation-delay: 120ms; }
+.gantt-v2 .cal-upcoming-card-row:nth-child(5) { animation-delay: 160ms; }
+
+/* 4. Vista Árbol WBS */
+.gantt-v2 .arbol-card.master-project {
+  animation: arbolBranchEntrance 0.36s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gantt-v2 .arbol-branch-item {
+  animation: arbolBranchEntrance 0.42s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.gantt-v2 .arbol-branch-item:nth-child(2) { animation-delay: 40ms; }
+.gantt-v2 .arbol-branch-item:nth-child(3) { animation-delay: 80ms; }
+.gantt-v2 .arbol-branch-item:nth-child(4) { animation-delay: 120ms; }
+.gantt-v2 .arbol-branch-item:nth-child(5) { animation-delay: 160ms; }
+.gantt-v2 .arbol-branch-item:nth-child(6) { animation-delay: 200ms; }
+
+/* 5. Vista Organigrama */
+.gantt-v2 .organigrama-card {
+  animation: orgCardEntrance 0.42s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Accesibilidad: respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .gantt-v2 .bar,
+  .gantt-v2 .view-lista-fullwidth .row,
+  .gantt-v2 .cronograma-lista-table tbody tr.lista-row,
+  .gantt-v2 .kanban-column,
+  .gantt-v2 .kanban-card,
+  .gantt-v2 .cal-gantt-bar,
+  .gantt-v2 .cal-upcoming-card-row,
+  .gantt-v2 .arbol-card.master-project,
+  .gantt-v2 .arbol-branch-item,
+  .gantt-v2 .organigrama-card {
+    animation: none !important;
+  }
+}

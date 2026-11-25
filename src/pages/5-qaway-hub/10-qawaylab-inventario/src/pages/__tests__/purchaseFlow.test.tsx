@@ -134,11 +134,17 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
       session: null,
       profile: null,
       loading: false,
+      memberships: [],
+      activeTenantId: null,
+      tenantLoading: false,
+      needsTenantSelection: false,
+      selectTenant: vi.fn(),
+      refreshTenantContext: vi.fn(),
       signIn: vi.fn(),
       signInWithOAuth: vi.fn(),
       resetPassword: vi.fn(),
       signOut: vi.fn(),
-    })
+    } as never)
   })
 
   afterAll(() => {

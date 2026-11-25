@@ -150,36 +150,41 @@ async function resolverTenantId(projectId: string): Promise<string | null> {
 }
 
 /**
- * Upsert tolerante al esquema: si la BD aún no tiene las columnas de línea base/fechas reales,
- * reintenta sin ellas para no romper la sincronización del resto de campos
- * (esos datos siguen en el respaldo local hasta ejecutar el SQL).
+ * Upsert tolerante al esquema: si la BD aún no tiene alguna columna de línea base / fechas
+ * reales / tipo EDT, reintenta retirando ÚNICAMENTE la columna que el error nombra.
+ * Antes se retiraba el bloque completo (8 columnas) ante la ausencia de una sola, y eso
+ * descartaba en silencio datos que la base sí podía guardar.
  */
 async function upsertRows(rows: Record<string, any>[]): Promise<{ message: string } | null> {
   const CHUNK_SIZE = 100;
   for (let i = 0; i < rows.length; i += CHUNK_SIZE) {
-    const chunk = rows.slice(i, i + CHUNK_SIZE);
-    const first = await supabase!.from('gestor_cronograma_items').upsert(chunk);
-    if (first.error) {
-      if (SCHEDULE_COLUMNS.some((col) => first.error!.message.includes(col))) {
-        console.warn('[Supabase Cronograma] Faltan columnas opcionales (02_gestor_cronograma_linea_base.sql / 04_gestor_tareas_tipo_icono.sql / 05_gestor_cronograma_edt_dependencias.sql); se sincroniza sin ellas.');
-        const stripped = chunk.map((r) => {
-          const copy = { ...r };
-          SCHEDULE_COLUMNS.forEach((col) => delete copy[col]);
-          return copy;
-        });
-        const retry = await supabase!.from('gestor_cronograma_items').upsert(stripped);
-        if (retry.error) return { message: retry.error.message };
-      } else {
-        return { message: first.error.message };
-      }
+    let chunk = rows.slice(i, i + CHUNK_SIZE);
+    let result = await supabase!.from('gestor_cronograma_items').upsert(chunk);
+    // Un reintento por columna ausente, como máximo. Cada vuelta retira solo lo que la BD reporta.
+    for (let intento = 0; result.error && intento < SCHEDULE_COLUMNS.length; intento++) {
+      const missing = SCHEDULE_COLUMNS.filter(
+        (col) => chunk.some((row) => col in row) && result.error!.message.includes(col)
+      );
+      if (missing.length === 0) break;
+      console.warn(
+        `[Supabase Cronograma] La BD no tiene la(s) columna(s) ${missing.join(', ')} ` +
+          '(02_gestor_cronograma_linea_base.sql / 04_gestor_tareas_tipo_icono.sql / 05_gestor_cronograma_edt_dependencias.sql); se omite solo esa(s) y se conserva el resto.'
+      );
+      chunk = chunk.map((row) => {
+        const copy = { ...row };
+        missing.forEach((col) => delete copy[col]);
+        return copy;
+      });
+      result = await supabase!.from('gestor_cronograma_items').upsert(chunk);
     }
+    if (result.error) return { message: result.error.message };
   }
   return null;
 }
 
 /* P2 (gstack 08): columnas explícitas de la lectura (superset exacto de los campos que mapea fromSupabaseRow). */
 const CRONOGRAMA_SELECT =
-  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end,edt_type,dependencies';
+  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end,task_type,icon,edt_type,dependencies';
 
 /**
  * P1 (gstack 08): dedup de promesas en vuelo por proyecto — evita la doble lectura del gantt

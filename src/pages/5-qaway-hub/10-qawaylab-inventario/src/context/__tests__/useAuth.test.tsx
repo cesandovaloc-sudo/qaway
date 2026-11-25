@@ -58,6 +58,10 @@ describe('useAuth', () => {
       data: { session: null },
       error: null,
     })
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: { id: 'user-1' } },
+      error: null,
+    } as never)
     vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
       data: { user: null, session: null },
       error: null,
@@ -68,6 +72,7 @@ describe('useAuth', () => {
         subscription: { id: 'sub-1', callback: vi.fn(), unsubscribe: vi.fn() },
       },
     }))
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: [], error: null } as never)
   })
 
   it('lanza error si se usa fuera de <AuthProvider>', () => {

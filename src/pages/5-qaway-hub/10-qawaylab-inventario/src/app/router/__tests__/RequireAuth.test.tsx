@@ -28,6 +28,12 @@ function mockAuth(overrides: Partial<AuthContextValue> = {}): void {
     session: null,
     profile: null,
     loading: false,
+    memberships: [],
+    activeTenantId: null,
+    tenantLoading: false,
+    needsTenantSelection: false,
+    selectTenant: vi.fn(),
+    refreshTenantContext: vi.fn(),
     signIn: vi.fn(),
     signInWithOAuth: vi.fn(),
     resetPassword: vi.fn(),
@@ -121,5 +127,31 @@ describe('RequireAuth', () => {
 
     expect(screen.getByText('CONTENIDO PROTEGIDO')).toBeInTheDocument()
     expect(screen.queryByTestId('login')).not.toBeInTheDocument()
+  })
+
+  it('con sesión y tenantLoading muestra spinner', () => {
+    mockAuth({ session, loading: false, tenantLoading: true })
+    const { container } = renderProtected()
+
+    expect(container.querySelector('.animate-spin')).not.toBeNull()
+    expect(screen.queryByText('CONTENIDO PROTEGIDO')).not.toBeInTheDocument()
+  })
+
+  it('con sesión y múltiples memberships sin contexto activo muestra selector', () => {
+    mockAuth({
+      session,
+      loading: false,
+      needsTenantSelection: true,
+      memberships: [
+        { membership_id: 'm1', tenant_id: 't1', tenant_slug: 'digere', tenant_name: 'DIGERE', tenant_status: 'active', membership_role: 'admin', membership_status: 'active', is_default: true, is_active_context: false },
+        { membership_id: 'm2', tenant_id: 't2', tenant_slug: 'pulir', tenant_name: 'Financiera Pulir', tenant_status: 'active', membership_role: 'viewer', membership_status: 'active', is_default: false, is_active_context: false },
+      ],
+    })
+    renderProtected()
+
+    expect(screen.getByText('Selecciona una empresa')).toBeInTheDocument()
+    expect(screen.getByText('DIGERE')).toBeInTheDocument()
+    expect(screen.getByText('Financiera Pulir')).toBeInTheDocument()
+    expect(screen.queryByText('CONTENIDO PROTEGIDO')).not.toBeInTheDocument()
   })
 })
