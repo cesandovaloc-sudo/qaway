@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router';
 import {
+  AlertCircle,
+  AlertTriangle,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -8,12 +11,14 @@ import {
   Calendar,
   Check,
   ChevronDown,
+  Clock,
   ChevronRight,
   ChevronUp,
   Copy,
   EyeOff,
   Filter,
   Hash,
+  Info,
   Pencil,
   Percent,
   PieChart,
@@ -408,6 +413,8 @@ interface ColumnHeaderMenuProps<R> {
   onChangeGraphFormat?: ((columnId: string, format: 'bar' | 'ring' | 'number') => void) | undefined;
   badgeStyle?: 'dot' | 'solid' | undefined;
   onChangeBadgeStyle?: ((columnId: string, style: 'dot' | 'solid') => void) | undefined;
+  thresholdIndicator?: boolean | undefined;
+  onToggleThresholdIndicator?: ((columnId: string, enabled: boolean) => void) | undefined;
   selectOptions?: { label: string; color: string }[] | undefined;
   onUpdateSelectOptions?: ((columnId: string, options: { label: string; color: string }[]) => void) | undefined;
   onUpdateOptionColor?: ((columnId: string, optionLabel: string, color: string) => void) | undefined;
@@ -439,6 +446,8 @@ export function ColumnHeaderMenu<R>({
   onChangeGraphFormat,
   badgeStyle,
   onChangeBadgeStyle,
+  thresholdIndicator,
+  onToggleThresholdIndicator,
   selectOptions,
   onUpdateSelectOptions,
   onUpdateOptionColor,
@@ -564,6 +573,8 @@ export function ColumnHeaderMenu<R>({
               onChangeGraphFormat={onChangeGraphFormat}
               badgeStyle={badgeStyle}
               onChangeBadgeStyle={onChangeBadgeStyle}
+              thresholdIndicator={thresholdIndicator}
+              onToggleThresholdIndicator={onToggleThresholdIndicator}
               selectOptions={selectOptions}
               onUpdateSelectOptions={onUpdateSelectOptions}
               onUpdateOptionColor={onUpdateOptionColor}
@@ -598,6 +609,8 @@ function MenuBody<R>({
   onChangeGraphFormat,
   badgeStyle,
   onChangeBadgeStyle,
+  thresholdIndicator,
+  onToggleThresholdIndicator,
   selectOptions,
   onUpdateSelectOptions,
   onUpdateOptionColor,
@@ -624,6 +637,8 @@ function MenuBody<R>({
   onChangeGraphFormat?: ((columnId: string, format: 'bar' | 'ring' | 'number') => void) | undefined;
   badgeStyle?: 'dot' | 'solid' | undefined;
   onChangeBadgeStyle?: ((columnId: string, style: 'dot' | 'solid') => void) | undefined;
+  thresholdIndicator?: boolean | undefined;
+  onToggleThresholdIndicator?: ((columnId: string, enabled: boolean) => void) | undefined;
   selectOptions?: { label: string; color: string }[] | undefined;
   onUpdateSelectOptions?: ((columnId: string, options: { label: string; color: string }[]) => void) | undefined;
   onUpdateOptionColor?: ((columnId: string, optionLabel: string, color: string) => void) | undefined;
@@ -655,6 +670,8 @@ function MenuBody<R>({
   useEffect(() => { if (graphFormat) setCurrentFormat(graphFormat); }, [graphFormat]);
   const [currentBadgeStyle, setCurrentBadgeStyle] = useState<'dot' | 'solid'>(badgeStyle || 'dot');
   useEffect(() => { if (badgeStyle) setCurrentBadgeStyle(badgeStyle); }, [badgeStyle]);
+  const navigate = useNavigate();
+  const [showCapsulesInfo, setShowCapsulesInfo] = useState(false);
   const [newOptLabel, setNewOptLabel] = useState('');
   const [newOptColor, setNewOptColor] = useState('#ef4444');
   const [editingOptIdx, setEditingOptIdx] = useState<number | null>(0);
@@ -866,8 +883,8 @@ function MenuBody<R>({
     <>
       {/* 0. Identificador visible del tipo de columna */}
       <div className="te-prop-header" style={{ padding: '6px 10px', borderBottom: '1px solid #f1f5f9' }}>
-        <div className="te-prop-title-wrap">
-          <span className="te-prop-icon">{getPropertyIcon(currentType)}</span>
+        <div className="te-prop-title-wrap" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <span className="te-prop-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>{getPropertyIcon(currentType)}</span>
           <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{col.label}</span>
         </div>
         <span className="te-prop-type-tag">{getPropertyTypeName(currentType)}</span>
@@ -954,8 +971,8 @@ function MenuBody<R>({
           </div>
         )}
 
-        {/* Acción directa: Estilo de cápsula sólida / punto en menú principal */}
-        {(currentType === 'select' || currentType === 'processState' || col.id === 'status') && onChangeBadgeStyle && (
+        {/* Acción directa: Activar / Desactivar cápsulas (Estado, Selección y Fin) */}
+        {(currentType === 'select' || currentType === 'processState' || col.id === 'status' || col.id === 'end') && onChangeBadgeStyle && (
           <div className="te-section" style={{ paddingBottom: 0 }}>
             <button
               type="button"
@@ -963,8 +980,114 @@ function MenuBody<R>({
               onClick={() => handleSelectBadgeStyle(currentBadgeStyle === 'solid' ? 'dot' : 'solid')}
             >
               <Tag size={12} />
-              <span>{currentBadgeStyle === 'solid' ? 'Cambiar a punto y texto' : 'Usar cápsula sólida (colores vivos)'}</span>
+              <span>{currentBadgeStyle === 'solid' ? 'Desactivar cápsulas' : 'Activar cápsulas'}</span>
             </button>
+          </div>
+        )}
+
+        {/* Acción directa: Micro cápsula de umbral en Fin + botón "i" de Umbrales */}
+        {col.id === 'end' && onToggleThresholdIndicator && (
+          <div className="te-section" style={{ paddingBottom: 0, position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <button
+                type="button"
+                className="te-row-btn"
+                style={{ flex: 1 }}
+                onClick={() => onToggleThresholdIndicator(col.id, !thresholdIndicator)}
+              >
+                <AlertTriangle size={12} />
+                <span>{thresholdIndicator ? 'Desactivar indicador de umbral' : 'Activar indicador de umbral'}</span>
+              </button>
+              <button
+                type="button"
+                aria-label="Información sobre umbrales de fecha Fin"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowCapsulesInfo((v) => !v);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '24px',
+                  height: '24px',
+                  flexShrink: 0,
+                  borderRadius: '7px',
+                  border: showCapsulesInfo ? '1px solid #93c5fd' : '1px solid #cbd5e1',
+                  background: showCapsulesInfo ? '#eff6ff' : '#ffffff',
+                  color: showCapsulesInfo ? '#2563eb' : '#64748b',
+                  cursor: 'pointer',
+                  padding: 0,
+                  marginRight: '4px',
+                }}
+              >
+                <Info size={13} />
+              </button>
+            </div>
+            {showCapsulesInfo && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                style={{
+                  position: 'absolute',
+                  top: -6,
+                  left: 'calc(100% + 14px)',
+                  width: '268px',
+                  zIndex: 90,
+                  padding: '11px 13px',
+                  borderRadius: '10px',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  color: '#334155',
+                  fontSize: '12px',
+                  lineHeight: 1.45,
+                  boxShadow: '0 12px 28px -6px rgba(15, 23, 42, 0.18), 0 4px 10px -2px rgba(15, 23, 42, 0.06)',
+                }}
+              >
+                <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+                  Umbrales de alerta en fecha Fin
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <AlertTriangle size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 11.5, color: '#475569' }}>1. Aviso previo al vencimiento</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Clock size={14} color="#0284c7" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 11.5, color: '#475569' }}>2. Días hábiles de gracia (hito)</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <AlertCircle size={14} color="#dc2626" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 11.5, color: '#475569' }}>3. Desvío crítico vs. Línea Base</span>
+                  </div>
+                </div>
+                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 8, fontSize: 11.5, color: '#475569' }}>
+                  Calculado según los días hábiles de{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCapsulesInfo(false);
+                      onClose();
+                      navigate('/gestor_proyectos/configuracion');
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      color: '#2563eb',
+                      fontWeight: 650,
+                      fontSize: 11.5,
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    Configuración → Umbrales de Control
+                  </button>
+                  .
+                </div>
+              </div>
+            )}
           </div>
         )}
 

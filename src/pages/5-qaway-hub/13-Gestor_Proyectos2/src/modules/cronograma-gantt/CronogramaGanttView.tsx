@@ -104,6 +104,7 @@ export {
 import {
   Activity,
   GitBranch,
+  AlertCircle,
   AlertTriangle,
   ArrowLeftRight,
   ArrowRight,
@@ -3091,6 +3092,20 @@ export default function CronogramaGanttView({
     });
   }, []);
 
+  const [endThresholdBadge, setEndThresholdBadge] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(uiKey('end-threshold-badge-v1')) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const handleToggleThresholdIndicator = useCallback((_columnId: string, enabled: boolean) => {
+    setEndThresholdBadge(enabled);
+    try {
+      localStorage.setItem(uiKey('end-threshold-badge-v1'), enabled ? 'true' : 'false');
+    } catch {}
+  }, [uiKey]);
+
   const handleChangeBadgeStyle = useCallback((columnId: string, style: 'dot' | 'solid') => {
     setBadgeStyles((prev) => {
       const next = { ...prev, [columnId]: style };
@@ -3738,6 +3753,8 @@ export default function CronogramaGanttView({
         onChangeGraphFormat={handleChangeGraphFormat}
         badgeStyle={badgeStyles[columnId] || customCol?.badgeStyle || 'dot'}
         onChangeBadgeStyle={handleChangeBadgeStyle}
+        thresholdIndicator={columnId === 'end' ? endThresholdBadge : undefined}
+        onToggleThresholdIndicator={columnId === 'end' ? handleToggleThresholdIndicator : undefined}
         selectOptions={resolvedSelectOptions}
         onUpdateSelectOptions={customCol ? handleUpdateSelectOptions : undefined}
         onUpdateOptionColor={handleUpdateOptionColor}
@@ -5905,13 +5922,73 @@ export default function CronogramaGanttView({
         <div
           key="end"
           className="end editable"
-          style={{ position: 'relative' }}
+          style={{ position: 'relative', overflow: 'visible' }}
           onClick={(e) => {
             e.stopPropagation();
             toggleEdit(x, 'end');
           }}
         >
-          <span className="cell-text">{formatDatePE(x.end)}</span>
+          {(() => {
+            const capsulesEnabled = badgeStyles['end'] === 'solid';
+            const alertLevel = getScheduleAlertState(x, currentTodayIso, cronoParams);
+            const isDoneItem = alertLevel === 'cumplido';
+            const isWarn = alertLevel === 'por_vencer';
+            const isGrace = alertLevel === 'gracia_hito';
+            const isCritical = alertLevel === 'desvio_critico';
+            const isOverdue = alertLevel === 'retraso';
+            const hasThreshold = isWarn || isGrace || isCritical;
+            const badgeTitle = isDoneItem
+              ? 'Cumplido'
+              : isWarn
+              ? `Aviso previo: dentro de ${cronoParams.diasAvisoPrevio} días hábiles`
+              : isGrace
+              ? `En gracia de hito: dentro de ${cronoParams.diasGraciaHito} días hábiles`
+              : isCritical
+              ? `Desvío crítico: supera ${cronoParams.umbralDesvioCritico} días hábiles sobre Línea Base`
+              : isOverdue
+              ? 'Plazo vencido'
+              : 'En plazo';
+
+            const pillStyle: React.CSSProperties = isCritical
+              ? { background: '#dc2626', color: '#ffffff', border: '1.5px solid #dc2626' }
+              : isOverdue
+              ? { background: '#ffffff', color: '#ef4444', border: '1.5px solid #ef4444' }
+              : isWarn || isGrace
+              ? { background: '#ffffff', color: '#f59e0b', border: '1.5px solid #f59e0b' }
+              : isDoneItem
+              ? { background: '#ffffff', color: '#16a34a', border: '1.5px solid #16a34a' }
+              : { background: '#ffffff', color: '#2563eb', border: '1.5px solid #2563eb' };
+
+            return (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {capsulesEnabled ? (
+                  <span
+                    className="status-pill-solid"
+                    style={pillStyle}
+                    title={badgeTitle}
+                  >
+                    <span>{formatDatePE(x.end)}</span>
+                  </span>
+                ) : (
+                  <span className="cell-text" title={badgeTitle}>{formatDatePE(x.end)}</span>
+                )}
+                {endThresholdBadge && hasThreshold && (
+                  <span
+                    title={badgeTitle}
+                    style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}
+                  >
+                    {isCritical ? (
+                      <AlertCircle size={16} strokeWidth={2.2} color="#dc2626" />
+                    ) : isGrace ? (
+                      <Clock size={16} strokeWidth={2.2} color="#0284c7" />
+                    ) : (
+                      <AlertTriangle size={16} strokeWidth={2.2} color="#f59e0b" />
+                    )}
+                  </span>
+                )}
+              </span>
+            );
+          })()}
           {isEditing(x, 'end') && (
             <InlineDatePopover
               value={x.end}
@@ -7400,7 +7477,7 @@ export default function CronogramaGanttView({
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    padding: '6px 8px',
+                                    padding: '8px 8px',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
                                     background: 'transparent',
@@ -7426,8 +7503,9 @@ export default function CronogramaGanttView({
                                     >
                                       <span
                                         style={{
-                                          fontSize: '12.5px',
-                                          color: isProdChecked ? '#0066ff' : '#1e293b',
+                                          fontSize: '13px',
+                                          lineHeight: 1.35,
+                                          color: '#1e293b',
                                           fontWeight: isProdChecked ? 600 : 500,
                                           whiteSpace: 'nowrap',
                                           overflow: 'hidden',
@@ -7645,10 +7723,10 @@ export default function CronogramaGanttView({
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    padding: '6px 8px',
+                                    padding: '8px 8px',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
-                                    background: isChecked ? '#eff6ff' : 'transparent',
+                                    background: 'transparent',
                                   }}
                                   onClick={() => toggleRegion(regName)}
                                   title={`${regName} (${numSedes} sedes)${coordinador ? ` · Coord. regional: ${coordinador}` : ''}`}
@@ -7671,8 +7749,9 @@ export default function CronogramaGanttView({
                                     >
                                       <span
                                         style={{
-                                          fontSize: '12.5px',
-                                          color: isChecked ? '#0066ff' : '#1e293b',
+                                          fontSize: '13px',
+                                          lineHeight: 1.35,
+                                          color: '#1e293b',
                                           fontWeight: isChecked ? 600 : 500,
                                           whiteSpace: 'nowrap',
                                           overflow: 'hidden',

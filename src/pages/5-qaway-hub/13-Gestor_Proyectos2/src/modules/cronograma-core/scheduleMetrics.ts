@@ -69,7 +69,7 @@ export const getDeviationDays = (it: ScheduleFields, today: string): number | un
 };
 
 export type DeviationTone = 'late' | 'ontime' | 'early' | 'none';
-export type ScheduleAlertLevel = 'cumplido' | 'desvio_critico' | 'retraso' | 'por_vencer' | 'en_plazo';
+export type ScheduleAlertLevel = 'cumplido' | 'desvio_critico' | 'retraso' | 'gracia_hito' | 'por_vencer' | 'en_plazo';
 
 /**
  * Desviación en días hábiles según la semana laboral configurada.
@@ -115,8 +115,8 @@ export const getScheduleAlertState = (
   if (it.end && today > it.end) {
     if (esHito) {
       const diasDespues = workingDaysBetween(it.end, today, params.semanaLaboral);
-      if (diasDespues <= (params.diasGraciaHito ?? 0)) {
-        return 'por_vencer';
+      if ((params.diasGraciaHito ?? 0) > 0 && diasDespues <= (params.diasGraciaHito ?? 0)) {
+        return 'gracia_hito';
       }
     }
     return 'retraso';

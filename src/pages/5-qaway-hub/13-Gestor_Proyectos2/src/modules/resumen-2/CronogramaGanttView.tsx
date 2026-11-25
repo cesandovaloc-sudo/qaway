@@ -7464,7 +7464,7 @@ export default function CronogramaGanttView({
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    padding: '6px 8px',
+                                    padding: '8px 8px',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
                                     background: 'transparent',
@@ -7490,8 +7490,9 @@ export default function CronogramaGanttView({
                                     >
                                       <span
                                         style={{
-                                          fontSize: '12.5px',
-                                          color: isProdChecked ? '#0066ff' : '#1e293b',
+                                          fontSize: '13px',
+                                          lineHeight: 1.35,
+                                          color: '#1e293b',
                                           fontWeight: isProdChecked ? 600 : 500,
                                           whiteSpace: 'nowrap',
                                           overflow: 'hidden',
@@ -7709,10 +7710,10 @@ export default function CronogramaGanttView({
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    padding: '6px 8px',
+                                    padding: '8px 8px',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
-                                    background: isChecked ? '#eff6ff' : 'transparent',
+                                    background: 'transparent',
                                   }}
                                   onClick={() => toggleRegion(regName)}
                                   title={`${regName} (${numSedes} sedes)${coordinador ? ` · Coord. regional: ${coordinador}` : ''}`}
@@ -7735,8 +7736,9 @@ export default function CronogramaGanttView({
                                     >
                                       <span
                                         style={{
-                                          fontSize: '12.5px',
-                                          color: isChecked ? '#0066ff' : '#1e293b',
+                                          fontSize: '13px',
+                                          lineHeight: 1.35,
+                                          color: '#1e293b',
                                           fontWeight: isChecked ? 600 : 500,
                                           whiteSpace: 'nowrap',
                                           overflow: 'hidden',
