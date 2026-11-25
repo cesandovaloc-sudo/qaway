@@ -606,7 +606,7 @@ export default function ConfiguracionView({
 
   const aplicarColchonProyectoActivo = async (params: ParametrosCronograma) => {
     if (!esAdmin || !currentProj?.id) return;
-    let baseItems: GanttItemData[] | null = await fetchCronogramaFromSupabase(currentProj.id);
+    let baseItems: GanttItemData[] | null = await fetchCronogramaFromSupabase(currentProj.id, { maestroOnly: true });
     if (!baseItems || baseItems.length === 0) {
       try {
         const localRaw =

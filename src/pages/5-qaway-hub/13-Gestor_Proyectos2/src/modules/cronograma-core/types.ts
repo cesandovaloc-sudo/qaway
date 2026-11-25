@@ -45,6 +45,7 @@ export type ColKey =
   | 'sede'
   | 'deviation'
   | 'actualEnd'
+  | 'metaInternaEnd'
   | 'reportType'
   | 'actions'
   | (string & {});

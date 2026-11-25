@@ -279,10 +279,14 @@ const inFlightCronograma = new Map<string, Promise<GanttItemData[] | null>>();
  * Carga los ítems del cronograma desde Supabase para el proyecto dado.
  * Si la tabla o conexión no está disponible, retorna null para activar el fallback local.
  */
-export async function fetchCronogramaFromSupabase(projectId: string): Promise<GanttItemData[] | null> {
+export async function fetchCronogramaFromSupabase(
+  projectId: string,
+  opts?: { maestroOnly?: boolean },
+): Promise<GanttItemData[] | null> {
   if (!supabase) return null;
   const db = supabase;
-  const key = `project:${projectId}`;
+  const maestroOnly = Boolean(opts?.maestroOnly);
+  const key = maestroOnly ? `project:${projectId}:maestro` : `project:${projectId}`;
   const existing = inFlightCronograma.get(key);
   if (existing) return existing;
   const run = (async (): Promise<GanttItemData[] | null> => {
@@ -293,10 +297,17 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
       const allRows: any[] = [];
       let useSelectAll = false;
       for (let from = 0; from < 15000; from += PAGE_SIZE) {
-        let respuesta = await db
+        let q = db
           .from('gestor_cronograma_items')
           .select(useSelectAll ? '*' : CRONOGRAMA_SELECT)
-          .eq('project_id', projectId)
+          .eq('project_id', projectId);
+        if (maestroOnly) {
+          q = q
+            .not('id', 'like', '%-unit-%')
+            .not('id', 'like', '%-dre-%')
+            .not('id', 'like', 'pt-1.6-%');
+        }
+        let respuesta = await q
           .order('id', { ascending: true })
           .range(from, from + PAGE_SIZE - 1)
           .abortSignal(controller.signal);
@@ -305,10 +316,17 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
         // aún no existe en la BD, relee con select=* para no romper la carga del cronograma.
         if (respuesta.error && !useSelectAll) {
           useSelectAll = true;
-          respuesta = await db
+          let qAll = db
             .from('gestor_cronograma_items')
             .select('*')
-            .eq('project_id', projectId)
+            .eq('project_id', projectId);
+          if (maestroOnly) {
+            qAll = qAll
+              .not('id', 'like', '%-unit-%')
+              .not('id', 'like', '%-dre-%')
+              .not('id', 'like', 'pt-1.6-%');
+          }
+          respuesta = await qAll
             .order('id', { ascending: true })
             .range(from, from + PAGE_SIZE - 1)
             .abortSignal(controller.signal);
@@ -421,6 +439,70 @@ export async function syncAllCronogramaItemsToSupabase(projectId: string, items:
   }
 }
 
+export interface DeleteCronogramaResult {
+  ok: boolean;
+  deletedIds: string[];
+  blockedIds: string[];
+  error?: string;
+}
+
+/**
+ * Elimina ítems de Supabase y verifica contra RLS/permisos que ningún registro visible haya quedado bloqueado sin borrar.
+ */
+export async function deleteCronogramaItemsVerified(
+  projectId: string,
+  ids: string[]
+): Promise<DeleteCronogramaResult> {
+  const allIds = Array.from(new Set(ids.filter(Boolean)));
+  if (allIds.length === 0) return { ok: true, deletedIds: [], blockedIds: [] };
+  if (!supabase) {
+    return { ok: false, deletedIds: [], blockedIds: allIds, error: 'Cliente Supabase no disponible.' };
+  }
+  try {
+    const { data: existingRows, error: checkErr } = await supabase
+      .from('gestor_cronograma_items')
+      .select('id')
+      .eq('project_id', projectId)
+      .in('id', allIds);
+
+    if (checkErr) {
+      console.warn('[Supabase Cronograma] Error verificando ítems antes de eliminar:', checkErr.message);
+    }
+
+    const { data: deletedRows, error } = await supabase
+      .from('gestor_cronograma_items')
+      .delete()
+      .eq('project_id', projectId)
+      .in('id', allIds)
+      .select('id');
+
+    if (error) {
+      console.warn('[Supabase Cronograma] No se pudo eliminar ítem en BD:', error.message);
+      return { ok: false, deletedIds: [], blockedIds: allIds, error: error.message };
+    }
+
+    const deletedIds = (deletedRows || []).map((r: { id: string }) => r.id);
+    const deletedSet = new Set(deletedIds);
+    const existingIds = (existingRows || []).map((r: { id: string }) => r.id);
+    const blockedIds = existingIds.filter((id) => !deletedSet.has(id));
+
+    if (blockedIds.length > 0) {
+      return {
+        ok: false,
+        deletedIds,
+        blockedIds,
+        error: `Supabase bloqueó la eliminación de ${blockedIds.length} registro(s) (permiso cronograma.editar_edt o política RLS). El dato sigue en la base de datos.`,
+      };
+    }
+
+    return { ok: true, deletedIds, blockedIds: [] };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error inesperado al eliminar en Supabase.';
+    console.warn('[Supabase Cronograma] Error al eliminar ítem:', err);
+    return { ok: false, deletedIds: [], blockedIds: allIds, error: msg };
+  }
+}
+
 /**
  * Elimina un ítem de Supabase (por id) y opcionalmente todos sus descendientes en cascada.
  */
@@ -429,24 +511,8 @@ export async function deleteCronogramaItemFromSupabase(
   itemId: string,
   descendantIds: string[] = []
 ): Promise<boolean> {
-  if (!supabase) return false;
-  try {
-    const allIds = Array.from(new Set([itemId, ...descendantIds]));
-    const { error } = await supabase
-      .from('gestor_cronograma_items')
-      .delete()
-      .eq('project_id', projectId)
-      .in('id', allIds);
-
-    if (error) {
-      console.warn('[Supabase Cronograma] No se pudo eliminar ítem en BD:', error.message);
-      return false;
-    }
-    return true;
-  } catch (err) {
-    console.warn('[Supabase Cronograma] Error al eliminar ítem:', err);
-    return false;
-  }
+  const res = await deleteCronogramaItemsVerified(projectId, [itemId, ...descendantIds]);
+  return res.ok;
 }
 
 /**

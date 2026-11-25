@@ -51,6 +51,7 @@ import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
   deleteCronogramaItemFromSupabase,
+  deleteCronogramaItemsVerified,
   suscribirEstadoEsquema,
   calcularSiguienteCodigoEdtLocal,
   type GanttItemData
@@ -647,7 +648,7 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'faseId', 'subfase', 'deliverable', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'successors', 'gestor', 'region', 'entidadResponsable', 'observaciones', 'actualEnd', 'reportType', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'faseId', 'subfase', 'deliverable', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'successors', 'gestor', 'region', 'entidadResponsable', 'observaciones', 'actualEnd', 'metaInternaEnd', 'reportType', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
@@ -670,6 +671,7 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   observaciones: 220,
   deviation: 120,
   actualEnd: 130,
+  metaInternaEnd: 135,
   reportType: 185,
   actions: 75,
   distrito: 130,
@@ -697,6 +699,7 @@ const MIN_COLS: Record<ColKey, number> = {
   observaciones: 120,
   deviation: 90,
   actualEnd: 100,
+  metaInternaEnd: 105,
   reportType: 140,
   actions: 60,
   distrito: 90,
@@ -724,6 +727,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'entidadResponsable', label: 'Entidad Referencial' },
   { key: 'observaciones', label: 'Observaciones' },
   { key: 'actualEnd', label: 'Fecha real' },
+  { key: 'metaInternaEnd', label: 'Meta interna' },
   { key: 'reportType', label: 'Formato de Reporte' },
   { key: 'actions', label: 'Acción' },
 ];
@@ -1334,10 +1338,9 @@ export default function CronogramaGanttView({
             const hasAllComponents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].every((n) =>
               parsed.some((it: Item) => it.id === `comp-${n}`)
             );
-            const hasLegacy17 = parsed.some((it: Item) => it.id === 'pt-1.7a' || it.code === '1.7a');
-            // La limpieza de semillas legacy solo aplica al proyecto histórico p1: un cronograma
+            // La limpieza de caché incompleta solo aplica al proyecto histórico p1: un cronograma
             // nuevo y pequeño de otro proyecto no debe vaciarse al recargar.
-            if (pid === 'p1' && (!hasAllComponents || parsed.length < 50 || hasLegacy17)) {
+            if (pid === 'p1' && (!hasAllComponents || parsed.length < 50)) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
@@ -1466,7 +1469,7 @@ export default function CronogramaGanttView({
     if (!isActive || perspective !== 'maestro') return;
     let isCancelled = false;
     if (!projectId) return;
-    fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
+    fetchCronogramaFromSupabase(projectId, { maestroOnly: perspective === 'maestro' }).then((cloudItems) => {
       if (isCancelled || cloudItems === null) return;
       if (cloudItems.length === 0) {
         lastSyncedSnapshotRef.current = new Map();
@@ -1477,13 +1480,9 @@ export default function CronogramaGanttView({
         const isMaestro = perspective === 'maestro';
         const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
 
-        // Filtrar datos contaminados obsoletos si provienen de sesiones anteriores en BD y ordenar canónicamente
+        // Ordenar canónicamente sin ocultar registros presentes en Supabase
         let cleanCloudItems = sortWbsHierarchy(
-          cloudItems.filter(
-            (it) =>
-              !isLegacyCronogramaItem(it) &&
-              (!it.parentId || cloudItems.some((p) => p.id === it.parentId))
-          ) as Item[]
+          cloudItems.filter((it) => !isLegacyCronogramaItem(it)) as Item[]
         );
 
         if (isMaestro) {
@@ -1709,7 +1708,11 @@ export default function CronogramaGanttView({
 
           const changedItems: Item[] = [];
           const nextSnap = new Map<string, string>();
+          const currentIdSet = new Set<string>();
           items.forEach((it) => {
+            // No subir borradores inline mientras el usuario aún no confirma su nombre
+            if (it.id === inlineDraftCreatedIdRef.current) return;
+            currentIdSet.add(it.id);
             const serialized = JSON.stringify(it);
             nextSnap.set(it.id, serialized);
             if (snap.get(it.id) !== serialized) {
@@ -1717,9 +1720,23 @@ export default function CronogramaGanttView({
             }
           });
 
+          const removedIds: string[] = [];
+          snap.forEach((_prevVal, prevId) => {
+            if (!currentIdSet.has(prevId) && prevId !== inlineDraftCreatedIdRef.current) {
+              removedIds.push(prevId);
+            }
+          });
+
           lastSyncedSnapshotRef.current = nextSnap;
           if (changedItems.length > 0) {
             syncAllCronogramaItemsToSupabase(projectId, changedItems as GanttItemData[]);
+          }
+          if (removedIds.length > 0) {
+            void deleteCronogramaItemsVerified(projectId, removedIds).then((res) => {
+              if (!res.ok) {
+                notify(res.error || 'No se pudo sincronizar eliminación con Supabase.', 'warn');
+              }
+            });
           }
         }, 2500);
         return () => clearTimeout(timer);
@@ -1729,6 +1746,7 @@ export default function CronogramaGanttView({
 
   const lastSyncedSnapshotRef = useRef<Map<string, string>>(new Map());
   const lastSyncedPidRef = useRef<string>('');
+  const inlineDraftCreatedIdRef = useRef<string | null>(null);
 
   /* [DESHABILITADO - NO USAR HASTA INDICACIÓN DIRECTA DE ADMIN DE PLATAFORMA]
      Supabase Realtime (subscribeCronogramaRealtime) está desactivado intencionalmente
@@ -2950,6 +2968,7 @@ export default function CronogramaGanttView({
     y: number;
   } | null>(null);
   const [inlineDraftCreatedId, setInlineDraftCreatedId] = useState<string | null>(null);
+  inlineDraftCreatedIdRef.current = inlineDraftCreatedId;
   const depHoverTimeoutRef = useRef<any>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
@@ -3058,6 +3077,7 @@ export default function CronogramaGanttView({
   const [mapSubView, setMapSubView] = useState<TerritorialSubView>('geo-real');
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
+  const [colsSearch, setColsSearch] = useState('');
   const [colFilterOpen, setColFilterOpen] = useState<ColKey | null>(null);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
@@ -3455,6 +3475,12 @@ export default function CronogramaGanttView({
         type: (colTypeOverrides['actualEnd'] || 'date') as any,
         accessor: (r) => r?.actualEnd,
       },
+      {
+        id: 'metaInternaEnd',
+        label: colCustomLabels['metaInternaEnd'] || 'Meta interna',
+        type: (colTypeOverrides['metaInternaEnd'] || 'date') as any,
+        accessor: (r) => r?.metaInternaEnd,
+      },
       ...customCols.map((c) => ({
         id: c.key,
         label: colCustomLabels[c.key] || c.label,
@@ -3503,6 +3529,7 @@ export default function CronogramaGanttView({
       region: 140,
       deviation: 120,
       actualEnd: 130,
+      metaInternaEnd: 135,
       actions: 75,
     };
 
@@ -3673,9 +3700,9 @@ export default function CronogramaGanttView({
     []
   );
 
-  const notify = (s: string) => {
-    setToast({ text: s, tone: 'ok' });
-    window.setTimeout(() => setToast(null), 2600);
+  const notify = (s: string, tone: 'ok' | 'warn' = 'ok') => {
+    setToast({ text: s, tone });
+    window.setTimeout(() => setToast(null), tone === 'warn' ? 6000 : 2600);
   };
 
   useEffect(() => {
@@ -5503,8 +5530,10 @@ export default function CronogramaGanttView({
     setDeleteConfirmModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (!activeItem) return;
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    if (!activeItem || isDeletingItem) return;
     const idsToDelete = new Set<string>();
     idsToDelete.add(activeItem.id);
     const collectDescendants = (parentId: string) => {
@@ -5515,15 +5544,66 @@ export default function CronogramaGanttView({
     };
     collectDescendants(activeItem.id);
 
-    const remaining = items.filter((x) => !idsToDelete.has(x.id));
-    commitChange(() => remaining);
-    deleteCronogramaItemFromSupabase(projectId, activeItem.id, Array.from(idsToDelete));
-    setDeleteConfirmModalOpen(false);
-    setDrawerDraft(null);
-    setSelectedId(null);
-    setPanelOpen(false);
-    notify('Elemento y sus dependientes eliminados con éxito del cronograma maestro');
+    setIsDeletingItem(true);
+    try {
+      const res = await deleteCronogramaItemsVerified(projectId, Array.from(idsToDelete));
+      if (!res.ok) {
+        notify(
+          res.error || 'No se pudo eliminar el registro en Supabase. Verifica tus permisos antes de reintentar.',
+          'warn'
+        );
+        return;
+      }
+
+      idsToDelete.forEach((id) => lastSyncedSnapshotRef.current.delete(id));
+      const remaining = items.filter((x) => !idsToDelete.has(x.id));
+      commitChange(() => remaining);
+      setDeleteConfirmModalOpen(false);
+      setDrawerDraft(null);
+      setSelectedId(null);
+      setPanelOpen(false);
+      notify('Elemento y sus dependientes eliminados definitivamente de Supabase y del cronograma');
+    } finally {
+      setIsDeletingItem(false);
+    }
   };
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!puedeAdministrarEdt || selectedRowIds.size === 0 || isDeletingItem) return;
+    const idsToDelete = new Set<string>();
+    const collectDescendants = (parentId: string) => {
+      items.filter((x) => x.parentId === parentId).forEach((child) => {
+        if (!idsToDelete.has(child.id)) {
+          idsToDelete.add(child.id);
+          collectDescendants(child.id);
+        }
+      });
+    };
+    selectedRowIds.forEach((id) => {
+      idsToDelete.add(id);
+      collectDescendants(id);
+    });
+
+    const ok = window.confirm(
+      `¿Eliminar definitivamente ${idsToDelete.size} registro(s) (incluyendo dependientes) de Supabase y del cronograma?`
+    );
+    if (!ok) return;
+
+    setIsDeletingItem(true);
+    try {
+      const res = await deleteCronogramaItemsVerified(projectId, Array.from(idsToDelete));
+      if (!res.ok) {
+        notify(res.error || 'No se pudo completar la eliminación masiva en Supabase.', 'warn');
+        return;
+      }
+      idsToDelete.forEach((id) => lastSyncedSnapshotRef.current.delete(id));
+      commitChange((prev) => prev.filter((item) => !idsToDelete.has(item.id)));
+      setSelectedRowIds(new Set());
+      notify(`${idsToDelete.size} registro(s) eliminados definitivamente de Supabase y del cronograma`);
+    } finally {
+      setIsDeletingItem(false);
+    }
+  }, [puedeAdministrarEdt, selectedRowIds, isDeletingItem, items, projectId]);
 
   const renderProgressInner = (val: number, statusTone: string, format: 'bar' | 'ring' | 'number') => {
     if (format === 'ring') {
@@ -5782,7 +5862,9 @@ export default function CronogramaGanttView({
               onBlur={(e) => {
                 const val = e.target.value.trim();
                 if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
+                  lastSyncedSnapshotRef.current.delete(x.id);
                   commitChange((old) => old.filter((it) => it.id !== x.id));
+                  void deleteCronogramaItemFromSupabase(projectId, x.id);
                   setInlineDraftCreatedId(null);
                   closeEdit();
                   notify('Borrador sin nombre descartado.');
@@ -5797,7 +5879,9 @@ export default function CronogramaGanttView({
                   e.preventDefault();
                   const val = e.currentTarget.value.trim();
                   if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
+                    lastSyncedSnapshotRef.current.delete(x.id);
                     commitChange((old) => old.filter((it) => it.id !== x.id));
+                    void deleteCronogramaItemFromSupabase(projectId, x.id);
                     setInlineDraftCreatedId(null);
                     closeEdit();
                     notify('Borrador sin nombre descartado.');
@@ -5815,7 +5899,9 @@ export default function CronogramaGanttView({
                 if (e.key === 'Escape') {
                   e.preventDefault();
                   if (inlineDraftCreatedId === x.id) {
+                    lastSyncedSnapshotRef.current.delete(x.id);
                     commitChange((old) => old.filter((it) => it.id !== x.id));
+                    void deleteCronogramaItemFromSupabase(projectId, x.id);
                     setInlineDraftCreatedId(null);
                     closeEdit();
                     notify('Creación cancelada.');
@@ -6771,6 +6857,37 @@ export default function CronogramaGanttView({
             />
           ) : (
             <span className="cell-text">{x.actualEnd ? formatDate(x.actualEnd) : '—'}</span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'metaInternaEnd') {
+      return (
+        <div
+          key="metaInternaEnd"
+          className="actual-end-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!esAdmin) return;
+            toggleEdit(x, 'metaInternaEnd');
+          }}
+        >
+          {isEditing(x, 'metaInternaEnd') && esAdmin ? (
+            <input
+              className="cell-editor cell-input date-edit"
+              type="date"
+              autoFocus
+              defaultValue={x.metaInternaEnd || ''}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                update(x.id, { metaInternaEnd: e.target.value || undefined });
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            />
+          ) : (
+            <span className="cell-text">{x.metaInternaEnd ? formatDate(x.metaInternaEnd) : '—'}</span>
           )}
         </div>
       );
@@ -9278,16 +9395,39 @@ export default function CronogramaGanttView({
                           <strong>Columnas de la vista</strong>
                           <span className="cols-pop-subtitle">Elige columnas o guarda tu orden actual.</span>
                         </div>
-                        <button type="button" onClick={() => setColsMenuOpen(false)} title="Cerrar panel">
+                        <button type="button" onClick={() => { setColsMenuOpen(false); setColsSearch(''); }} title="Cerrar panel">
                           <X size={14} />
                         </button>
                       </div>
+                      <div className="af-popover-search" style={{ margin: '8px 12px 4px' }}>
+                        <Search size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                        <input
+                          type="text"
+                          value={colsSearch}
+                          onChange={(e) => setColsSearch(e.target.value)}
+                          placeholder="Buscar columna..."
+                          aria-label="Buscar columna"
+                        />
+                        {colsSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setColsSearch('')}
+                            title="Limpiar búsqueda"
+                            style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center' }}
+                          >
+                            <X size={12} />
+                          </button>
+                        )}
+                      </div>
                       <div className="cols-pop-list">
                         {(() => {
+                          const norm = (s: string) =>
+                            s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                          const qCol = norm(colsSearch.trim());
                           const allMeta = [
                             ...ALL_COL_META,
                             ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
-                          ];
+                          ].filter((col) => !qCol || norm(getColLabel(col.key, col.label)).includes(qCol));
                           const moveCol = (key: ColKey, dir: -1 | 1) => {
                             setVisibleCols((prev) => {
                               const idx = prev.indexOf(key);
@@ -9300,6 +9440,13 @@ export default function CronogramaGanttView({
                               return next;
                             });
                           };
+                          if (allMeta.length === 0) {
+                            return (
+                              <div style={{ padding: '12px 10px', fontSize: '12px', color: '#94a3b8', textAlign: 'center' }}>
+                                Sin columnas coincidentes
+                              </div>
+                            );
+                          }
                           return allMeta.map((col) => {
                             const isVisible = visibleCols.includes(col.key);
                             const visIdx = visibleCols.indexOf(col.key);
@@ -11536,6 +11683,19 @@ export default function CronogramaGanttView({
                 >
                   <span>Pendiente</span>
                 </button>
+                {puedeAdministrarEdt && (
+                  <button
+                    type="button"
+                    className="batch-action-btn"
+                    style={{ color: '#b91c1c', background: '#fef2f2', borderColor: '#fecaca' }}
+                    disabled={isDeletingItem}
+                    onClick={handleBulkDelete}
+                    title="Eliminar definitivamente los registros seleccionados de Supabase"
+                  >
+                    <Trash2 size={13} />
+                    <span>{isDeletingItem ? 'Eliminando...' : 'Eliminar'}</span>
+                  </button>
+                )}
               </div>
               <div className="batch-divider" />
               <button
@@ -11925,27 +12085,32 @@ export default function CronogramaGanttView({
                 </button>
                 <button
                   type="button"
+                  disabled={isDeletingItem}
                   style={{
                     height: '38px',
                     padding: '0 18px',
-                    background: '#dc2626',
+                    background: isDeletingItem ? '#94a3b8' : '#dc2626',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '12.5px',
                     fontWeight: 650,
-                    cursor: 'pointer',
+                    cursor: isDeletingItem ? 'not-allowed' : 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
                     transition: 'background 0.15s ease',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#b91c1c')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = '#dc2626')}
+                  onMouseEnter={(e) => {
+                    if (!isDeletingItem) e.currentTarget.style.background = '#b91c1c';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isDeletingItem) e.currentTarget.style.background = '#dc2626';
+                  }}
                   onClick={handleConfirmDelete}
                 >
                   <Trash2 size={14} />
-                  <span>Eliminar definitivamente</span>
+                  <span>{isDeletingItem ? 'Eliminando en Supabase...' : 'Eliminar definitivamente'}</span>
                 </button>
               </div>
             </div>
