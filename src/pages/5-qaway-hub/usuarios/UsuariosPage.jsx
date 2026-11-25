@@ -103,21 +103,59 @@ export default function UsuariosPage() {
     refresh()
   }
 
-  async function handleRemoveUser(targetUser) {
+    const [offboarding, setOffboarding] = useState(null)
+  const [offboardLoading, setOffboardLoading] = useState(false)
+
+  async function openOffboarding(targetUser) {
+    const tenantId = targetUser.tenant_id || me?.tenant_id
+    setOffboardLoading(true)
+    setMsg('')
+    try {
+      const [{ data: appRoles }, { data: membership }] = await Promise.all([
+        supabase.from('user_app_roles').select('app_id, role, app_catalog(name, slug)').eq('user_id', targetUser.id).eq('tenant_id', tenantId),
+        supabase.from('tenant_memberships').select('id, role, status, created_at').eq('user_id', targetUser.id).eq('tenant_id', tenantId).maybeSingle(),
+      ])
+      setOffboarding({
+        user: targetUser,
+        tenantId,
+        appRoles: appRoles || [],
+        membership: membership || null,
+        reassignTo: '',
+        reason: '',
+      })
+    } catch (err) {
+      setMsg('Error al cargar impacto: ' + (err.message || 'Error desconocido'))
+    } finally {
+      setOffboardLoading(false)
+    }
+  }
+
+  async function confirmOffboarding() {
+    if (!offboarding) return
+    const targetUser = offboarding.user
     const name = targetUser.full_name || targetUser.email
-    if (!window.confirm(`¿Retirar acceso de ${name} a esta marca? Se conservará su avance/data y se revocará su acceso a este tenant.`)) return
+    const reassign = members.find((m) => m.id === offboarding.reassignTo)
+    const reassignLabel = reassign ? (reassign.full_name || reassign.email) : 'sin reasignar'
+    const reason = [
+      offboarding.reason?.trim() || 'Retirado desde UsuariosPage',
+      `Reasignaci?n operativa: ${reassignLabel}`,
+    ].join(' | ')
+    setOffboardLoading(true)
     setMsg('')
     try {
       const { error } = await supabase.rpc('remove_tenant_member', {
         p_user_id: targetUser.id,
-        p_tenant_id: targetUser.tenant_id || me?.tenant_id,
-        p_reason: 'Retirado desde UsuariosPage',
+        p_tenant_id: offboarding.tenantId,
+        p_reason: reason,
       })
       if (error) throw error
-      setMsg('Acceso retirado. La data y el historial del usuario se conservaron.')
+      setMsg(`Acceso retirado para ${name}. Data/historial conservados. Reasignaci?n operativa: ${reassignLabel}.`)
+      setOffboarding(null)
       refresh()
     } catch (err) {
       setMsg('Error al retirar acceso: ' + (err.message || 'Error desconocido'))
+    } finally {
+      setOffboardLoading(false)
     }
   }
 
@@ -185,7 +223,7 @@ export default function UsuariosPage() {
                       {isAdmin && u.id !== me?.id && (
                         <button
                           type="button"
-                          onClick={() => handleRemoveUser(u)}
+                          onClick={() => openOffboarding(u)}
                           className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 transition"
                         >
                           Retirar acceso
@@ -286,6 +324,56 @@ export default function UsuariosPage() {
               </section>
             )}
           </>
+        )}
+
+        {offboarding && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+            <div className="w-full max-w-2xl rounded-2xl border bg-white p-5 shadow-xl" style={{ borderColor: '#e5e5e9' }}>
+              <h3 className="text-lg font-semibold" style={{ color: '#111' }}>Retirar acceso al tenant</h3>
+              <p className="mt-1 text-sm" style={{ color: '#73737b' }}>
+                Retiras acceso, no borras identidad ni data. El avance/historial del usuario se conserva.
+              </p>
+              <div className="mt-4 rounded-xl border p-4 text-sm" style={{ borderColor: '#eee', color: '#333' }}>
+                <div><b>Usuario:</b> {offboarding.user.full_name || offboarding.user.email} ({offboarding.user.email})</div>
+                <div className="mt-1"><b>Membresía:</b> {offboarding.membership?.role || offboarding.user.role || '—'} / {offboarding.membership?.status || 'activa'}</div>
+                <div className="mt-2"><b>Apps/roles en este tenant:</b></div>
+                <ul className="mt-1 list-disc pl-5" style={{ color: '#55555c' }}>
+                  {(offboarding.appRoles || []).length ? offboarding.appRoles.map((r, i) => (
+                    <li key={r.app_id || i}>{r.app_catalog?.name || r.app_id} — {r.role}</li>
+                  )) : <li>Sin roles de app asignados.</li>}
+                </ul>
+                <p className="mt-3 text-xs" style={{ color: '#73737b' }}>
+                  Impacto: se revoca acceso al tenant y a sus apps; se conserva data creada (proyectos, tareas, registros, auditoría). Reasigna responsable operativo si este usuario tenía pendientes.
+                </p>
+              </div>
+              <label className="mt-4 block text-sm font-medium" style={{ color: '#333' }}>Reasignar responsable operativo (opcional)</label>
+              <select
+                value={offboarding.reassignTo}
+                onChange={(e) => setOffboarding({ ...offboarding, reassignTo: e.target.value })}
+                className="mt-1 w-full rounded-xl border px-3 py-2 text-sm"
+                style={{ borderColor: '#dddde2' }}
+              >
+                <option value="">Sin reasignar ahora</option>
+                {members.filter((m) => m.id !== offboarding.user.id && m.id !== me?.id).map((m) => (
+                  <option key={m.id} value={m.id}>{m.full_name || m.email} ({m.role})</option>
+                ))}
+              </select>
+              <label className="mt-3 block text-sm font-medium" style={{ color: '#333' }}>Motivo / nota de auditoría (opcional)</label>
+              <input
+                value={offboarding.reason}
+                onChange={(e) => setOffboarding({ ...offboarding, reason: e.target.value })}
+                placeholder="Ej: renuncia, reasignado a otro equipo"
+                className="mt-1 w-full rounded-xl border px-3 py-2 text-sm"
+                style={{ borderColor: '#dddde2' }}
+              />
+              <div className="mt-5 flex justify-end gap-2">
+                <button type="button" onClick={() => !offboardLoading && setOffboarding(null)} className="rounded-xl border px-4 py-2 text-sm font-semibold" style={{ borderColor: '#dddde2' }}>Cancelar</button>
+                <button type="button" disabled={offboardLoading} onClick={confirmOffboarding} className="rounded-xl px-4 py-2 text-sm font-bold text-white disabled:opacity-50" style={{ background: '#dc2626' }}>
+                  {offboardLoading ? 'Retirando…' : 'Confirmar retiro de acceso'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

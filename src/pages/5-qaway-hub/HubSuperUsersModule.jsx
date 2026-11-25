@@ -560,6 +560,10 @@ export default function UsersModule({
   const [showProvision, setShowProvision] = useState(false);
   const [creds, setCreds] = useState(null);
   const [refreshTick, setRefreshTick] = useState(0);
+  const [grants, setGrants] = useState([]);
+  const [grantsLoading, setGrantsLoading] = useState(false);
+  const [grantMsg, setGrantMsg] = useState('');
+  const [grantForm, setGrantForm] = useState({ user_id: '', max_additional_tenants: '1', reason: '' });
 
   useDismissOnEscapeOrOutside(!!openMenu, () => setOpenMenu(null));
   useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
@@ -733,6 +737,66 @@ export default function UsersModule({
       cancelled = true;
     };
   }, [supabase, tenantId, isPlatformAdmin, session, tenantName, refreshTick]);
+
+  const loadGrants = async () => {
+    if (!isPlatformAdmin) return;
+    setGrantsLoading(true);
+    setGrantMsg('');
+    try {
+      const { data, error: gErr } = await supabase
+        .from('identity_tenant_creation_grants')
+        .select('id,user_id,status,max_additional_tenants,reason,approved_by,approved_at,revoked_at,created_at,updated_at')
+        .order('created_at', { ascending: false });
+      if (gErr) throw gErr;
+      const rows = data || [];
+      const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+      let usersById = {};
+      if (userIds.length) {
+        const { data: urows } = await supabase.from('users').select('id,email,full_name').in('id', userIds);
+        usersById = Object.fromEntries((urows || []).map((u) => [u.id, u]));
+      }
+      setGrants(rows.map((r) => ({ ...r, user: usersById[r.user_id] || null })));
+    } catch (err) {
+      setGrantMsg('Error cargando aprobaciones: ' + (err?.message || 'desconocido'));
+    } finally {
+      setGrantsLoading(false);
+    }
+  };
+
+  useEffect(() => { loadGrants(); }, [isPlatformAdmin, refreshTick]);
+
+  const upsertGrant = async (patch) => {
+    if (!isPlatformAdmin) return;
+    setGrantMsg('');
+    try {
+      const payload = {
+        user_id: patch.user_id,
+        status: patch.status,
+        max_additional_tenants: patch.max_additional_tenants,
+        reason: patch.reason || null,
+        approved_by: session?.user?.id || null,
+        approved_at: patch.status === 'approved' ? new Date().toISOString() : null,
+        revoked_at: patch.status === 'revoked' ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      };
+      const { data: existing } = await supabase
+        .from('identity_tenant_creation_grants')
+        .select('id')
+        .eq('user_id', patch.user_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const q = existing?.id
+        ? supabase.from('identity_tenant_creation_grants').update(payload).eq('id', existing.id)
+        : supabase.from('identity_tenant_creation_grants').insert({ ...payload, created_at: new Date().toISOString() });
+      const { error } = await q;
+      if (error) throw error;
+      setGrantMsg(patch.status === 'approved' ? 'Aprobación guardada.' : 'Aprobación revocada.');
+      await loadGrants();
+    } catch (err) {
+      setGrantMsg('Error guardando aprobación: ' + (err?.message || 'desconocido'));
+    }
+  };
 
   const filteredUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -1029,7 +1093,48 @@ export default function UsersModule({
 
         {/* Main content */}
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="min-w-0 lg:col-span-2">
+          <div className="min-w-0 lg:col-span-2 space-y-4">
+            {isPlatformAdmin && (
+              <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xs">
+                <div className="border-b border-zinc-100 px-5 py-5 md:px-6">
+                  <h2 className="text-base font-bold text-zinc-950">Aprobaciones: crear tenant adicional</h2>
+                  <p className="mt-1 text-sm text-zinc-500">Por defecto bloqueado. Solo plataforma admin puede aprobar/revocar que una identidad cree tenants adicionales. Queda auditado.</p>
+                  {grantMsg && <p className="mt-2 text-xs font-semibold text-zinc-700">{grantMsg}</p>}
+                  <div className="mt-4 grid gap-2 sm:grid-cols-4">
+                    <select value={grantForm.user_id} onChange={(e) => setGrantForm({ ...grantForm, user_id: e.target.value })} className="h-10 rounded-xl border border-zinc-200 px-3 text-sm">
+                      <option value="">Seleccionar usuario</option>
+                      {users.map((u) => <option key={u.id} value={u.id}>{u.name || u.email} ({u.email})</option>)}
+                    </select>
+                    <input type="number" min="1" value={grantForm.max_additional_tenants} onChange={(e) => setGrantForm({ ...grantForm, max_additional_tenants: e.target.value })} className="h-10 rounded-xl border border-zinc-200 px-3 text-sm" placeholder="Máx. tenants extra" />
+                    <input value={grantForm.reason} onChange={(e) => setGrantForm({ ...grantForm, reason: e.target.value })} className="h-10 rounded-xl border border-zinc-200 px-3 text-sm" placeholder="Motivo / auditoría" />
+                    <button type="button" onClick={() => grantForm.user_id && upsertGrant({ user_id: grantForm.user_id, status: 'approved', max_additional_tenants: Number(grantForm.max_additional_tenants || 1), reason: grantForm.reason })} className="h-10 rounded-xl bg-[#ff4b0b] px-4 text-sm font-bold text-white hover:bg-[#e03f06]">Aprobar / actualizar</button>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] text-left">
+                    <thead><tr className="border-b border-zinc-100 bg-zinc-50/50 text-[11px] font-extrabold uppercase tracking-wide text-zinc-500"><th className="px-5 py-3">Usuario</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3">Máx. extra</th><th className="px-4 py-3">Motivo</th><th className="px-4 py-3">Actualizado</th><th className="px-4 py-3 text-right">Acción</th></tr></thead>
+                    <tbody>
+                      {grantsLoading ? <tr><td colSpan={6} className="px-5 py-6 text-sm text-zinc-500">Cargando aprobaciones…</td></tr> : grants.length ? grants.map((g) => (
+                        <tr key={g.id} className="border-b border-zinc-100 last:border-0">
+                          <td className="px-5 py-3 text-sm"><div className="font-semibold text-zinc-900">{g.user?.full_name || g.user?.email || g.user_id}</div><div className="text-[11px] text-zinc-400">{g.user?.email || ''}</div></td>
+                          <td className="px-4 py-3 text-xs font-bold {g.status === 'approved' ? 'text-emerald-600' : 'text-red-500'}">{g.status === 'approved' ? <span className="text-emerald-600">Aprobada</span> : <span className="text-red-500">Revocada</span>}</td>
+                          <td className="px-4 py-3 text-sm text-zinc-700">{g.max_additional_tenants ?? '—'}</td>
+                          <td className="px-4 py-3 text-xs text-zinc-500">{g.reason || '—'}</td>
+                          <td className="px-4 py-3 text-xs text-zinc-400">{g.updated_at ? new Date(g.updated_at).toLocaleString() : '—'}</td>
+                          <td className="px-4 py-3 text-right">
+                            {g.status === 'approved' ? (
+                              <button type="button" onClick={() => upsertGrant({ user_id: g.user_id, status: 'revoked', max_additional_tenants: g.max_additional_tenants, reason: g.reason })} className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50">Revocar</button>
+                            ) : (
+                              <button type="button" onClick={() => upsertGrant({ user_id: g.user_id, status: 'approved', max_additional_tenants: g.max_additional_tenants || 1, reason: g.reason })} className="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-50">Aprobar</button>
+                            )}
+                          </td>
+                        </tr>
+                      )) : <tr><td colSpan={6} className="px-5 py-6 text-sm text-zinc-500">Sin aprobaciones registradas. Creación de tenant adicional sigue bloqueada por defecto.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
             <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xs">
               <div className="border-b border-zinc-100 px-5 py-5 md:px-6">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">

@@ -11066,7 +11066,7 @@ body.gantt-resizing {
 
 .gantt-v2 .bar-tools-accordion:hover .accordion-expandable-items,
 .gantt-v2 .bar-tools-accordion:focus-within .accordion-expandable-items {
-  max-width: 156px;
+  max-width: 200px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);

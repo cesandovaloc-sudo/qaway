@@ -2191,6 +2191,13 @@ function HubPanelContent({ canvasOnly = false }) {
   // Contexto real (sesion + tenant) para las vistas que viven dentro del shell (30.X).
   const [panelAuth, setPanelAuth] = useState(null)
   const [allowedAppSlugs, setAllowedAppSlugs] = useState(null)
+  const [tenantCtxVersion, setTenantCtxVersion] = useState(0)
+
+  useEffect(() => {
+    const onCtx = () => setTenantCtxVersion((v) => v + 1)
+    window.addEventListener('qaway:tenant-context-changed', onCtx)
+    return () => window.removeEventListener('qaway:tenant-context-changed', onCtx)
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -2214,7 +2221,7 @@ function HubPanelContent({ canvasOnly = false }) {
         setAllowedAppSlugs(slugs)
       })
     return () => { alive = false }
-  }, [panelAuth?.isPlatformAdmin, panelAuth?.tenantId, scopedTenant?.id])
+  }, [panelAuth?.isPlatformAdmin, panelAuth?.tenantId, scopedTenant?.id, tenantCtxVersion])
   useEffect(() => {
     let alive = true
     ;(async () => {
@@ -2480,7 +2487,9 @@ function HubPanelContent({ canvasOnly = false }) {
     const activePillar = PILLARS.find((p) => p.label === activeTab)
     const q = globalSearchQuery.trim().toLowerCase()
     return ROUTES.filter((route) => {
-      const okApp = !route.app || (denied && typeof denied.has === 'function' ? !denied.has(route.app) : true)
+      const okDenied = !route.app || (denied && typeof denied.has === 'function' ? !denied.has(route.app) : true)
+      const okSubscribed = !route.app || !Array.isArray(allowedAppSlugs) || allowedAppSlugs.includes(route.app)
+      const okApp = okDenied && okSubscribed
       const okQ = !q ||
         (route.title && route.title.toLowerCase().includes(q)) ||
         (route.description && route.description.toLowerCase().includes(q)) ||
@@ -2489,7 +2498,7 @@ function HubPanelContent({ canvasOnly = false }) {
       const okPillar = q ? true : (!activePillar?.match || (route.pillar && route.pillar.includes(activePillar.match)))
       return okApp && okPillar && okQ
     })
-  }, [globalSearchQuery, activeTab, denied])
+  }, [globalSearchQuery, activeTab, denied, allowedAppSlugs])
 
   // Búsqueda de personas en vivo (lógica "potente" del CRM en el Hub): escribe "fernando"
   // → usuarios reales de Supabase, con su marca (nombre + código) para que se entienda

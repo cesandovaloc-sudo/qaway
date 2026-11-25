@@ -101,14 +101,43 @@ Se ejecuta en **3 pasos grandes**. Cada paso se cierra solo cuando su verificaci
   - Usuario 3 membresías (cuenta de prueba temporal con Constructora/DIGERE/Prueba Chulls): al entrar a `/hub/inventario` vio selector "Selecciona una empresa" con los 3 tenants; al elegir Constructora cargó contexto Constructora (`/tienda/minedu-prueba-2-kjos` en links de tienda); tras limpiar contexto y elegir Prueba Chulls cargó contexto Prueba Chulls (`/tienda/prueba-chulls`), sin mezcla visible. Datos temporales de prueba limpiados.
 - **Estado**: Paso 1 cerrado.
 
-### Paso 2 - PAUSADO (deuda, no cerrado)
+### Paso 2 - IMPLEMENTACIÓN COMPLETA (solo validación visual pendiente)
 
-- **Base aplicada**: `AuthContext` refresca perfil/rol al cambiar tenant y emite `qaway:tenant-context-changed`; `HubAccessGuard` reevalúa con contexto activo/membresías y filtra acceso multi-membresía sin contexto por suscripción de app; `RequirePlanFeature` reevalúa al cambiar tenant activo.
-- **Deuda pendiente para cerrar**: verificación visible de catálogo Hub por suscripciones del tenant activo; rol por app en rutas reales; bloqueo claro en slug no permitido sin mezclar datos; confirmar onboarding/suscripciones pausado/reusable. No rehacer ni borrar tablas/lógica existente.
-- **Estado**: pausado por decisión del usuario (prioridad en otro frente). Retomar antes de dar Paso 2 por cerrado.
+- **Implementado**:
+  - `AuthContext` refresca perfil/rol al cambiar tenant y emite `qaway:tenant-context-changed`; `HubAccessGuard` reevalúa por contexto activo/membresía/suscripción de app.
+  - `useAppAccess` reevalúa `user_can_use_app` al cambiar contexto y ya no usa lista fija limitada; consulta catálogo y refresca por evento.
+  - `HubPanelPage` filtra catálogo/rutas visibles por suscripción activa del tenant (`tenant_app_subscriptions` active/trialing) + permiso por app (`user_can_use_app`/denied), y refresca con `qaway:tenant-context-changed`.
+  - `AplicacionesModule` recibe `allowedAppSlugs` y muestra solo apps permitidas por tenant.
+  - Rutas de app no permitidas quedan bloqueadas por `HubAccessGuard` con `AppAccessLockedView` (sin exponer datos de otro tenant).
+  - Onboarding/suscripciones permanece pausado/reusable (gate explícito reversible en `HubAccessGuard`, tablas/lógica existentes intactas; no rehacer ni borrar).
+- **Pendiente**: solo validación visual del usuario en front/ruta.
 
-### Paso 3 - PAUSADO (deuda, no cerrado)
+### Paso 3 - IMPLEMENTACIÓN COMPLETA (solo validación visual pendiente)
 
-- **Base aplicada**: `admin_assign_user_tenant` upserta `tenant_memberships`; `remove_tenant_member` desactiva membresía, revoca roles de app del tenant, limpia contexto activo/legacy, conserva data y deja auditoría en metadata. `UsuariosPage` retira acceso no destructivo. `invite-user` agrega/reactiva membresía para identidad existente. `register-brand` bloquea tenant adicional por defecto y requiere grant/aprobación de plataforma.
-- **Deuda pendiente para cerrar**: UI de plataforma admin para aprobar/revocar `identity_tenant_creation_grants`; UI de impacto/reasignación antes de offboarding; validación visible front/ruta de retiro de acceso, preservación de data, reasignación y bloqueo/aprobación de tenant adicional. Onboarding/suscripciones siguen como deuda reusable, no rehacer.
-- **Estado**: pausado por decisión del usuario. No rehacer ni borrar; retomar para verificación/cierre.
+- **Implementado**:
+  - `admin_assign_user_tenant` upserta `tenant_memberships`; `remove_tenant_member` desactiva membresía, revoca roles de app del tenant, limpia contexto activo/legacy, conserva data y deja auditoría en metadata.
+  - `UsuariosPage` tiene offboarding no destructivo con modal previo de impacto/reasignación: muestra membresía, apps/roles del tenant, advertencia de preservación de data/historial, responsable operativo opcional y motivo de auditoría.
+  - `invite-user` agrega/reactiva membresía para identidad existente; `register-brand` bloquea tenant adicional por defecto y exige grant/aprobación de plataforma.
+  - `HubSuperUsersModule` (plataforma admin) incluye UI para aprobar/revocar `identity_tenant_creation_grants`, con max tenants extra, motivo y auditoría (approved_by/fechas/estado).
+- **Pendiente**: solo validación visual del usuario en front/ruta.
+
+
+## Checklist de validación visual pendiente (usuario)
+
+### Paso 2
+- URL: `http://localhost:4100/hub/panel/aplicaciones` (usuario con tenant activo y suscripciones conocidas).
+  - Ver que el catálogo visible coincide con apps suscritas activas/trial del tenant activo.
+  - Cambiar contexto/tenant (selector de empresa o flujo de contexto activo) y confirmar que el catálogo se actualiza al tenant activo.
+- URL: `http://localhost:4100/hub/panel` y rutas de apps (ej. `/hub/inventario`, `/hub/crm`, `/hub/agenda`, `/hub/blog-editor` según suscripción).
+  - Entrar por slug de app no permitida para el tenant/rol activo: debe mostrar bloqueo claro (`AppAccessLockedView`), sin datos de otro tenant.
+- Confirmar que onboarding/suscripciones sigue pausado/reusable: no hay rework destructivo; flujo existente intacto.
+
+### Paso 3
+- URL: `http://localhost:4100/hub/panel/usuarios` como admin de tenant.
+  - En “Personal de tu marca”, pulsar “Retirar acceso”: debe abrir modal de impacto/reasignación antes de confirmar.
+  - Verificar que modal muestra usuario, membresía, apps/roles, aviso de preservación de data/historial, campo de reasignación operativa y motivo.
+  - Confirmar retiro: usuario pierde acceso a ese tenant; su data/avance/historial no se borra.
+- URL: `http://localhost:4100/hub/panel/usuarios` como plataforma admin (`s.admin@qawaylab.com`).
+  - Ver bloque “Aprobaciones: crear tenant adicional”.
+  - Aprobar/revocar grant para una identidad, con max tenants extra y motivo; verificar estado/auditoría en tabla.
+- Flujo register-brand (mismo correo, tenant adicional): por defecto bloqueado; con grant aprobado por plataforma admin debe permitir según regla.

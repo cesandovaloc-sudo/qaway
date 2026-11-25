@@ -8830,24 +8830,23 @@ export default function CronogramaGanttView({
                   )}
                 </button>
 
-                {!ocultarOficialNoAdmin && (
-                  <button
-                    type="button"
-                    className={`tool-btn gantt-tooltip-trigger ${showMetaInterna ? 'active' : ''}`}
-                    onClick={() => {
-                      setShowMetaInterna((v) => !v);
-                      notify(showMetaInterna ? 'Meta interna del equipo oculta' : 'Meta interna del equipo visible');
-                    }}
-                    style={showMetaInterna ? { color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' } : undefined}
-                    data-tooltip={showMetaInterna ? 'Ocultar meta interna del equipo' : 'Mostrar meta interna del equipo'}
-                    aria-label="Conmutar visualización de la meta interna del equipo"
-                  >
-                    <Target size={15} />
-                  </button>
-                )}
-
-                {/* Despliegue suave al pasar el mouse (hover): Fijar Línea Base + Porcentaje + Dependencias + Responsables */}
+                {/* Despliegue suave al pasar el mouse (hover): Fijar Línea Base + Meta Interna + Porcentaje + Dependencias + Responsables */}
                 <div className="accordion-expandable-items">
+                  {!ocultarOficialNoAdmin && (
+                    <button
+                      type="button"
+                      className={`btn secondary qm-btn-icon ${showMetaInterna ? 'active' : ''}`}
+                      onClick={() => {
+                        setShowMetaInterna((v) => !v);
+                        notify(showMetaInterna ? 'Meta interna del equipo oculta' : 'Meta interna del equipo visible');
+                      }}
+                      style={showMetaInterna ? { color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' } : undefined}
+                      data-tooltip={showMetaInterna ? 'Ocultar meta interna del equipo' : 'Mostrar meta interna del equipo'}
+                      aria-label="Conmutar visualización de la meta interna del equipo"
+                    >
+                      <Target size={15} />
+                    </button>
+                  )}
                   {/* [ ⚓ ] Fijar / Congelar fechas actuales como Línea Base Oficial */}
                   <button
                     type="button"
