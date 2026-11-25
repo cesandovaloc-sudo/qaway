@@ -58,9 +58,12 @@ import SelectEstilizado from './SelectEstilizado';
 import { MiniCalendar, isTerritorialSedeOnlyItem } from '../cronograma-gantt/CronogramaGanttView';
 import {
   DIAS_SEMANA_ORDEN,
+  EVENTO_ALERTAS_COLCHON,
   aplicarColchonAdelantoItems,
   getParametrosCronograma,
+  getSnapshotAlertasColchon,
   saveParametrosCronograma,
+  saveSnapshotAlertasColchon,
   type AlertaColchonPaquete,
   type FrecuenciaCorte,
   type MetodoPonderacion,
@@ -260,8 +263,6 @@ export default function ConfiguracionView({
 
   const [cronoParams, setCronoParams] = useState<ParametrosCronograma>(() => getParametrosCronograma());
   const [cronoParamsGuardado, setCronoParamsGuardado] = useState<ParametrosCronograma>(() => getParametrosCronograma());
-  const [alertasColchon, setAlertasColchon] = useState<AlertaColchonPaquete[]>([]);
-  const [resumenColchon, setResumenColchon] = useState<string | null>(null);
   const [editandoProyecto, setEditandoProyecto] = useState(false);
   const [editandoCrono, setEditandoCrono] = useState(false);
   const [editandoGeneral, setEditandoGeneral] = useState(false);
@@ -341,6 +342,23 @@ export default function ConfiguracionView({
       subtext: '',
     };
   }, [projects, activeProjectId]);
+
+  const [alertasColchon, setAlertasColchon] = useState<AlertaColchonPaquete[]>(
+    () => getSnapshotAlertasColchon(currentProj?.id)?.alertas ?? [],
+  );
+  const [resumenColchon, setResumenColchon] = useState<string | null>(
+    () => getSnapshotAlertasColchon(currentProj?.id)?.resumen ?? null,
+  );
+  useEffect(() => {
+    const syncSnap = () => {
+      const snap = getSnapshotAlertasColchon(currentProj?.id);
+      setAlertasColchon(snap?.alertas ?? []);
+      setResumenColchon(snap?.resumen ?? null);
+    };
+    syncSnap();
+    window.addEventListener(EVENTO_ALERTAS_COLCHON, syncSnap);
+    return () => window.removeEventListener(EVENTO_ALERTAS_COLCHON, syncSnap);
+  }, [currentProj?.id]);
 
   const [editName, setEditName] = useState(currentProj.name);
   const [editCode, setEditCode] = useState(currentProj.code);
@@ -627,16 +645,24 @@ export default function ConfiguracionView({
     } catch {}
     setAlertasColchon(res.alertas);
     if (params.diasColchonAdelanto <= 0) {
+      saveSnapshotAlertasColchon(currentProj.id, null);
       setResumenColchon(null);
       return;
     }
-    setResumenColchon(
-      `Meta interna (-${params.diasColchonAdelanto} día(s) hábil(es)) aplicada a ${res.aplicados} paquete(s) sin alterar fechas oficiales. ${
-        res.alertas.length > 0
-          ? `${res.alertas.length} paquete(s) quedaron en alerta para ajuste manual.`
-          : 'Sin paquetes en alerta.'
-      }`,
-    );
+    const nextResumen = `Meta interna (-${params.diasColchonAdelanto} día(s) hábil(es)) aplicada a ${res.aplicados} paquete(s) sin alterar fechas oficiales. ${
+      res.alertas.length > 0
+        ? `${res.alertas.length} paquete(s) quedaron en alerta para ajuste manual.`
+        : 'Sin paquetes en alerta.'
+    }`;
+    setResumenColchon(nextResumen);
+    saveSnapshotAlertasColchon(currentProj.id, {
+      projectId: currentProj.id,
+      diasColchon: params.diasColchonAdelanto,
+      aplicados: res.aplicados,
+      resumen: nextResumen,
+      alertas: res.alertas,
+      updatedAt: new Date().toISOString(),
+    });
   };
 
   const handleSave = async () => {
@@ -1680,55 +1706,106 @@ export default function ConfiguracionView({
                   </div>
 
                   {(resumenColchon || alertasColchon.length > 0) && (
-                    <div
-                      style={{
-                        marginTop: 14,
-                        padding: '14px 16px',
-                        borderRadius: 12,
-                        border: alertasColchon.length > 0 ? '1px solid #fecaca' : '1px solid #bfdbfe',
-                        background: alertasColchon.length > 0 ? '#fef2f2' : '#eff6ff',
-                        fontSize: '12.5px',
-                        color: alertasColchon.length > 0 ? '#7f1d1d' : '#1e3a8a',
-                        display: 'flex',
-                        gap: 12,
-                        alignItems: 'flex-start',
-                      }}
-                    >
+                    <div className="form-row" style={{ alignItems: 'flex-start' }}>
                       <div
                         style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 8,
-                          background: alertasColchon.length > 0 ? '#fee2e2' : '#dbeafe',
-                          color: alertasColchon.length > 0 ? '#dc2626' : '#2563eb',
-                          display: 'grid',
-                          placeItems: 'center',
-                          flexShrink: 0,
+                          width: '100%',
+                          padding: '14px 16px',
+                          borderRadius: 12,
+                          border: alertasColchon.length > 0 ? '1px solid #fecaca' : '1px solid #bfdbfe',
+                          background: alertasColchon.length > 0 ? '#fef2f2' : '#eff6ff',
+                          fontSize: '12.5px',
+                          color: alertasColchon.length > 0 ? '#7f1d1d' : '#1e3a8a',
+                          display: 'flex',
+                          gap: 12,
+                          alignItems: 'flex-start',
                         }}
                       >
-                        {alertasColchon.length > 0 ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        {resumenColchon && (
-                          <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: alertasColchon.length > 0 ? 8 : 0 }}>
-                            {resumenColchon}
-                          </div>
-                        )}
-                        {alertasColchon.length > 0 && (
-                          <>
-                            <div style={{ fontWeight: 600, marginBottom: 6, color: '#991b1b' }}>
-                              Paquetes con plazo corto no modificados (requieren ajuste manual en el Gantt):
+                        <div
+                          style={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 8,
+                            background: alertasColchon.length > 0 ? '#fee2e2' : '#dbeafe',
+                            color: alertasColchon.length > 0 ? '#dc2626' : '#2563eb',
+                            display: 'grid',
+                            placeItems: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {alertasColchon.length > 0 ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          {resumenColchon && (
+                            <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: alertasColchon.length > 0 ? 8 : 0 }}>
+                              {resumenColchon}
                             </div>
-                            <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>
-                              {alertasColchon.map((a) => (
-                                <li key={a.id}>
-                                  <b>{a.code}</b> {a.name} — plazo actual: {a.plazoHabil} día(s) hábil(es), quedarían{' '}
-                                  <b style={{ color: '#dc2626' }}>{a.diasRestantes} día(s)</b>.
-                                </li>
-                              ))}
-                            </ul>
-                          </>
-                        )}
+                          )}
+                          {alertasColchon.length > 0 && (
+                            <>
+                              <div style={{ fontWeight: 600, marginBottom: 8, color: '#991b1b' }}>
+                                Paquetes con plazo corto no modificados (requieren ajuste manual en el Gantt):
+                              </div>
+                              <div style={{ display: 'grid', gap: 6 }}>
+                                {alertasColchon.map((a) => {
+                                  const parts = (a.code || '').replace(/\.$/, '').split('.').filter(Boolean);
+                                  const indentPx = Math.max(0, parts.length - 1) * 14;
+                                  return (
+                                    <div
+                                      key={a.id}
+                                      style={{
+                                        marginLeft: indentPx,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: 10,
+                                        padding: '6px 10px',
+                                        borderRadius: 8,
+                                        background: 'rgba(255, 255, 255, 0.72)',
+                                        border: '1px solid #fecaca',
+                                      }}
+                                    >
+                                      <span>
+                                        <b>{a.code}</b> {a.name} — plazo actual: {a.plazoHabil} día(s) hábil(es), quedarían{' '}
+                                        <b style={{ color: '#dc2626' }}>{a.diasRestantes} día(s)</b>.
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          try {
+                                            localStorage.setItem(
+                                              'qaway-gantt-focus-item-v1',
+                                              JSON.stringify({ projectId: currentProj?.id || '', itemId: a.id }),
+                                            );
+                                          } catch {}
+                                          window.dispatchEvent(
+                                            new CustomEvent('qaway-gantt-focus-item', {
+                                              detail: { projectId: currentProj?.id || '', itemId: a.id },
+                                            }),
+                                          );
+                                          navigate('/gestor_proyectos/proyecto');
+                                        }}
+                                        style={{
+                                          flexShrink: 0,
+                                          padding: '4px 10px',
+                                          borderRadius: 6,
+                                          border: '1px solid #fca5a5',
+                                          background: '#ffffff',
+                                          color: '#b91c1c',
+                                          fontSize: '11.5px',
+                                          fontWeight: 700,
+                                          cursor: 'pointer',
+                                        }}
+                                      >
+                                        Ir al ítem →
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}

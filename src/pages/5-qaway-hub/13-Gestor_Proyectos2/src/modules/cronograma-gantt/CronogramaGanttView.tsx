@@ -52,6 +52,7 @@ import {
   syncAllCronogramaItemsToSupabase,
   deleteCronogramaItemFromSupabase,
   suscribirEstadoEsquema,
+  calcularSiguienteCodigoEdtLocal,
   type GanttItemData
 } from '../../services/gestorCronogramaService';
 import {
@@ -82,7 +83,7 @@ import {
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 import { usePermisosGpModulo } from '../../services/gpPermisosService';
-import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma, isDowLaboral } from '../../services/gpCronogramaConfigService';
+import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma, isDowLaboral, reconciliarAlertasColchonConItems } from '../../services/gpCronogramaConfigService';
 import { syncScheduleAlertNotifications } from '../../components/NotificationPopover';
 
 type UnidadRemotaGantt = { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number };
@@ -1551,6 +1552,64 @@ export default function CronogramaGanttView({
     window.addEventListener('qaway-gantt-items-updated', onExternalItemsUpdated);
     return () => window.removeEventListener('qaway-gantt-items-updated', onExternalItemsUpdated);
   }, [projectId, perspective, rawTasks]);
+
+  // Reconciliación local de alertas de colchón cuando el usuario corrige ítems en el Gantt (0 consultas BD)
+  useEffect(() => {
+    if (perspective !== 'maestro' || !projectId || items.length === 0) return;
+    reconciliarAlertasColchonConItems(projectId, items, cronoParams);
+  }, [items, projectId, perspective, cronoParams]);
+
+  // Deep-link desde Configuración → Ir al ítem en el Gantt
+  useEffect(() => {
+    if (perspective !== 'maestro' || !isActive || items.length === 0) return;
+    const focusTarget = (targetId: string) => {
+      const target = items.find((it) => it.id === targetId);
+      if (!target) return;
+      const ancestors: string[] = [];
+      let curParent = target.parentId;
+      let guard = 0;
+      while (curParent && guard < 12) {
+        ancestors.push(curParent);
+        curParent = items.find((p) => p.id === curParent)?.parentId;
+        guard += 1;
+      }
+      if (ancestors.length > 0) {
+        const mode = viewMode === 'lista' ? 'lista' : 'gantt';
+        setCollapsedByMode((prev) => {
+          const next = { ...prev, [mode]: { ...prev[mode] } };
+          ancestors.forEach((aid) => {
+            next[mode][aid] = false;
+          });
+          return next;
+        });
+      }
+      setSelectedId(target.id);
+      openEditorForItem(target);
+    };
+
+    try {
+      const raw = localStorage.getItem('qaway-gantt-focus-item-v1');
+      if (raw) {
+        const parsed = JSON.parse(raw) as { projectId?: string; itemId?: string };
+        if (parsed?.projectId === projectId && parsed?.itemId) {
+          localStorage.removeItem('qaway-gantt-focus-item-v1');
+          focusTarget(parsed.itemId);
+        }
+      }
+    } catch {}
+
+    const onFocusEvent = (e: Event) => {
+      const detail = (e as CustomEvent<{ projectId?: string; itemId?: string }>).detail;
+      if (detail?.projectId === projectId && detail?.itemId) {
+        try {
+          localStorage.removeItem('qaway-gantt-focus-item-v1');
+        } catch {}
+        focusTarget(detail.itemId);
+      }
+    };
+    window.addEventListener('qaway-gantt-focus-item', onFocusEvent);
+    return () => window.removeEventListener('qaway-gantt-focus-item', onFocusEvent);
+  }, [perspective, isActive, projectId, items, viewMode]);
 
   // Sincronización reactiva bidireccional con el módulo de tareas operativas (/tareas)
   useEffect(() => {
@@ -5244,21 +5303,21 @@ export default function CronogramaGanttView({
     }
     const id = (kind === 'hito' ? 'comp-' : 'sub-') + Date.now();
     const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
-    let code = `${hitos.length + 1}.`;
+    const parent = kind === 'subproceso' ? items.find((x) => x.id === pId) : undefined;
+    if (kind === 'subproceso' && (!pId || !parent)) {
+      notify('No se pudo crear el paquete de trabajo: falta un nodo padre válido en el árbol.');
+      return;
+    }
+    const code = calcularSiguienteCodigoEdtLocal(items, kind, pId);
+    if (!code) {
+      notify('No se pudo calcular un código EDT válido para el nuevo elemento.');
+      return;
+    }
     let defaultStart = '2026-10-26';
     let defaultEnd = '2026-11-30';
-    if (kind === 'subproceso') {
-      const parent = items.find((x) => x.id === pId);
-      if (parent) {
-        const siblings = items.filter((x) => x.parentId === pId);
-        const childIndex = siblings.length + 1;
-        const parentCodeClean = parent.code.endsWith('.') ? parent.code.slice(0, -1) : parent.code;
-        code = `${parentCodeClean}.${childIndex}`;
-        defaultStart = parent.start;
-        defaultEnd = parent.end;
-      } else {
-        code = `1.${subs.length + 1}`;
-      }
+    if (kind === 'subproceso' && parent) {
+      defaultStart = parent.start;
+      defaultEnd = parent.end;
     }
     if (kind === 'subproceso' && pId) {
       const parentDepth = itemDepthMap.get(pId) ?? 0;
@@ -5770,6 +5829,20 @@ export default function CronogramaGanttView({
                     }}
                   >
                     <CornerDownRight size={13} style={{ color: '#0284c7' }} />
+                  </button>
+                  <button
+                    type="button"
+                    className="quick-inline-icon-btn"
+                    title={`Eliminar ${x.code ? `${x.code} ` : ''}${x.name}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDrawerDraft(null);
+                      setIsNewDraft(false);
+                      setSelectedId(x.id);
+                      setDeleteConfirmModalOpen(true);
+                    }}
+                  >
+                    <Trash2 size={13} style={{ color: '#ef4444' }} />
                   </button>
                 </>
               )}

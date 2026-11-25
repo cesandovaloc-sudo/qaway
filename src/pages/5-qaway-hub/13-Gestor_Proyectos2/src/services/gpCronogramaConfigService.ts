@@ -252,6 +252,108 @@ export interface ResultadoColchonAdelanto<T> {
   alertas: AlertaColchonPaquete[];
 }
 
+export interface SnapshotColchonAlertas {
+  projectId: string;
+  diasColchon: number;
+  aplicados: number;
+  resumen: string;
+  alertas: AlertaColchonPaquete[];
+  updatedAt: string;
+}
+
+export const EVENTO_ALERTAS_COLCHON = 'qaway-colchon-alertas-changed';
+const ALERTAS_STORAGE_PREFIX = 'qaway-colchon-alertas-v1-';
+
+export function getSnapshotAlertasColchon(projectId?: string | null): SnapshotColchonAlertas | null {
+  if (!projectId) return null;
+  try {
+    const raw = localStorage.getItem(`${ALERTAS_STORAGE_PREFIX}${projectId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SnapshotColchonAlertas;
+    if (!parsed || parsed.projectId !== projectId || !Array.isArray(parsed.alertas)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function saveSnapshotAlertasColchon(
+  projectId: string | null | undefined,
+  snapshot: SnapshotColchonAlertas | null,
+): void {
+  if (!projectId) return;
+  try {
+    if (!snapshot) {
+      localStorage.removeItem(`${ALERTAS_STORAGE_PREFIX}${projectId}`);
+    } else {
+      localStorage.setItem(`${ALERTAS_STORAGE_PREFIX}${projectId}`, JSON.stringify(snapshot));
+    }
+  } catch {
+    /* ignore storage quota errors */
+  }
+  window.dispatchEvent(new CustomEvent(EVENTO_ALERTAS_COLCHON, { detail: { projectId, snapshot } }));
+}
+
+/**
+ * Reconcilia la fotografía de alertas contra los ítems vivos del Gantt (0 consultas a BD).
+ * Si un paquete fue completado, eliminado, recibió metaInternaEnd manual o amplió su plazo,
+ * se retira automáticamente de la lista de alertas.
+ */
+export function reconciliarAlertasColchonConItems<
+  T extends {
+    id: string;
+    code: string;
+    name: string;
+    start: string;
+    end: string;
+    progress?: number;
+    status?: string;
+    baselineEnd?: string;
+    metaInternaEnd?: string;
+  },
+>(
+  projectId: string,
+  items: T[],
+  params: Pick<ParametrosCronograma, 'semanaLaboral' | 'diasLaboralesCustom'>,
+  minDiasRestantes = 2,
+): void {
+  const snap = getSnapshotAlertasColchon(projectId);
+  if (!snap || snap.alertas.length === 0) return;
+
+  const byId = new Map(items.map((it) => [it.id, it]));
+  const pendientes: AlertaColchonPaquete[] = [];
+  for (const al of snap.alertas) {
+    const it = byId.get(al.id);
+    if (!it) continue;
+    if (it.status === 'Completado' || it.status === 'Cumple' || (it.progress ?? 0) >= 100) continue;
+    if (it.metaInternaEnd) continue;
+    const fechaOficial = (it.baselineEnd || it.end || '').slice(0, 10);
+    if (!it.start || !fechaOficial) continue;
+    const plazoHabil = countWorkingDays(it.start, fechaOficial, params.semanaLaboral, params.diasLaboralesCustom);
+    const diasRestantes = plazoHabil - snap.diasColchon;
+    if (diasRestantes < minDiasRestantes) {
+      pendientes.push({ id: it.id, code: it.code, name: it.name, plazoHabil, diasRestantes });
+    }
+  }
+
+  const unchanged =
+    pendientes.length === snap.alertas.length &&
+    pendientes.every((p, i) => p.id === snap.alertas[i].id && p.diasRestantes === snap.alertas[i].diasRestantes);
+  if (unchanged) return;
+
+  const nextResumen =
+    pendientes.length > 0
+      ? `Meta interna (-${snap.diasColchon} día(s) hábil(es)) aplicada a ${snap.aplicados} paquete(s). ${pendientes.length} paquete(s) pendiente(s) de ajuste manual.`
+      : `Meta interna (-${snap.diasColchon} día(s) hábil(es)): todos los paquetes en alerta fueron resueltos.`;
+
+  saveSnapshotAlertasColchon(projectId, {
+    ...snap,
+    resumen: nextResumen,
+    alertas: pendientes,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 /**
  * Aplica un descuento de `diasColchon` días hábiles sobre la fecha oficial (`baselineEnd || end`)
  * de cada paquete de trabajo. Si el paquete quedaría con menos de `minDiasRestantes` (por defecto 2),

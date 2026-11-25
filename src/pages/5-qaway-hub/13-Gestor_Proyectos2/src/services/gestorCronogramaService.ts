@@ -425,6 +425,47 @@ export async function deleteCronogramaItemFromSupabase(
  * Desactivado intencionalmente para evitar costos innecesarios por conexiones WebSocket
  * y multiplicación de mensajes (Fan-Out). Ningún agente debe activarlo sin autorización explícita.
  */
+export function calcularSiguienteCodigoEdtLocal(
+  items: Array<{ id: string; code: string; kind: string; parentId?: string }>,
+  kind: 'hito' | 'subproceso',
+  parentId?: string
+): string | null {
+  const existingCodes = new Set(items.map((x) => x.code).filter(Boolean));
+
+  if (kind === 'hito') {
+    let maxRoot = 0;
+    for (const it of items) {
+      if (it.parentId) continue;
+      const m = /^(\d+)\.?$/.exec((it.code || '').trim());
+      if (m) {
+        const n = parseInt(m[1], 10);
+        if (n > maxRoot) maxRoot = n;
+      }
+    }
+    let nextNum = maxRoot + 1;
+    while (existingCodes.has(`${nextNum}.`)) nextNum += 1;
+    return `${nextNum}.`;
+  }
+
+  if (!parentId) return null;
+  const parent = items.find((x) => x.id === parentId);
+  if (!parent) return null;
+
+  const parentPrefix = (parent.code || '').trim().replace(/\.$/, '') || '1';
+  let maxChild = 0;
+  for (const it of items) {
+    if (it.parentId !== parentId) continue;
+    const m = /\.(\d+)$/.exec((it.code || '').trim());
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (n > maxChild) maxChild = n;
+    }
+  }
+  let nextNum = maxChild + 1;
+  while (existingCodes.has(`${parentPrefix}.${nextNum}`)) nextNum += 1;
+  return `${parentPrefix}.${nextNum}`;
+}
+
 export function subscribeCronogramaRealtime(
   _projectId: string,
   _onRemoteChange: () => void

@@ -141,3 +141,13 @@ Se ejecuta en **3 pasos grandes**. Cada paso se cierra solo cuando su verificaci
   - Ver bloque “Aprobaciones: crear tenant adicional”.
   - Aprobar/revocar grant para una identidad, con max tenants extra y motivo; verificar estado/auditoría en tabla.
 - Flujo register-brand (mismo correo, tenant adicional): por defecto bloqueado; con grant aprobado por plataforma admin debe permitir según regla.
+
+## Resumen total (para prueba visual)
+
+- **Qué buscábamos:** base identidad/multitenant Opción 1: 1 persona = 1 identidad/email, varias membresías por tenant, contexto activo, acceso por tenant + app + rol + suscripción, sin mezclar datos; offboarding/control plataforma. Solo queda validación visual del usuario.
+- **Cómo estaba:** acceso legacy ligado a `users.tenant_id`; faltaban membresías/contexto activo, selector multi-tenant, conexión completa suscripciones/roles por app y controles front de grants/offboarding.
+- **Cómo está ahora:**
+  - **Paso 1 (cerrado, validado visual):** `tenant_memberships`, `user_active_context`, grants base; 1 tenant entra directo, varios ven selector; contexto aislado.
+  - **Paso 2 (implementación completa, falta validación visual):** catálogo/rutas Hub filtran por suscripción activa del tenant + permiso/rol de app; bloqueo claro en app no permitida; onboarding/suscripciones pausado/reusable.
+  - **Paso 3 (implementación completa, falta validación visual):** retiro acceso no destructivo con modal impacto/reasignación (conserva data/historial); invitación reactiva membresía; tenant adicional con mismo correo bloqueado por defecto, aprobable/revocable por plataforma admin en UI.
+- **Validación usada:** migraciones SQL aplicadas/validadas, pruebas Paso 1 (7/7), verificación visual Paso 1 en `localhost:4100`, revisión código/gates/RPCs, verificación DB de grants y commits en `main-web`. Pendiente: validación visual Paso 2 y 3.
