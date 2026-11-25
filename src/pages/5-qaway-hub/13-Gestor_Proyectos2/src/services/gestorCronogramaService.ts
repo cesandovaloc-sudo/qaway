@@ -45,6 +45,8 @@ export interface GanttItemData {
   baselineEnd?: string;
   actualStart?: string;
   actualEnd?: string;
+  /** 3.ª línea exclusiva de meta interna asignada al equipo (no contamina end ni baselineEnd). */
+  metaInternaEnd?: string;
   /** Tipo oficial de tarea (Reunión, Asistencia técnica, Informe, etc.) e icono Lucide */
   taskType?: string;
   icon?: string;
@@ -78,6 +80,7 @@ const toSupabaseRow = (projectId: string, item: GanttItemData, tenantId?: string
   baseline_end: item.baselineEnd || null,
   actual_start: item.actualStart || null,
   actual_end: item.actualEnd || null,
+  meta_interna_end: item.metaInternaEnd || null,
   task_type: item.taskType || null,
   icon: item.icon || null,
   edt_type: item.edtType || null,
@@ -113,13 +116,14 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
   baselineEnd: row.baseline_end || undefined,
   actualStart: row.actual_start || undefined,
   actualEnd: row.actual_end || undefined,
+  metaInternaEnd: row.meta_interna_end || undefined,
   taskType: row.task_type || undefined,
   icon: row.icon || undefined,
 });
 
 /* Columnas de la Fase 1 (supabase/02_gestor_cronograma_linea_base.sql) y Tipo/Icono. */
-const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end', 'task_type', 'icon', 'edt_type', 'dependencies'] as const;
-const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'taskType', 'icon', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
+const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end', 'meta_interna_end', 'task_type', 'icon', 'edt_type', 'dependencies'] as const;
+const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'metaInternaEnd', 'taskType', 'icon', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
 
 /**
  * Estado del esquema del cronograma en esta sesión.
@@ -245,7 +249,7 @@ async function upsertRows(rows: Record<string, any>[]): Promise<{ message: strin
 
 /* P2 (gstack 08): columnas explícitas de la lectura (superset exacto de los campos que mapea fromSupabaseRow). */
 const CRONOGRAMA_SELECT =
-  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end,task_type,icon,edt_type,dependencies';
+  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end,meta_interna_end,task_type,icon,edt_type,dependencies';
 
 /**
  * P1 (gstack 08): dedup de promesas en vuelo por proyecto — evita la doble lectura del gantt

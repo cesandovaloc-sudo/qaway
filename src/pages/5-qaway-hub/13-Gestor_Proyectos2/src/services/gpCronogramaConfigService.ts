@@ -265,8 +265,11 @@ export function aplicarColchonAdelantoItems<
     kind: string;
     start: string;
     end: string;
+    progress?: number;
+    status?: string;
     baselineStart?: string;
     baselineEnd?: string;
+    metaInternaEnd?: string;
   },
 >(
   items: T[],
@@ -276,7 +279,13 @@ export function aplicarColchonAdelantoItems<
   minDiasRestantes = 2,
 ): ResultadoColchonAdelanto<T> {
   if (diasColchon <= 0) {
-    return { items, aplicados: 0, alertas: [] };
+    const cleaned = items.map((it) => {
+      if (!it.metaInternaEnd) return it;
+      const copy = { ...it };
+      delete copy.metaInternaEnd;
+      return copy;
+    });
+    return { items: cleaned, aplicados: 0, alertas: [] };
   }
   const alertas: AlertaColchonPaquete[] = [];
   let aplicados = 0;
@@ -284,7 +293,12 @@ export function aplicarColchonAdelantoItems<
     if (it.kind !== 'subproceso' || !it.start || (!it.end && !it.baselineEnd)) {
       return it;
     }
+    if (it.status === 'Completado' || it.status === 'Cumple' || (it.progress ?? 0) >= 100) {
+      return it;
+    }
+    // La fecha oficial intacta manda; si en una prueba previa se pisó `end` sin `metaInternaEnd`, se restaura desde `baselineEnd`.
     const fechaOficial = (it.baselineEnd || it.end).slice(0, 10);
+    const endOficial = !it.metaInternaEnd && it.baselineEnd && it.end < it.baselineEnd ? it.baselineEnd.slice(0, 10) : it.end;
     const plazoHabil = countWorkingDays(it.start, fechaOficial, semana, customDays);
     const diasRestantes = plazoHabil - diasColchon;
     if (diasRestantes < minDiasRestantes) {
@@ -295,15 +309,14 @@ export function aplicarColchonAdelantoItems<
         plazoHabil,
         diasRestantes,
       });
-      return it;
+      return endOficial !== it.end ? { ...it, end: endOficial } : it;
     }
-    const nuevoFin = subtractWorkingDays(fechaOficial, diasColchon, semana, customDays);
+    const nuevaMetaInterna = subtractWorkingDays(fechaOficial, diasColchon, semana, customDays);
     aplicados += 1;
     return {
       ...it,
-      baselineStart: it.baselineStart || it.start,
-      baselineEnd: fechaOficial,
-      end: nuevoFin,
+      end: endOficial,
+      metaInternaEnd: nuevaMetaInterna,
     };
   });
   return { items: nextItems, aplicados, alertas };

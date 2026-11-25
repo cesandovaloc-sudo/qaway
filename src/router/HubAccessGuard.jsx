@@ -58,7 +58,14 @@ function resolveHubAccessRule(pathname) {
 
 export default function HubAccessGuard({ children, loadingFallback = null }) {
   const location = useLocation()
+  const [tenantContextVersion, setTenantContextVersion] = useState(0)
   const [state, setState] = useState({ checking: true, redirect: null, locked: false, moduleKey: null })
+
+  useEffect(() => {
+    const onTenantContextChanged = () => setTenantContextVersion((v) => v + 1)
+    window.addEventListener('qaway:tenant-context-changed', onTenantContextChanged)
+    return () => window.removeEventListener('qaway:tenant-context-changed', onTenantContextChanged)
+  }, [])
 
   // El search no cambia la regla de acceso: solo se usa para construir el
   // redirect. Depender de él hacía que el guard repitiera 5 consultas en cada
@@ -186,10 +193,29 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
       } else if (activeMemberships.length === 1) {
         resolvedTenantId = activeMemberships[0].tenant_id
       } else if (activeMemberships.length > 1) {
-        // Múltiples membresías sin contexto activo: dejar pasar para que la app
-        // muestre el selector de tenant (Paso 1). No abrir acceso de plataforma.
+        // Múltiples membresías sin contexto activo: permitir selector solo si
+        // alguna membresía tiene suscripción válida para esta app.
         if (rule.type === 'app') {
-          resolve(null)
+          if (appErr || !appRow?.id) {
+            resolve(null, true, rule.moduleKey)
+            return
+          }
+          const membershipTenantIds = activeMemberships.map((m) => m.tenant_id).filter(Boolean)
+          const { data: subRows, error: subErr } = await consultaCacheada(
+            `sub-any:${session.user.id}:${appRow.id}:${membershipTenantIds.join(',')}`,
+            () => supabase
+              .from('tenant_app_subscriptions')
+              .select('tenant_id')
+              .in('tenant_id', membershipTenantIds)
+              .eq('app_id', appRow.id)
+              .in('status', ['active', 'trialing'])
+              .limit(1),
+          )
+          if (!subErr && Array.isArray(subRows) && subRows.length > 0) {
+            resolve(null)
+            return
+          }
+          resolve(null, true, rule.moduleKey)
           return
         }
         resolve(null, true, rule.moduleKey)
@@ -263,7 +289,7 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
 
     checkAccess().catch(() => resolve(loginHref))
     return () => { alive = false }
-  }, [location.pathname])
+  }, [location.pathname, tenantContextVersion])
 
   if (state.checking) return loadingFallback || <RouteLoading />
   if (state.locked) return <AppAccessLockedView moduleKey={state.moduleKey} />

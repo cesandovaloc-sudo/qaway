@@ -82,7 +82,7 @@ import {
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 import { usePermisosGpModulo } from '../../services/gpPermisosService';
-import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma } from '../../services/gpCronogramaConfigService';
+import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma, isDowLaboral } from '../../services/gpCronogramaConfigService';
 import { syncScheduleAlertNotifications } from '../../components/NotificationPopover';
 
 type UnidadRemotaGantt = { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number };
@@ -1000,13 +1000,13 @@ const monthCols = MONTHS.map((m) => `${monthDays(m.start)}fr`).join(' ');
    Los pesos "fr" derivan de días reales, por lo que las barras (%) y la línea
    "Hoy" quedan sempre alineadas con la cuadrícula. */
 const buildSegments = (zoom: string) => {
-  const segs: { label: string; days: number; key: string }[] = [];
+  const segs: { label: string; days: number; key: string; dow?: number }[] = [];
 
   if (zoom === 'Día') {
     for (let i = 0; i < TOTAL_SPAN_DAYS; i++) {
       const d = new Date(START_TIMESTAMP + i * 86400000);
       const dom = d.getDate();
-      segs.push({ label: String(dom), days: 1, key: `d${i}` });
+      segs.push({ label: String(dom), days: 1, key: `d${i}`, dow: d.getDay() });
     }
     return segs;
   }
@@ -1476,6 +1476,7 @@ export default function CronogramaGanttView({
             if (cloud.actualEnd) updated.actualEnd = cloud.actualEnd;
             if (cloud.baselineStart) updated.baselineStart = cloud.baselineStart;
             if (cloud.baselineEnd) updated.baselineEnd = cloud.baselineEnd;
+            if ((cloud as any).metaInternaEnd) (updated as any).metaInternaEnd = (cloud as any).metaInternaEnd;
             // Contenido y responsables: la base manda. La plantilla solo cubre filas ausentes en BD.
             if (typeof cloud.name === 'string' && cloud.name.trim()) updated.name = cloud.name;
             if (typeof cloud.deliverable === 'string' && cloud.deliverable.trim()) updated.deliverable = cloud.deliverable;
@@ -1534,6 +1535,23 @@ export default function CronogramaGanttView({
     };
   }, [projectId, isActive, perspective]);
 
+  // Sincronización reactiva desde Configuración (Keep-Alive sin race condition)
+  useEffect(() => {
+    if (perspective !== 'maestro') return;
+    const onExternalItemsUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<{ projectId?: string; items?: Item[] }>).detail;
+      if (!detail || detail.projectId !== projectId || !Array.isArray(detail.items)) return;
+      const recomputed = computeWbsHierarchy(detail.items, rawTasks);
+      const nextSnap = new Map<string, string>();
+      recomputed.forEach((it) => nextSnap.set(it.id, JSON.stringify(it)));
+      lastSyncedSnapshotRef.current = nextSnap;
+      lastSyncedPidRef.current = projectId;
+      setItems(recomputed);
+    };
+    window.addEventListener('qaway-gantt-items-updated', onExternalItemsUpdated);
+    return () => window.removeEventListener('qaway-gantt-items-updated', onExternalItemsUpdated);
+  }, [projectId, perspective, rawTasks]);
+
   // Sincronización reactiva bidireccional con el módulo de tareas operativas (/tareas)
   useEffect(() => {
     if (!isActive) return;
@@ -1544,6 +1562,11 @@ export default function CronogramaGanttView({
         setRawTasks(parsed);
         setItems((prevItems) => {
           const recomputed = computeWbsHierarchy(prevItems, parsed);
+          if (lastSyncedPidRef.current === projectId) {
+            const nextSnap = new Map<string, string>();
+            recomputed.forEach((it) => nextSnap.set(it.id, JSON.stringify(it)));
+            lastSyncedSnapshotRef.current = nextSnap;
+          }
           try {
             localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
             window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
@@ -6180,7 +6203,16 @@ export default function CronogramaGanttView({
             toggleEdit(x, 'deviation');
           }}
         >
-          <span className={`dev-text ${tone}`} style={{ fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+          <span
+            className={`dev-text ${tone}`}
+            style={{
+              fontWeight: dev !== undefined && dev < 0 ? 700 : 500,
+              color: dev !== undefined && dev < 0 ? '#dc2626' : undefined,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
             <span>{formatDeviation(dev)}</span>
             {alertLevel === 'desvio_critico' && (
               <span
@@ -10321,9 +10353,21 @@ export default function CronogramaGanttView({
                     )}
                   </div>
                   <div className="months" style={{ gridTemplateColumns: segCols }}>
-                    {segments.map((s) => (
-                      <span key={s.key}>{s.label}</span>
-                    ))}
+                    {segments.map((s) => {
+                      const isNonWorking =
+                        zoom === 'Día' &&
+                        typeof s.dow === 'number' &&
+                        !isDowLaboral(s.dow, cronoParams.semanaLaboral, cronoParams.diasLaboralesCustom);
+                      return (
+                        <span
+                          key={s.key}
+                          style={isNonWorking ? { background: '#f1f5f9', color: '#94a3b8' } : undefined}
+                          title={isNonWorking ? 'Día no hábil según calendario laboral' : undefined}
+                        >
+                          {s.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -10433,13 +10477,22 @@ export default function CronogramaGanttView({
                 {viewMode === 'gantt' && (
                   <div className="timeline" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
                     <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
-                      {segments.map((s) => (
-                        <span key={s.key} />
-              ))}
+                      {segments.map((s) => {
+                        const isNonWorking =
+                          zoom === 'Día' &&
+                          typeof s.dow === 'number' &&
+                          !isDowLaboral(s.dow, cronoParams.semanaLaboral, cronoParams.diasLaboralesCustom);
+                        return (
+                          <span
+                            key={s.key}
+                            style={isNonWorking ? { background: 'rgba(241, 245, 249, 0.78)' } : undefined}
+                          />
+                        );
+                      })}
               <div ref={prefetchSentinelRef} aria-hidden="true" style={{ height: 1, width: '100%' }} />
                     </div>
-                    {/* Sombra de Línea Base Desacoplada (Punto 2.A: coordenadas absolutas independientes) */}
-                    {showBaseline && (() => {
+                    {/* Sombra de Línea Base Desacoplada (solo visible si no está oculta a no-admin) */}
+                    {showBaseline && !ocultarOficialNoAdmin && (() => {
                       const bStart = x.baselineStart || x.start;
                       const bEnd = x.baselineEnd || x.end;
                       if (!bStart || !bEnd) return null;
@@ -10457,11 +10510,37 @@ export default function CronogramaGanttView({
                         />
                       );
                     })()}
+                    {/* 3.ª línea exclusiva para Admin: Meta interna asignada al equipo (no contamina end ni baseline) */}
+                    {!ocultarOficialNoAdmin && (x as any).metaInternaEnd && (() => {
+                      const mEnd = (x as any).metaInternaEnd as string;
+                      const mLeft = getDatePixelOffset(x.start);
+                      const mWidth = Math.max(8, getDatePixelOffset(shiftDays(mEnd, 1)) - mLeft);
+                      return (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            left: `${mLeft}px`,
+                            width: `${mWidth}px`,
+                            bottom: 2,
+                            height: 3,
+                            borderRadius: 999,
+                            background: '#dc2626',
+                            pointerEvents: 'auto',
+                            zIndex: 4,
+                          }}
+                          title={`Meta interna asignada al equipo: ${formatDatePE(x.start)} – ${formatDatePE(mEnd)} (solo ajuste manual o cumplimiento)`}
+                        />
+                      );
+                    })()}
                     {(() => {
+                      const displayEnd =
+                        ocultarOficialNoAdmin && (x as any).metaInternaEnd
+                          ? ((x as any).metaInternaEnd as string)
+                          : x.end;
                       const barWidthPx =
                         resizingTaskId === x.id && resizeTempWidth !== null
                           ? resizeTempWidth
-                          : Math.max(8, getDatePixelOffset(shiftDays(x.end, 1)) - getDatePixelOffset(x.start));
+                          : Math.max(8, getDatePixelOffset(shiftDays(displayEnd, 1)) - getDatePixelOffset(x.start));
                       // El relleno físico real en píxeles que tiene el color de avance
                       const fillWidthPx = barWidthPx * (Math.min(100, Math.max(0, x.progress)) / 100);
                       // Vive dentro de la barra si el relleno físico tiene al menos 42px para el texto

@@ -3,12 +3,12 @@ import { supabase } from '@/config/supabase'
 
 // Gestión de usuarios y marca (SaaS, run 2026-09-21).
 // Diseño: lenguaje limpio de /hub/bienvenida (claro, tarjetas blancas).
-// Lógica intacta: crear marca, invitar, asignar rol y apps vía servidor/RLS.
+// Paso 3: membresías por tenant (no borrar identidad/data al retirar acceso).
 const ROLES = ['admin', 'editor', 'viewer', 'guest']
 
 export default function UsuariosPage() {
   const [me, setMe] = useState(null)
-  const [users, setUsers] = useState([])
+  const [members, setMembers] = useState([])
   const [apps, setApps] = useState([])
   const [msg, setMsg] = useState('')
   const [invite, setInvite] = useState({ email: '', role: 'viewer', app_slugs: [] })
@@ -19,7 +19,6 @@ export default function UsuariosPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      // En paralelo lo independiente: perfil + catálogo. Mates depende del tenant.
       const [{ data: meRow }, { data: catalog }] = await Promise.all([
         supabase.from('users').select('*').eq('id', user.id).single(),
         supabase.from('app_catalog').select('*').order('name'),
@@ -27,10 +26,31 @@ export default function UsuariosPage() {
       setMe(meRow || null)
       setApps(catalog || [])
       if (meRow?.tenant_id) {
-        const { data: mates } = await supabase.from('users').select('id, email, full_name, role, tenant_id, avatar_url').eq('tenant_id', meRow.tenant_id)
-        setUsers(mates || [])
+        const { data: membershipRows, error: membershipErr } = await supabase
+          .from('tenant_memberships')
+          .select('id, user_id, tenant_id, role, status, created_at, users:user_id(id, email, full_name, avatar_url)')
+          .eq('tenant_id', meRow.tenant_id)
+          .eq('status', 'active')
+          .order('created_at', { ascending: true })
+
+        if (!membershipErr && Array.isArray(membershipRows)) {
+          setMembers(membershipRows.map((m) => ({
+            membership_id: m.id,
+            id: m.user_id,
+            tenant_id: m.tenant_id,
+            role: m.role,
+            status: m.status,
+            email: m.users?.email || '',
+            full_name: m.users?.full_name || '',
+            avatar_url: m.users?.avatar_url || null,
+          })))
+        } else {
+          // Fallback legacy si memberships no está disponible
+          const { data: mates } = await supabase.from('users').select('id, email, full_name, role, tenant_id, avatar_url').eq('tenant_id', meRow.tenant_id)
+          setMembers((mates || []).map((u) => ({ ...u, membership_id: null, status: 'active' })))
+        }
       } else {
-        setUsers([])
+        setMembers([])
       }
     } finally {
       setLoading(false)
@@ -84,19 +104,20 @@ export default function UsuariosPage() {
   }
 
   async function handleRemoveUser(targetUser) {
-    if (!window.confirm(`¿Estás seguro de que deseas eliminar a ${targetUser.full_name || targetUser.email} de tu marca?`)) return
+    const name = targetUser.full_name || targetUser.email
+    if (!window.confirm(`¿Retirar acceso de ${name} a esta marca? Se conservará su avance/data y se revocará su acceso a este tenant.`)) return
     setMsg('')
     try {
-      await supabase.from('user_app_roles').delete().eq('user_id', targetUser.id)
-      const { error } = await supabase.from('users').delete().eq('id', targetUser.id)
-      if (error) {
-        const { error: upErr } = await supabase.from('users').update({ tenant_id: null, status: 'Inactivo' }).eq('id', targetUser.id)
-        if (upErr) throw upErr
-      }
-      setMsg('Usuario eliminado correctamente.')
+      const { error } = await supabase.rpc('remove_tenant_member', {
+        p_user_id: targetUser.id,
+        p_tenant_id: targetUser.tenant_id || me?.tenant_id,
+        p_reason: 'Retirado desde UsuariosPage',
+      })
+      if (error) throw error
+      setMsg('Acceso retirado. La data y el historial del usuario se conservaron.')
       refresh()
     } catch (err) {
-      setMsg('Error al eliminar usuario: ' + (err.message || 'Error desconocido'))
+      setMsg('Error al retirar acceso: ' + (err.message || 'Error desconocido'))
     }
   }
 
@@ -146,10 +167,10 @@ export default function UsuariosPage() {
         {!loading && me?.tenant_id && (
           <>
             <section className="mt-8">
-              <h2 className="text-xl font-semibold" style={{ color: '#111' }}>Personal de tu marca ({users.length})</h2>
+              <h2 className="text-xl font-semibold" style={{ color: '#111' }}>Personal de tu marca ({members.length})</h2>
               <ul className="mt-3 divide-y rounded-2xl border bg-white" style={{ borderColor: '#e5e5e9', divideColor: '#eee' }}>
-                {users.map((u) => (
-                  <li key={u.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm" style={{ color: '#111' }}>
+                {members.map((u) => (
+                  <li key={u.membership_id || u.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm" style={{ color: '#111' }}>
                     <span className="flex items-center gap-2.5">
                       <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-100 text-[10px] font-extrabold text-zinc-600">
                         {((u.full_name || u.email) || '').split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase() || '?'}
@@ -167,13 +188,13 @@ export default function UsuariosPage() {
                           onClick={() => handleRemoveUser(u)}
                           className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 transition"
                         >
-                          Eliminar
+                          Retirar acceso
                         </button>
                       )}
                     </div>
                   </li>
                 ))}
-                {users.length === 0 && <li className="px-4 py-3 text-sm" style={{ color: '#85858c' }}>Sin usuarios visibles.</li>}
+                {members.length === 0 && <li className="px-4 py-3 text-sm" style={{ color: '#85858c' }}>Sin usuarios visibles.</li>}
               </ul>
             </section>
 
@@ -239,8 +260,8 @@ export default function UsuariosPage() {
 
                 <p className="mt-6" style={{ color: '#111', fontSize: 12, fontWeight: 800 }}>Asignar rol y apps a personal existente</p>
                 <ul className="mt-2 space-y-2">
-                  {users.filter((u) => u.id !== me.id).map((u) => (
-                    <li key={u.id} className="flex flex-wrap items-center gap-2 text-sm" style={{ color: '#111' }}>
+                  {members.filter((u) => u.id !== me.id).map((u) => (
+                    <li key={u.membership_id || u.id} className="flex flex-wrap items-center gap-2 text-sm" style={{ color: '#111' }}>
                       <span className="min-w-40">{u.email}</span>
                       <select
                         defaultValue={u.role} id={`role-${u.id}`}

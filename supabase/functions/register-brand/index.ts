@@ -31,7 +31,20 @@ serve(async (req: Request) => {
   const admin = createClient(url, serviceKey)
   const { data: me } = await admin.from('users').select('tenant_id').eq('id', caller.id).single()
   if (!me) return json({ error: 'Sin perfil' }, 403)
-  if (me.tenant_id !== null) return json({ error: 'Ya perteneces a una marca' }, 403)
+
+  const { data: activeMemberships } = await admin
+    .from('tenant_memberships')
+    .select('id')
+    .eq('user_id', caller.id)
+    .eq('status', 'active')
+    .limit(1)
+  const hasExistingTenant = me.tenant_id !== null || (Array.isArray(activeMemberships) && activeMemberships.length > 0)
+  if (hasExistingTenant) {
+    const { data: canCreate } = await admin.rpc('can_create_additional_tenant', { p_user_id: caller.id })
+    if (canCreate !== true) {
+      return json({ error: 'Crear una marca adicional con este correo está bloqueado por defecto. Solicita aprobación de plataforma admin.' }, 403)
+    }
+  }
 
   const { name, slug, plans = [] } = await req.json()
   if (!name || typeof name !== 'string' || name.trim().length < 2) return json({ error: 'Nombre inválido' }, 400)
@@ -50,6 +63,23 @@ serve(async (req: Request) => {
     role: 'admin',
   }).eq('id', caller.id)
   if (uErr) return json({ error: 'No se pudo vincular' }, 500)
+
+  await admin.from('tenant_memberships').upsert({
+    user_id: caller.id,
+    tenant_id: tenant.id,
+    role: 'admin',
+    status: 'active',
+    is_default: !hasExistingTenant,
+    invited_by: caller.id,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id,tenant_id' })
+
+  await admin.from('user_active_context').upsert({
+    user_id: caller.id,
+    active_tenant_id: tenant.id,
+    updated_at: new Date().toISOString(),
+    updated_by: caller.id,
+  }, { onConflict: 'user_id' })
 
   // Las condiciones comerciales se aplican en checkout, no al crear la marca.
   // Este endpoint solo deja la contratación pendiente y captura el precio de

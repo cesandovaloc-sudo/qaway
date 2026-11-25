@@ -219,8 +219,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
     setActiveTenantId(tenantId)
     setMemberships((prev) => prev.map((m) => ({ ...m, is_active_context: m.tenant_id === tenantId })))
-    // Compatibilidad: mantener profile.tenant_id alineado con contexto activo
-    setProfile((prev) => (prev ? { ...prev, tenant_id: tenantId } : prev))
+    // Refrescar perfil/rol para el tenant activo (user_app_roles depende del contexto)
+    try {
+      const nextProfile = await userService.getCurrentUser()
+      setProfile(nextProfile)
+    } catch {
+      setProfile((prev) => (prev ? { ...prev, tenant_id: tenantId } : prev))
+    }
+    window.dispatchEvent(new CustomEvent('qaway:tenant-context-changed'))
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {

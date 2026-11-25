@@ -103,14 +103,19 @@ serve(async (req: Request) => {
         || detail.includes('duplicate')
 
       if (alreadyExists) {
-        // Sin segunda invitación ni cuenta nueva: el correo ya pertenece a Qaway.
-        // Se elimina la fila de invitación huérfana (no habrá envío a un existente).
+        // Identidad ya existe en Qaway: no duplicar cuenta. Agregar membresía al tenant.
         await admin.from('user_invites').delete().eq('email', inviteEmail).eq('tenant_id', tenant_id)
 
         const { data: existingUser } = await admin.from('users').select('id, tenant_id').eq('email', inviteEmail).maybeSingle()
         if (existingUser) {
-          const { data: roleRows } = await admin.from('user_app_roles').select('id').eq('user_id', existingUser.id).eq('tenant_id', tenant_id).limit(1)
-          const alreadyMember = existingUser.tenant_id === tenant_id || (roleRows && roleRows.length > 0)
+          const { data: membershipRow } = await admin
+            .from('tenant_memberships')
+            .select('id, status')
+            .eq('user_id', existingUser.id)
+            .eq('tenant_id', tenant_id)
+            .maybeSingle()
+
+          const alreadyMember = membershipRow?.status === 'active'
           if (alreadyMember) {
             if (validUnidadId) {
               await admin.from('gestor_unidad_miembros').upsert(
@@ -120,6 +125,39 @@ serve(async (req: Request) => {
             }
             return json({ status: 'already_member' })
           }
+
+          // Agregar/reactivar membresía (Option 1: misma identidad, múltiples tenants)
+          await admin.from('tenant_memberships').upsert(
+            { user_id: existingUser.id, tenant_id, role, status: 'active', is_default: false, invited_by: caller.id, updated_at: new Date().toISOString() },
+            { onConflict: 'user_id,tenant_id' },
+          )
+
+          // Compatibilidad legacy: solo fijar users.tenant_id si no tiene uno
+          if (!existingUser.tenant_id) {
+            await admin.from('users').update({ tenant_id, role }).eq('id', existingUser.id)
+          }
+
+          // Asignar roles de app solicitados
+          if (validSlugs.length) {
+            const { data: appRows } = await admin.from('app_catalog').select('id, slug').in('slug', validSlugs)
+            const roleRows = (appRows || []).map((a: { id: string }) => ({
+              user_id: existingUser.id,
+              tenant_id,
+              app_id: a.id,
+              role,
+            }))
+            if (roleRows.length) {
+              await admin.from('user_app_roles').upsert(roleRows, { onConflict: 'user_id,tenant_id,app_id' })
+            }
+          }
+
+          if (validUnidadId) {
+            await admin.from('gestor_unidad_miembros').upsert(
+              { tenant_id, unit_id: validUnidadId, user_id: existingUser.id, is_primary: true, status: 'active' },
+              { onConflict: 'unit_id,user_id' },
+            )
+          }
+          return json({ ok: true, status: 'member_added' })
         }
         return json({ status: 'existing_account' })
       }

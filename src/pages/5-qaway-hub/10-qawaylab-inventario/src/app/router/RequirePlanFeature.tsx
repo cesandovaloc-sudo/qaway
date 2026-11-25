@@ -92,7 +92,7 @@ export default function RequirePlanFeature({ feature, children }: {
     })
 
     return () => { alive = false }
-  }, [feature, session, isPlatformAdmin])
+  }, [feature, session, isPlatformAdmin, profile?.tenant_id])
 
   if (loading || (session && allowed === null)) {
     return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>

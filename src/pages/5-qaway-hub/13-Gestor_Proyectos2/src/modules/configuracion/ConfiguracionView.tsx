@@ -55,7 +55,7 @@ import PerfilTab from './PerfilTab';
 import PreferenciasTab from './PreferenciasTab';
 import EmpresaTab from './EmpresaTab';
 import SelectEstilizado from './SelectEstilizado';
-import { MiniCalendar } from '../cronograma-gantt/CronogramaGanttView';
+import { MiniCalendar, isTerritorialSedeOnlyItem } from '../cronograma-gantt/CronogramaGanttView';
 import {
   DIAS_SEMANA_ORDEN,
   aplicarColchonAdelantoItems,
@@ -260,7 +260,6 @@ export default function ConfiguracionView({
 
   const [cronoParams, setCronoParams] = useState<ParametrosCronograma>(() => getParametrosCronograma());
   const [cronoParamsGuardado, setCronoParamsGuardado] = useState<ParametrosCronograma>(() => getParametrosCronograma());
-  const [aplicandoColchon, setAplicandoColchon] = useState(false);
   const [alertasColchon, setAlertasColchon] = useState<AlertaColchonPaquete[]>([]);
   const [resumenColchon, setResumenColchon] = useState<string | null>(null);
   const [editandoProyecto, setEditandoProyecto] = useState(false);
@@ -587,7 +586,60 @@ export default function ConfiguracionView({
     }
   };
 
-  const handleSave = () => {
+  const aplicarColchonProyectoActivo = async (params: ParametrosCronograma) => {
+    if (!esAdmin || !currentProj?.id) return;
+    let baseItems: GanttItemData[] | null = await fetchCronogramaFromSupabase(currentProj.id);
+    if (!baseItems || baseItems.length === 0) {
+      try {
+        const localRaw =
+          localStorage.getItem(`qaway-gantt-items-${currentProj.id}-maestro`) ||
+          localStorage.getItem(`qaway-gantt-items-${currentProj.id}`);
+        baseItems = localRaw ? (JSON.parse(localRaw) as GanttItemData[]) : [];
+      } catch {
+        baseItems = [];
+      }
+    }
+    const maestroItems = (baseItems || []).filter((it) => !isTerritorialSedeOnlyItem(it));
+    if (maestroItems.length === 0) {
+      setAlertasColchon([]);
+      setResumenColchon(
+        params.diasColchonAdelanto > 0
+          ? 'El proyecto activo aún no tiene paquetes de trabajo EDT para ajustar.'
+          : null,
+      );
+      return;
+    }
+    const res = aplicarColchonAdelantoItems(
+      maestroItems,
+      params.diasColchonAdelanto,
+      params.semanaLaboral,
+      params.diasLaboralesCustom,
+    );
+    await syncAllCronogramaItemsToSupabase(currentProj.id, res.items);
+    try {
+      localStorage.setItem(`qaway-gantt-items-${currentProj.id}-maestro`, JSON.stringify(res.items));
+      localStorage.setItem(`qaway-gantt-items-${currentProj.id}`, JSON.stringify(res.items));
+      window.dispatchEvent(
+        new CustomEvent('qaway-gantt-items-updated', {
+          detail: { projectId: currentProj.id, items: res.items },
+        }),
+      );
+    } catch {}
+    setAlertasColchon(res.alertas);
+    if (params.diasColchonAdelanto <= 0) {
+      setResumenColchon(null);
+      return;
+    }
+    setResumenColchon(
+      `Meta interna (-${params.diasColchonAdelanto} día(s) hábil(es)) aplicada a ${res.aplicados} paquete(s) sin alterar fechas oficiales. ${
+        res.alertas.length > 0
+          ? `${res.alertas.length} paquete(s) quedaron en alerta para ajuste manual.`
+          : 'Sin paquetes en alerta.'
+      }`,
+    );
+  };
+
+  const handleSave = async () => {
     localStorage.setItem('qaway-system-timezone-v1', timezone);
     localStorage.setItem('qaway-system-date-mode-v1', dateMode);
     localStorage.setItem('qaway-system-date-v1', customDate);
@@ -609,10 +661,14 @@ export default function ConfiguracionView({
       })
     );
 
+    if (esAdmin && activeTab === 'cronograma') {
+      await aplicarColchonProyectoActivo(cronoParams);
+    }
+
     setEditandoCrono(false);
     setEditandoGeneral(false);
     setEditandoAsistente(false);
-    notify('Configuración general y parámetros del Asistente IA guardados con éxito');
+    notify('Configuración general y parámetros del Cronograma guardados con éxito');
   };
 
   const currentDisplayDate = dateMode === 'custom' ? customDate : new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(new Date());
@@ -1565,77 +1621,42 @@ export default function ConfiguracionView({
                   <div className="form-row">
                     <div className="field-info">
                       <label htmlFor="cfg-colchon-adelanto">4. Adelanto interno sobre fecha oficial (días hábiles · Solo Administrador)</label>
-                      <p>Descuenta días hábiles (según la semana laboral configurada) respecto a la fecha oficial/Línea Base para que el equipo persiga una meta adelantada.</p>
+                      <p>Descuenta días hábiles (según la semana laboral configurada) respecto a la fecha oficial/Línea Base al guardar cambios.</p>
                     </div>
-                    <div className="field-control" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <input
-                        id="cfg-colchon-adelanto"
-                        type="number"
-                        min={0}
-                        max={30}
-                        disabled={!editandoCrono}
-                        className="select-input"
-                        style={{ maxWidth: 120, ...(!editandoCrono ? estiloSoloLectura : {}) }}
-                        value={cronoParams.diasColchonAdelanto}
-                        onChange={(e) => setCronoParams((p) => ({ ...p, diasColchonAdelanto: Number(e.target.value) }))}
-                      />
-                      <button
-                        type="button"
-                        className="btn secondary"
-                        disabled={aplicandoColchon || cronoParams.diasColchonAdelanto <= 0}
-                        onClick={async () => {
-                          if (!currentProj?.id) return;
-                          setAplicandoColchon(true);
-                          setResumenColchon(null);
-                          try {
-                            saveParametrosCronograma(cronoParams);
-                            setCronoParamsGuardado(cronoParams);
-                            let baseItems: GanttItemData[] | null = await fetchCronogramaFromSupabase(currentProj.id);
-                            if (!baseItems || baseItems.length === 0) {
-                              try {
-                                const localRaw =
-                                  localStorage.getItem(`qaway-gantt-items-${currentProj.id}-maestro`) ||
-                                  localStorage.getItem(`qaway-gantt-items-${currentProj.id}`);
-                                baseItems = localRaw ? (JSON.parse(localRaw) as GanttItemData[]) : [];
-                              } catch {
-                                baseItems = [];
-                              }
-                            }
-                            if (!baseItems || baseItems.length === 0) {
-                              setAlertasColchon([]);
-                              setResumenColchon('El proyecto activo aún no tiene paquetes de trabajo para ajustar.');
-                              return;
-                            }
-                            const res = aplicarColchonAdelantoItems(
-                              baseItems,
-                              cronoParams.diasColchonAdelanto,
-                              cronoParams.semanaLaboral,
-                              cronoParams.diasLaboralesCustom,
-                            );
-                            if (res.aplicados > 0) {
-                              await syncAllCronogramaItemsToSupabase(currentProj.id, res.items);
-                              try {
-                                localStorage.setItem(`qaway-gantt-items-${currentProj.id}-maestro`, JSON.stringify(res.items));
-                                localStorage.setItem(`qaway-gantt-items-${currentProj.id}`, JSON.stringify(res.items));
-                                window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
-                              } catch {}
-                            }
-                            setAlertasColchon(res.alertas);
-                            setResumenColchon(
-                              `Adelanto aplicado a ${res.aplicados} paquete(s). ${
-                                res.alertas.length > 0
-                                  ? `${res.alertas.length} paquete(s) quedaron en alerta para ajuste manual.`
-                                  : 'Sin paquetes en alerta.'
-                              }`,
-                            );
-                            notify(`Adelanto de ${cronoParams.diasColchonAdelanto} días hábiles procesado (${res.aplicados} aplicados, ${res.alertas.length} en alerta).`);
-                          } finally {
-                            setAplicandoColchon(false);
-                          }
+                    <div className="field-control">
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          maxWidth: 130,
+                          borderRadius: 8,
+                          border: cronoParams.diasColchonAdelanto > 0 ? '1px solid #fca5a5' : '1px solid #cbd5e1',
+                          background: !editandoCrono ? '#f8fafc' : cronoParams.diasColchonAdelanto > 0 ? '#fef2f2' : '#ffffff',
+                          paddingLeft: 10,
                         }}
                       >
-                        {aplicandoColchon ? 'Aplicando...' : 'Aplicar adelanto al proyecto activo'}
-                      </button>
+                        {cronoParams.diasColchonAdelanto > 0 && (
+                          <span style={{ color: '#dc2626', fontWeight: 800, fontSize: '14px', userSelect: 'none' }}>−</span>
+                        )}
+                        <input
+                          id="cfg-colchon-adelanto"
+                          type="number"
+                          min={0}
+                          max={30}
+                          disabled={!editandoCrono}
+                          className="select-input"
+                          style={{
+                            maxWidth: 96,
+                            border: 'none',
+                            background: 'transparent',
+                            color: cronoParams.diasColchonAdelanto > 0 ? '#dc2626' : '#0f172a',
+                            fontWeight: cronoParams.diasColchonAdelanto > 0 ? 700 : 500,
+                            boxShadow: 'none',
+                          }}
+                          value={cronoParams.diasColchonAdelanto}
+                          onChange={(e) => setCronoParams((p) => ({ ...p, diasColchonAdelanto: Math.max(0, Number(e.target.value)) }))}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1659,22 +1680,56 @@ export default function ConfiguracionView({
                   </div>
 
                   {(resumenColchon || alertasColchon.length > 0) && (
-                    <div style={{ marginTop: 12, padding: '12px 14px', borderRadius: 10, border: '1px solid #f59e0b', background: '#fffbeb', fontSize: '12.5px', color: '#78350f' }}>
-                      {resumenColchon && <div style={{ fontWeight: 700, marginBottom: alertasColchon.length > 0 ? 8 : 0 }}>{resumenColchon}</div>}
-                      {alertasColchon.length > 0 && (
-                        <>
-                          <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                            Paquetes con plazo corto no modificados (requieren ajuste manual en el Gantt):
+                    <div
+                      style={{
+                        marginTop: 14,
+                        padding: '14px 16px',
+                        borderRadius: 12,
+                        border: alertasColchon.length > 0 ? '1px solid #fecaca' : '1px solid #bfdbfe',
+                        background: alertasColchon.length > 0 ? '#fef2f2' : '#eff6ff',
+                        fontSize: '12.5px',
+                        color: alertasColchon.length > 0 ? '#7f1d1d' : '#1e3a8a',
+                        display: 'flex',
+                        gap: 12,
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: 8,
+                          background: alertasColchon.length > 0 ? '#fee2e2' : '#dbeafe',
+                          color: alertasColchon.length > 0 ? '#dc2626' : '#2563eb',
+                          display: 'grid',
+                          placeItems: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {alertasColchon.length > 0 ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        {resumenColchon && (
+                          <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: alertasColchon.length > 0 ? 8 : 0 }}>
+                            {resumenColchon}
                           </div>
-                          <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 3 }}>
-                            {alertasColchon.map((a) => (
-                              <li key={a.id}>
-                                <b>{a.code}</b> {a.name} — plazo actual: {a.plazoHabil} día(s) hábil(es), quedarían {a.diasRestantes} día(s).
-                              </li>
-                            ))}
-                          </ul>
-                        </>
-                      )}
+                        )}
+                        {alertasColchon.length > 0 && (
+                          <>
+                            <div style={{ fontWeight: 600, marginBottom: 6, color: '#991b1b' }}>
+                              Paquetes con plazo corto no modificados (requieren ajuste manual en el Gantt):
+                            </div>
+                            <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 4 }}>
+                              {alertasColchon.map((a) => (
+                                <li key={a.id}>
+                                  <b>{a.code}</b> {a.name} — plazo actual: {a.plazoHabil} día(s) hábil(es), quedarían{' '}
+                                  <b style={{ color: '#dc2626' }}>{a.diasRestantes} día(s)</b>.
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+                      </div>
                     </div>
                   )}
                 </>

@@ -99,4 +99,19 @@ Se ejecuta en **3 pasos grandes**. Cada paso se cierra solo cuando su verificaci
 - **Verificación visible (2026-11-25, localhost:4100)**:
   - Usuario 1 tenant (`connectingperu.online@gmail.com`, Prueba Chulls): entró directo a `/hub/inventario`, sin selector; cabecera mostró "Empresa asignada: Prueba Chulls" y datos del tenant (actividad "Ropa 1").
   - Usuario 3 membresías (cuenta de prueba temporal con Constructora/DIGERE/Prueba Chulls): al entrar a `/hub/inventario` vio selector "Selecciona una empresa" con los 3 tenants; al elegir Constructora cargó contexto Constructora (`/tienda/minedu-prueba-2-kjos` en links de tienda); tras limpiar contexto y elegir Prueba Chulls cargó contexto Prueba Chulls (`/tienda/prueba-chulls`), sin mezcla visible. Datos temporales de prueba limpiados.
-- **Estado**: Paso 1 cerrado. Siguiente: Paso 2.
+- **Estado**: Paso 1 cerrado.
+
+### Paso 2 - PAUSADO (deuda, no cerrado)
+
+- **Base aplicada**: `AuthContext` refresca perfil/rol al cambiar tenant y emite `qaway:tenant-context-changed`; `HubAccessGuard` reevalúa con contexto activo/membresías y filtra acceso multi-membresía sin contexto por suscripción de app; `RequirePlanFeature` reevalúa al cambiar tenant activo.
+- **Deuda pendiente para cerrar**: verificación visible de catálogo Hub por suscripciones del tenant activo; rol por app en rutas reales; bloqueo claro en slug no permitido sin mezclar datos; confirmar onboarding/suscripciones pausado/reusable. No rehacer ni borrar tablas/lógica existente.
+- **Estado**: pausado por decisión del usuario (prioridad en otro frente). Retomar antes de dar Paso 2 por cerrado.
+
+### Paso 3 - EN CURSO (avance base)
+
+- **DB/RPC aplicado**: `admin_assign_user_tenant` ahora también upserta `tenant_memberships` (compatibilidad legacy); creada `remove_tenant_member` (desactiva membresía, revoca `user_app_roles` del tenant, limpia contexto activo/legacy `users.tenant_id`, conserva data; auditoría en metadata). Migración: `20261125160000_identity_memberships_step3_offboarding_rpcs.sql`.
+- **Front/funciones actualizado**:
+  - `UsuariosPage.jsx`: lista desde `tenant_memberships`, “Retirar acceso” no destructivo vía `remove_tenant_member`.
+  - `invite-user`: si el correo ya existe, no duplica identidad; agrega/reactiva membresía y roles de app en tenant destino (Option 1).
+  - `register-brand`: crear tenant adicional con mismo correo bloqueado por defecto; permite solo con `can_create_additional_tenant`/grant; crea `tenant_memberships` + `user_active_context`.
+- **Pendiente para cerrar Paso 3**: UI/flujo de plataforma admin para aprobar/revocar `identity_tenant_creation_grants`; UI de impacto/reasignación antes de offboarding; validación visible front/ruta de retiro de acceso, preservación de data, reasignación y bloqueo/aprobación de tenant adicional. Onboarding/suscripciones siguen como deuda reusable, no rehacer.
