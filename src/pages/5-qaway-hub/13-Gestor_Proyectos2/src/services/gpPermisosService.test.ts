@@ -166,3 +166,37 @@ describe('capacidadesDe — matriz del modelo del responsable', () => {
     expect(capacidadesDe('superusuario', TODAS, false, true)).toEqual(vacias());
   });
 });
+
+import { evaluarPermisosModulo } from './gpPermisosService';
+
+describe('evaluarPermisosModulo (contrato único reutilizable)', () => {
+  it('mientras carga (cargando=true) ⇒ fail-closed total aunque no haya perfil aún', () => {
+    const p = evaluarPermisosModulo(null, true, vacias());
+    expect(p.aplicarPermisos).toBe(true);
+    expect(p.puedeCrearProyecto).toBe(false);
+    expect(p.puedeAdministrarEdt).toBe(false);
+    expect(p.puedeRegistrarPersonas).toBe(false);
+    expect(p.puedeRestablecerLineaBase(true)).toBe(false);
+  });
+
+  it('sin sesión (cargando=false, perfil=null) ⇒ modo local sin bloqueo', () => {
+    const p = evaluarPermisosModulo(null, false, vacias());
+    expect(p.aplicarPermisos).toBe(false);
+    expect(p.puedeAdministrarEdt).toBe(true);
+    expect(p.puedeRegistrarPersonas).toBe(true);
+  });
+
+  it('editor con sesión sin gp.administrar_edt ⇒ puede crear tareas pero NO administrar EDT', () => {
+    const cap = capacidadesDe('editor', [], false, true);
+    const p = evaluarPermisosModulo(
+      { userId: 'u1', tenantId: 't1', esPlataforma: false, rol: 'editor', permisos: [] },
+      false,
+      cap,
+    );
+    expect(p.aplicarPermisos).toBe(true);
+    expect(p.puedeCrearTarea).toBe(true);
+    expect(p.puedeAdministrarEdt).toBe(false);
+    expect(p.puedeCrearProyecto).toBe(false);
+    expect(p.puedeRegistrarPersonas).toBe(false);
+  });
+});

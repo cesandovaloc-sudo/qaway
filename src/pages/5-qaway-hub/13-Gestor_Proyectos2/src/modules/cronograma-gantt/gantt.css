@@ -3999,7 +3999,6 @@
   inset: 0;
   z-index: 1000;
   background: rgba(15, 23, 42, 0.28);
-  backdrop-filter: blur(1.5px);
   animation: fadeInPop 0.18s ease-out;
 }
 
@@ -4623,10 +4622,10 @@
   position: fixed;
   z-index: 10000;
   top: 24px;
-  right: 28px;
-  left: auto;
+  left: 50%;
+  right: auto;
   bottom: auto;
-  transform: none;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -4642,14 +4641,23 @@
   animation: toastSlideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.gantt-v2 .toast--warn {
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #92400e;
+  white-space: normal;
+  max-width: 420px;
+  line-height: 1.45;
+}
+
 @keyframes toastSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translate(-50%, -8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
 }
 

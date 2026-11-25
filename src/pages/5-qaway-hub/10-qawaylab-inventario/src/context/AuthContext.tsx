@@ -122,7 +122,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      // 0 o múltiples sin contexto activo: fallback al tenant_id legacy si existe
+      // Múltiples membresías sin contexto activo: exigir selección explícita.
+      if (rows.length > 1) {
+        setActiveTenantId(null)
+        return
+      }
+
+      // 0 membresías: fallback legacy no destructivo
       setActiveTenantId(user?.tenant_id ?? null)
     } catch {
       // Fallback no destructivo: mantener comportamiento previo basado en users.tenant_id

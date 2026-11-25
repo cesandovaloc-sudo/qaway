@@ -122,6 +122,63 @@ const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'act
 const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'taskType', 'icon', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
 
 /**
+ * Estado del esquema del cronograma en esta sesión.
+ * Cuando la BD reporta una columna ausente se registra una sola vez y se deja de enviar:
+ * así cada guardado posterior vuelve a ser un único round-trip en lugar de fallar y reintentar.
+ * La suscripción existe para que la interfaz avise del guardado parcial, en vez de dejarlo solo en consola.
+ */
+const ETIQUETA_COLUMNA: Record<string, { label: string; script: string }> = {
+  baseline_start: { label: 'Línea base (inicio)', script: '02' },
+  baseline_end: { label: 'Línea base (fin)', script: '02' },
+  actual_start: { label: 'Fecha real (inicio)', script: '02' },
+  actual_end: { label: 'Fecha real (fin)', script: '02' },
+  task_type: { label: 'Tipo de tarea', script: '04' },
+  icon: { label: 'Icono', script: '04' },
+  edt_type: { label: 'Tipo EDT', script: '05' },
+  dependencies: { label: 'Predecesores', script: '05' },
+};
+
+const columnasAusentes = new Set<string>();
+const oyentesEsquema = new Set<(mensaje: string | null) => void>();
+
+function describirAusentes(): string | null {
+  if (columnasAusentes.size === 0) return null;
+  const items = [...columnasAusentes].map((col) => ETIQUETA_COLUMNA[col] ?? { label: col, script: '' });
+  const labels = items.map((i) => i.label);
+  const lista =
+    labels.length > 1 ? `${labels.slice(0, -1).join(', ')} y ${labels[labels.length - 1]}` : labels[0];
+  const frase = labels.length > 1 ? `Guardado parcial: no se guardan ${lista}.` : `Guardado parcial: no se guarda ${lista}.`;
+  const scripts = [...new Set(items.map((i) => i.script).filter(Boolean))];
+  return scripts.length > 0 ? `${frase} Falta ejecutar el script ${scripts.join(' y ')} en Supabase.` : frase;
+}
+
+function registrarColumnasAusentes(columnas: string[]): void {
+  let nuevas = false;
+  columnas.forEach((col) => {
+    if (!columnasAusentes.has(col)) {
+      columnasAusentes.add(col);
+      nuevas = true;
+    }
+  });
+  if (!nuevas) return;
+  console.warn(`[Supabase Cronograma] Esquema incompleto: falta(n) ${columnas.join(', ')}. Se omite solo esa(s) columna(s).`);
+  const mensaje = describirAusentes();
+  oyentesEsquema.forEach((cb) => cb(mensaje));
+}
+
+/**
+ * Suscribe la interfaz al estado del esquema. Emite el aviso vigente al suscribirse (una vista
+ * montada después de la detección también lo muestra) y en cada nueva columna ausente.
+ */
+export function suscribirEstadoEsquema(cb: (mensaje: string | null) => void): () => void {
+  oyentesEsquema.add(cb);
+  if (columnasAusentes.size > 0) cb(describirAusentes());
+  return () => {
+    oyentesEsquema.delete(cb);
+  };
+}
+
+/**
  * Tenant dueño de la fila del cronograma. La RLS de `gestor_cronograma_items` exige
  * `tenant_id = get_auth_tenant_id()`, y el default de la columna es justamente ese valor:
  * una cuenta de plataforma sin empresa propia guardaba filas con tenant NULL (huérfanas).
@@ -157,8 +214,15 @@ async function resolverTenantId(projectId: string): Promise<string | null> {
  */
 async function upsertRows(rows: Record<string, any>[]): Promise<{ message: string } | null> {
   const CHUNK_SIZE = 100;
+  const sinColumnasAusentes = (fila: Record<string, any>): Record<string, any> => {
+    const copy = { ...fila };
+    columnasAusentes.forEach((col) => {
+      if (col in copy) delete copy[col];
+    });
+    return copy;
+  };
   for (let i = 0; i < rows.length; i += CHUNK_SIZE) {
-    let chunk = rows.slice(i, i + CHUNK_SIZE);
+    let chunk = rows.slice(i, i + CHUNK_SIZE).map(sinColumnasAusentes);
     let result = await supabase!.from('gestor_cronograma_items').upsert(chunk);
     // Un reintento por columna ausente, como máximo. Cada vuelta retira solo lo que la BD reporta.
     for (let intento = 0; result.error && intento < SCHEDULE_COLUMNS.length; intento++) {
@@ -166,10 +230,7 @@ async function upsertRows(rows: Record<string, any>[]): Promise<{ message: strin
         (col) => chunk.some((row) => col in row) && result.error!.message.includes(col)
       );
       if (missing.length === 0) break;
-      console.warn(
-        `[Supabase Cronograma] La BD no tiene la(s) columna(s) ${missing.join(', ')} ` +
-          '(02_gestor_cronograma_linea_base.sql / 04_gestor_tareas_tipo_icono.sql / 05_gestor_cronograma_edt_dependencias.sql); se omite solo esa(s) y se conserva el resto.'
-      );
+      registrarColumnasAusentes([...missing]);
       chunk = chunk.map((row) => {
         const copy = { ...row };
         missing.forEach((col) => delete copy[col]);

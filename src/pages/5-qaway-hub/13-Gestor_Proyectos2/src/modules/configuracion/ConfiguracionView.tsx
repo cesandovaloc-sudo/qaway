@@ -58,13 +58,20 @@ import SelectEstilizado from './SelectEstilizado';
 import { MiniCalendar } from '../cronograma-gantt/CronogramaGanttView';
 import {
   DIAS_SEMANA_ORDEN,
+  aplicarColchonAdelantoItems,
   getParametrosCronograma,
   saveParametrosCronograma,
+  type AlertaColchonPaquete,
   type FrecuenciaCorte,
   type MetodoPonderacion,
   type ParametrosCronograma,
   type SemanaLaboral,
 } from '../../services/gpCronogramaConfigService';
+import {
+  fetchCronogramaFromSupabase,
+  syncAllCronogramaItemsToSupabase,
+  type GanttItemData,
+} from '../../services/gestorCronogramaService';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { usePerfilVisible } from '../../services/perfilVisibleService';
 import { listarUnidadesParaJerarquia } from '../../services/organizacionJerarquiaLectura';
@@ -253,6 +260,9 @@ export default function ConfiguracionView({
 
   const [cronoParams, setCronoParams] = useState<ParametrosCronograma>(() => getParametrosCronograma());
   const [cronoParamsGuardado, setCronoParamsGuardado] = useState<ParametrosCronograma>(() => getParametrosCronograma());
+  const [aplicandoColchon, setAplicandoColchon] = useState(false);
+  const [alertasColchon, setAlertasColchon] = useState<AlertaColchonPaquete[]>([]);
+  const [resumenColchon, setResumenColchon] = useState<string | null>(null);
   const [editandoProyecto, setEditandoProyecto] = useState(false);
   const [editandoCrono, setEditandoCrono] = useState(false);
   const [editandoGeneral, setEditandoGeneral] = useState(false);
@@ -1549,6 +1559,126 @@ export default function ConfiguracionView({
                   />
                 </div>
               </div>
+
+              {esAdmin && (
+                <>
+                  <div className="form-row">
+                    <div className="field-info">
+                      <label htmlFor="cfg-colchon-adelanto">4. Adelanto interno sobre fecha oficial (días hábiles · Solo Administrador)</label>
+                      <p>Descuenta días hábiles (según la semana laboral configurada) respecto a la fecha oficial/Línea Base para que el equipo persiga una meta adelantada.</p>
+                    </div>
+                    <div className="field-control" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                      <input
+                        id="cfg-colchon-adelanto"
+                        type="number"
+                        min={0}
+                        max={30}
+                        disabled={!editandoCrono}
+                        className="select-input"
+                        style={{ maxWidth: 120, ...(!editandoCrono ? estiloSoloLectura : {}) }}
+                        value={cronoParams.diasColchonAdelanto}
+                        onChange={(e) => setCronoParams((p) => ({ ...p, diasColchonAdelanto: Number(e.target.value) }))}
+                      />
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        disabled={aplicandoColchon || cronoParams.diasColchonAdelanto <= 0}
+                        onClick={async () => {
+                          if (!currentProj?.id) return;
+                          setAplicandoColchon(true);
+                          setResumenColchon(null);
+                          try {
+                            saveParametrosCronograma(cronoParams);
+                            setCronoParamsGuardado(cronoParams);
+                            let baseItems: GanttItemData[] | null = await fetchCronogramaFromSupabase(currentProj.id);
+                            if (!baseItems || baseItems.length === 0) {
+                              try {
+                                const localRaw =
+                                  localStorage.getItem(`qaway-gantt-items-${currentProj.id}-maestro`) ||
+                                  localStorage.getItem(`qaway-gantt-items-${currentProj.id}`);
+                                baseItems = localRaw ? (JSON.parse(localRaw) as GanttItemData[]) : [];
+                              } catch {
+                                baseItems = [];
+                              }
+                            }
+                            if (!baseItems || baseItems.length === 0) {
+                              setAlertasColchon([]);
+                              setResumenColchon('El proyecto activo aún no tiene paquetes de trabajo para ajustar.');
+                              return;
+                            }
+                            const res = aplicarColchonAdelantoItems(
+                              baseItems,
+                              cronoParams.diasColchonAdelanto,
+                              cronoParams.semanaLaboral,
+                              cronoParams.diasLaboralesCustom,
+                            );
+                            if (res.aplicados > 0) {
+                              await syncAllCronogramaItemsToSupabase(currentProj.id, res.items);
+                              try {
+                                localStorage.setItem(`qaway-gantt-items-${currentProj.id}-maestro`, JSON.stringify(res.items));
+                                localStorage.setItem(`qaway-gantt-items-${currentProj.id}`, JSON.stringify(res.items));
+                                window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+                              } catch {}
+                            }
+                            setAlertasColchon(res.alertas);
+                            setResumenColchon(
+                              `Adelanto aplicado a ${res.aplicados} paquete(s). ${
+                                res.alertas.length > 0
+                                  ? `${res.alertas.length} paquete(s) quedaron en alerta para ajuste manual.`
+                                  : 'Sin paquetes en alerta.'
+                              }`,
+                            );
+                            notify(`Adelanto de ${cronoParams.diasColchonAdelanto} días hábiles procesado (${res.aplicados} aplicados, ${res.alertas.length} en alerta).`);
+                          } finally {
+                            setAplicandoColchon(false);
+                          }
+                        }}
+                      >
+                        {aplicandoColchon ? 'Aplicando...' : 'Aplicar adelanto al proyecto activo'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="field-info">
+                      <label htmlFor="cfg-ocultar-oficial">5. Ocultar fecha oficial (Línea Base) a usuarios no-admin</label>
+                      <p>Si está activo, los usuarios operativos/editores solo ven su fecha de seguimiento adelantada y no el colchón oficial.</p>
+                    </div>
+                    <div className="field-control">
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '13px', fontWeight: 600, color: '#0f172a', cursor: editandoCrono ? 'pointer' : 'not-allowed' }}>
+                        <input
+                          id="cfg-ocultar-oficial"
+                          type="checkbox"
+                          disabled={!editandoCrono}
+                          checked={cronoParams.ocultarFechaOficialANoAdmin}
+                          onChange={(e) => setCronoParams((p) => ({ ...p, ocultarFechaOficialANoAdmin: e.target.checked }))}
+                        />
+                        <span>Ocultar Línea Base oficial al equipo</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {(resumenColchon || alertasColchon.length > 0) && (
+                    <div style={{ marginTop: 12, padding: '12px 14px', borderRadius: 10, border: '1px solid #f59e0b', background: '#fffbeb', fontSize: '12.5px', color: '#78350f' }}>
+                      {resumenColchon && <div style={{ fontWeight: 700, marginBottom: alertasColchon.length > 0 ? 8 : 0 }}>{resumenColchon}</div>}
+                      {alertasColchon.length > 0 && (
+                        <>
+                          <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                            Paquetes con plazo corto no modificados (requieren ajuste manual en el Gantt):
+                          </div>
+                          <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 3 }}>
+                            {alertasColchon.map((a) => (
+                              <li key={a.id}>
+                                <b>{a.code}</b> {a.name} — plazo actual: {a.plazoHabil} día(s) hábil(es), quedarían {a.diasRestantes} día(s).
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}

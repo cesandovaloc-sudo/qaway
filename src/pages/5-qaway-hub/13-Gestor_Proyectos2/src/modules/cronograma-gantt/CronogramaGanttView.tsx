@@ -51,6 +51,7 @@ import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
   deleteCronogramaItemFromSupabase,
+  suscribirEstadoEsquema,
   type GanttItemData
 } from '../../services/gestorCronogramaService';
 import {
@@ -80,7 +81,7 @@ import {
 } from './regionalCoordinationModel';
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
-import { usePerfilGp } from '../../services/gpPermisosService';
+import { usePermisosGpModulo } from '../../services/gpPermisosService';
 import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma } from '../../services/gpCronogramaConfigService';
 import { syncScheduleAlertNotifications } from '../../components/NotificationPopover';
 
@@ -1261,7 +1262,8 @@ export default function CronogramaGanttView({
 }) {
   const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
-  const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  const permisosGp = usePermisosGpModulo();
+  const { perfil: perfilGp, cargando: cargandoPerfilGp, puedeAdministrarEdt } = permisosGp;
   const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
   // Se retiró el parche local `cargandoNube` (0-SOLUCIONES/1-Pop Up.txt:16-19):
   // App.tsx ya no monta este canvas hasta que identidad y proyectos terminaron.
@@ -1417,16 +1419,19 @@ export default function CronogramaGanttView({
     if (!hasAnyDep && items.length > 0) {
       const targetInitial = perspective === 'maestro' ? MASTER_INITIAL_ITEMS : TERRITORIAL_INITIAL_ITEMS;
       const initialMap = new Map(targetInitial.map((x) => [x.id, x]));
-      setItems((prev) =>
-        prev.map((it) => {
+      setItems((prev) => {
+        let changed = false;
+        const next = prev.map((it) => {
+          if (it.dependencies && it.dependencies.length > 0) return it;
           const init = initialMap.get(it.id);
           const official = OFFICIAL_WBS_DEPENDENCIES[it.id] || [];
-          return {
-            ...it,
-            dependencies: it.dependencies && it.dependencies.length > 0 ? it.dependencies : (init?.dependencies && init.dependencies.length > 0 ? init.dependencies : official),
-          };
-        })
-      );
+          const resolved = init?.dependencies && init.dependencies.length > 0 ? init.dependencies : official;
+          if (!resolved || resolved.length === 0) return it;
+          changed = true;
+          return { ...it, dependencies: resolved };
+        });
+        return changed ? next : prev;
+      });
     }
   }, [items, perspective]);
 
@@ -1436,7 +1441,13 @@ export default function CronogramaGanttView({
     let isCancelled = false;
     if (!projectId) return;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
-      if (!isCancelled && cloudItems && cloudItems.length > 0) {
+      if (isCancelled || cloudItems === null) return;
+      if (cloudItems.length === 0) {
+        lastSyncedSnapshotRef.current = new Map();
+        lastSyncedPidRef.current = projectId;
+        return;
+      }
+      if (cloudItems.length > 0) {
         const isMaestro = perspective === 'maestro';
         const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
 
@@ -1490,6 +1501,10 @@ export default function CronogramaGanttView({
           });
           merged.push(...extras);
           const recomputed = computeWbsHierarchy(merged, rawTasks);
+          const cloudSnap = new Map<string, string>();
+          recomputed.forEach((it) => cloudSnap.set(it.id, JSON.stringify(it)));
+          lastSyncedSnapshotRef.current = cloudSnap;
+          lastSyncedPidRef.current = projectId;
           setItems(recomputed);
           try {
             localStorage.setItem(storageKey, JSON.stringify(recomputed));
@@ -1566,7 +1581,7 @@ export default function CronogramaGanttView({
           const snap = lastSyncedSnapshotRef.current;
           const prevPid = lastSyncedPidRef.current;
 
-          if (prevPid !== projectId || snap.size === 0) {
+          if (prevPid !== projectId) {
             const nextSnap = new Map<string, string>();
             items.forEach((it) => nextSnap.set(it.id, JSON.stringify(it)));
             lastSyncedSnapshotRef.current = nextSnap;
@@ -2920,7 +2935,7 @@ export default function CronogramaGanttView({
   const [importOpen, setImportOpen] = useState(false);
   const [attachment, setAttachment] = useState('');
   const [pickedFile, setPickedFile] = useState('');
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState<{ text: string; tone: 'ok' | 'warn' } | null>(null);
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
   
   type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | 'phase' | 'edtComponent' | 'equipoSede' | 'equipoEstado' | 'equipoCuenta' | 'equipoArea' | null;
@@ -3531,9 +3546,21 @@ export default function CronogramaGanttView({
   // Scroll progresivo: el siguiente bloque se prepara antes de que el usuario
   // llegue al final, evitando pintar miles de filas en el primer render.
 
+  // Aviso de guardado parcial: si Supabase no tiene columnas de la serie 02/04/05, el servicio
+  // lo informa aquí, no solo por consola.
+  useEffect(
+    () =>
+      suscribirEstadoEsquema((mensaje) => {
+        if (!mensaje) return;
+        setToast({ text: mensaje, tone: 'warn' });
+        window.setTimeout(() => setToast(null), 9000);
+      }),
+    []
+  );
+
   const notify = (s: string) => {
-    setToast(s);
-    window.setTimeout(() => setToast(''), 2600);
+    setToast({ text: s, tone: 'ok' });
+    window.setTimeout(() => setToast(null), 2600);
   };
 
   useEffect(() => {
@@ -4023,10 +4050,22 @@ export default function CronogramaGanttView({
     document.body.classList.add('gantt-resizing');
   };
 
+  const ocultarOficialNoAdmin =
+    getParametrosCronograma().ocultarFechaOficialANoAdmin &&
+    Boolean(perfilGp) &&
+    !perfilGp?.esPlataforma &&
+    perfilGp?.rol !== 'admin';
+
   const effectiveRenderedCols = useMemo(() => {
     const allAllowed = new Set([...CANONICAL_COLS, ...customCols.map((c) => c.key as ColKey)]);
-    return visibleCols.filter((k) => allAllowed.has(k));
-  }, [visibleCols, customCols]);
+    return visibleCols.filter((k) => {
+      if (!allAllowed.has(k)) return false;
+      if (ocultarOficialNoAdmin && (k === 'baselineStart' || k === 'baselineEnd' || k === 'deviation')) {
+        return false;
+      }
+      return true;
+    });
+  }, [visibleCols, customCols, ocultarOficialNoAdmin]);
 
   const fixedWidth = useMemo(
     () => effectiveRenderedCols.reduce((acc, k) => acc + (colWidths[k] || DEFAULT_COLS[k] || 140), 0),
@@ -5175,6 +5214,10 @@ export default function CronogramaGanttView({
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
   const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false, initialStatus?: Status, initialName?: string) => {
+    if (!puedeAdministrarEdt) {
+      notify('Solo lectura: administrar la estructura EDT requiere rol admin o llave gp.administrar_edt.');
+      return;
+    }
     const id = (kind === 'hito' ? 'comp-' : 'sub-') + Date.now();
     const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
     let code = `${hitos.length + 1}.`;
@@ -5299,7 +5342,6 @@ export default function CronogramaGanttView({
         rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 80);
-    notify(`Nuevo ${kind === 'hito' ? 'componente' : 'paquete de trabajo'} "${draftItem.code}" creado. Configúralo en el panel derecho.`);
   };
 
   const exportCSV = () => {
@@ -5681,19 +5723,19 @@ export default function CronogramaGanttView({
           {/* Micro-acciones rápidas inline */}
           {edit?.id !== x.id && (
             <div className="quick-inline-actions" onClick={(e) => e.stopPropagation()}>
-              <button
-                type="button"
-                className="quick-inline-icon-btn"
-                title={x.parentId ? 'Agregar elemento hermano' : 'Agregar nuevo componente'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (x.parentId) { add('subproceso', x.parentId, true); } else { add('hito', undefined, true); }
-                }}
-              >
-                <Plus size={13} style={{ color: '#0066ff' }} />
-              </button>
-              {true && (
+              {puedeAdministrarEdt && (
                 <>
+                  <button
+                    type="button"
+                    className="quick-inline-icon-btn"
+                    title={x.parentId ? 'Agregar elemento hermano' : 'Agregar nuevo componente'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (x.parentId) { add('subproceso', x.parentId, true); } else { add('hito', undefined, true); }
+                    }}
+                  >
+                    <Plus size={13} style={{ color: '#0066ff' }} />
+                  </button>
                   <button
                     type="button"
                     className="quick-inline-icon-btn"
@@ -5705,6 +5747,8 @@ export default function CronogramaGanttView({
                   >
                     <CornerDownRight size={13} style={{ color: '#0284c7' }} />
                   </button>
+                </>
+              )}
                   <button
                     type="button"
                     className="quick-inline-icon-btn"
@@ -5720,8 +5764,6 @@ export default function CronogramaGanttView({
                       <ChevronRight size={13} style={{ color: '#64748b' }} />
                     )}
                   </button>
-                </>
-              )}
             </div>
           )}
         </div>
@@ -6856,7 +6898,7 @@ export default function CronogramaGanttView({
                   <Plus size={16} />
                   <span>Nueva sede</span>
                 </button>
-              ) : (
+              ) : puedeAdministrarEdt ? (
                 <div className="menu-wrap">
                   <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
                     <Plus size={16} />
@@ -6897,7 +6939,7 @@ export default function CronogramaGanttView({
                     </div>
                   )}
                 </div>
-              )}
+              ) : null}
             </>
           }
         />
@@ -10327,6 +10369,7 @@ export default function CronogramaGanttView({
                 <p style={{ margin: 0, fontSize: '13px', color: '#64748b', maxWidth: '440px', textAlign: 'center', lineHeight: 1.45 }}>
                   Este proyecto inicia desde cero (completamente en blanco). Agrega tu primer componente o importa un cronograma oficial para comenzar.
                 </p>
+                {puedeAdministrarEdt && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
                   <button
                     type="button"
@@ -10350,6 +10393,7 @@ export default function CronogramaGanttView({
                     <span>Importar Plantilla</span>
                   </button>
                 </div>
+                )}
               </div>
             ) : (
             <div
@@ -10532,6 +10576,7 @@ export default function CronogramaGanttView({
           ))}
 
               {/* Fila interactiva para creación rápida de nuevo Componente Principal al pie */}
+              {puedeAdministrarEdt && (
               <div
                 className="row quick-add-row"
                 onClick={() => add('hito', undefined, true)}
@@ -10554,6 +10599,7 @@ export default function CronogramaGanttView({
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Capa Overlay de Línea de Tiempo (Mismas dimensiones y alineación absoluta que las barras del timeline) */}
               {viewMode === 'gantt' && (
@@ -11422,6 +11468,10 @@ export default function CronogramaGanttView({
           hitos={hitos}
           currentTodayIso={currentTodayIso}
           onSave={(updated, isNew) => {
+            if (!puedeAdministrarEdt) {
+              notify('Solo lectura: administrar la estructura EDT requiere rol admin o llave gp.administrar_edt.');
+              return;
+            }
             if (isNew) {
               commitChange((old) =>
                 updated.kind === 'subproceso' && updated.parentId
@@ -11442,6 +11492,10 @@ export default function CronogramaGanttView({
             setIsNewDraft(false);
           }}
           onDeleteItem={(item) => {
+            if (!puedeAdministrarEdt) {
+              notify('Solo lectura: eliminar elementos EDT requiere rol admin o llave gp.administrar_edt.');
+              return;
+            }
             setSelectedId(item.id);
             setDeleteConfirmModalOpen(true);
           }}
@@ -12211,9 +12265,13 @@ export default function CronogramaGanttView({
 
         {/* Notificación Toast */}
         {toast && (
-          <div className="toast">
-            <CheckCircle2 size={16} color="#4ade80" />
-            <span>{toast}</span>
+          <div className={toast.tone === 'warn' ? 'toast toast--warn' : 'toast'}>
+            {toast.tone === 'warn' ? (
+              <AlertTriangle size={16} color="#f59e0b" />
+            ) : (
+              <CheckCircle2 size={16} color="#4ade80" />
+            )}
+            <span>{toast.text}</span>
           </div>
         )}
       </div>

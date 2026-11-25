@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import './usuarios.css';
 import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { usePermisosGpModulo } from '../../services/gpPermisosService';
 import { formatearTelefono, linkWhatsApp, normalizarTelefono, telefonoDeContacto } from '../../services/comunicacionesService';
 import { PAISES } from '@/config/paises';
 import {
@@ -101,6 +102,7 @@ const USER_COLUMNS: ColumnDef<Person>[] = [
 
 export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds) => void }) {
   const { perfil: visible } = usePerfilVisible();
+  const { puedeRegistrarPersonas } = usePermisosGpModulo();
   const [currentMode, setCurrentMode] = useState<'directorio' | 'organigrama'>('directorio');
   const [organigramaTipo, setOrganigramaTipo] = useState<'tradicional' | 'matricial' | 'territorial' | 'circular'>('tradicional');
   const [people, setPeople] = useState<Person[]>(initialPeople);
@@ -412,21 +414,25 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
               accept=".xlsx, .xls, .csv"
               onChange={handleFileUpload}
             />
-            <button className="button secondary" onClick={() => fileInputRef.current?.click()} title="Carga masiva desde archivo Excel (.xlsx) o CSV">
-              <Upload size={15} /> Importar Excel / CSV
-            </button>
+            {puedeRegistrarPersonas && (
+              <button className="button secondary" onClick={() => fileInputRef.current?.click()} title="Carga masiva desde archivo Excel (.xlsx) o CSV">
+                <Upload size={15} /> Importar Excel / CSV
+              </button>
+            )}
             <button className="button secondary" onClick={exportCsv} title="Descargar listado en formato CSV">
               <Download size={15} /> Exportar CSV
             </button>
-            <button
-              className="button primary"
-              onClick={() => {
-                setEditingUser(null);
-                setShowCreate(true);
-              }}
-            >
-              <Plus size={16} /> Agregar usuario
-            </button>
+            {puedeRegistrarPersonas && (
+              <button
+                className="button primary"
+                onClick={() => {
+                  setEditingUser(null);
+                  setShowCreate(true);
+                }}
+              >
+                <Plus size={16} /> Agregar usuario
+              </button>
+            )}
           </div>
         </div>
 

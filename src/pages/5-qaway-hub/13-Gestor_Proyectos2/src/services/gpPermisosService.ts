@@ -253,10 +253,68 @@ export function usePerfilGp(): { perfil: PerfilGp | null; cargando: boolean; cap
   return {
     perfil: perfil ?? null,
     cargando,
-    capacidades: cargando
-      ? CAPACIDADES_VACIAS
-      : capacidadesDe(perfil!.rol, perfil!.permisos, perfil!.esPlataforma, true),
+    capacidades:
+      !cargando && perfil
+        ? capacidadesDe(perfil.rol, perfil.permisos, perfil.esPlataforma, true)
+        : CAPACIDADES_VACIAS,
   };
+}
+
+/**
+ * Contrato único para cualquier módulo del Gestor (actual o futuro).
+ * Fail-closed: mientras `cargando` sea true o exista sesión (`perfil !== null`),
+ * exige las capacidades reales del rol + llaves delicadas (`LLAVES_V1`).
+ * Solo en modo local sin sesión (`!cargando && !perfil`) conserva operación libre.
+ */
+export interface PermisosGpModulo {
+  perfil: PerfilGp | null;
+  cargando: boolean;
+  aplicarPermisos: boolean;
+  capacidades: CapacidadesGp;
+  puedeCrearProyecto: boolean;
+  puedeEditarProyecto: boolean;
+  puedeEliminarProyecto: boolean;
+  puedeAdministrarEdt: boolean;
+  puedeRegistrarPersonas: boolean;
+  puedeCrearTarea: boolean;
+  puedeEditarTareaAjena: boolean;
+  puedeEditarPropio: boolean;
+  puedeAdministrarPermisos: boolean;
+  puedeRestablecerLineaBase: (bloquearSoloAdmin: boolean) => boolean;
+}
+
+export function evaluarPermisosModulo(
+  perfil: PerfilGp | null,
+  cargando: boolean,
+  capacidades: CapacidadesGp,
+): PermisosGpModulo {
+  const aplicarPermisos = cargando || Boolean(perfil);
+  return {
+    perfil,
+    cargando,
+    aplicarPermisos,
+    capacidades,
+    puedeCrearProyecto: !aplicarPermisos || capacidades.crearProyecto,
+    puedeEditarProyecto: !aplicarPermisos || capacidades.editarProyecto,
+    puedeEliminarProyecto: !aplicarPermisos || capacidades.eliminarProyecto,
+    puedeAdministrarEdt: !aplicarPermisos || capacidades.administrarEdt,
+    puedeRegistrarPersonas: !aplicarPermisos || capacidades.registrarPersonas,
+    puedeCrearTarea: !aplicarPermisos || capacidades.crearTarea,
+    puedeEditarTareaAjena: !aplicarPermisos || capacidades.editarTareaAjena,
+    puedeEditarPropio: !aplicarPermisos || capacidades.editarPropio,
+    puedeAdministrarPermisos: !aplicarPermisos || capacidades.administrarPermisos,
+    puedeRestablecerLineaBase: (bloquearSoloAdmin: boolean) =>
+      !aplicarPermisos ||
+      !bloquearSoloAdmin ||
+      Boolean(perfil?.esPlataforma) ||
+      perfil?.rol === 'admin',
+  };
+}
+
+/** Hook único recomendado para todo módulo nuevo o existente del Gestor. */
+export function usePermisosGpModulo(): PermisosGpModulo {
+  const { perfil, cargando, capacidades } = usePerfilGp();
+  return evaluarPermisosModulo(perfil, cargando, capacidades);
 }
 
 // ---------------------------------------------------------------------------

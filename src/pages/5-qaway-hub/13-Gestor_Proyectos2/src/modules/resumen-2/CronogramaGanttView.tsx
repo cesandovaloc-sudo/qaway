@@ -94,7 +94,7 @@ import {
 } from './regionalCoordinationModel';
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
-import { usePerfilGp } from '../../services/gpPermisosService';
+import { usePermisosGpModulo } from '../../services/gpPermisosService';
 import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma, type FrecuenciaCorte, type ParametrosCronograma } from '../../services/gpCronogramaConfigService';
 import { computeSCurveSeries } from '../cronograma-core/scheduleMetrics';
 
@@ -1272,7 +1272,8 @@ export default function CronogramaGanttView({
 }) {
   const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
-  const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  const permisosGp = usePermisosGpModulo();
+  const { perfil: perfilGp, cargando: cargandoPerfilGp, puedeAdministrarEdt } = permisosGp;
   const [cronoParamsLive, setCronoParamsLive] = useState<ParametrosCronograma>(() => getParametrosCronograma());
   const [sCurveFreqOverride, setSCurveFreqOverride] = useState<FrecuenciaCorte | null>(null);
   useEffect(() => {
@@ -5309,7 +5310,6 @@ export default function CronogramaGanttView({
         rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 80);
-    notify(`Nuevo ${kind === 'hito' ? 'componente' : 'paquete de trabajo'} "${draftItem.code}" creado. Configúralo en el panel derecho.`);
   };
 
   const exportCSV = () => {

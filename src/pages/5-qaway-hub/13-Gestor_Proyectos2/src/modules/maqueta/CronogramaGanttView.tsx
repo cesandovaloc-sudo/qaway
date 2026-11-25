@@ -5183,7 +5183,6 @@ export default function CronogramaGanttView({
         rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 80);
-    notify(`Nuevo ${kind === 'hito' ? 'componente' : 'paquete de trabajo'} "${draftItem.code}" creado. Configúralo en el panel derecho.`);
   };
 
   const exportCSV = () => {

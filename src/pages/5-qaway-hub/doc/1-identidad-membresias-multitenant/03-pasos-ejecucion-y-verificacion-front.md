@@ -87,9 +87,16 @@ Se ejecuta en **3 pasos grandes**. Cada paso se cierra solo cuando su verificaci
 
 ## Estado de ejecución
 
-### Paso 1 - avance (no cerrado)
+### Paso 1 - CERRADO (verificación visible front/ruta)
 
-- **DB aplicado y validado**: migración `20261125000000_identity_memberships_step1.sql` aplicada. Creadas `tenant_memberships`, `user_active_context`, `identity_tenant_creation_grants`; backfill 5 membresías activas + 5 contextos activos; helpers/RPCs/RLS presentes (`get_auth_tenant_id`, `is_tenant_member`, `is_tenant_admin`, `get_my_tenant_memberships`, `set_active_tenant`, `can_create_additional_tenant`, `has_active_tenant_membership`).
-- **Front implementado (base inventario)**: `AuthContext` carga membresías y resuelve contexto activo; si hay 1 membresía la activa; si hay varias sin contexto activo, `RequireAuth` muestra selector de tenant; `set_active_tenant` sincroniza `users.tenant_id` por compatibilidad. Sin mezcla de datos por cambio de contexto.
-- **Pruebas**: `RequireAuth.test.tsx` actualizado y pasando (7/7).
-- **Pendiente para cerrar Paso 1**: verificación visible en front/ruta según checklist de Paso 1 (usuario 1 tenant entra directo; usuario 3 tenants ve selector y no mezcla datos; cambio de tenant actualiza contexto visible). No cerrar hasta verificación visible.
+- **DB aplicado y validado**: migración `20261125000000_identity_memberships_step1.sql` aplicada. Creadas `tenant_memberships`, `user_active_context`, `identity_tenant_creation_grants`; backfill 5 membresías activas + 5 contextos activos; helpers/RPCs/RLS presentes.
+- **Front implementado**: `AuthContext` carga membresías/contexto activo; 1 membresía entra directo; múltiples sin contexto activo exigen selector (`RequireAuth`); `set_active_tenant` sincroniza `users.tenant_id` por compatibilidad.
+- **Ajustes de cierre durante verificación**:
+  - `AuthContext`: con múltiples membresías y sin contexto activo ya no hace fallback a `users.tenant_id`; deja `activeTenantId=null` para mostrar selector.
+  - `HubAccessGuard`: resuelve tenant por `user_active_context` + `tenant_memberships` (fallback legacy `users.tenant_id`); si hay múltiples membresías sin contexto activo en ruta de app, deja pasar al selector de la app.
+  - DB: `prevent_role_escalation` ajustado para permitir que el propio usuario sincronice su `users.tenant_id` solo a un tenant donde tenga membresía activa (compatibilidad de `set_active_tenant`), sin permitir cambios de `is_platform_admin` ni escalación.
+- **Pruebas**: `RequireAuth.test.tsx` pasando (7/7).
+- **Verificación visible (2026-11-25, localhost:4100)**:
+  - Usuario 1 tenant (`connectingperu.online@gmail.com`, Prueba Chulls): entró directo a `/hub/inventario`, sin selector; cabecera mostró "Empresa asignada: Prueba Chulls" y datos del tenant (actividad "Ropa 1").
+  - Usuario 3 membresías (cuenta de prueba temporal con Constructora/DIGERE/Prueba Chulls): al entrar a `/hub/inventario` vio selector "Selecciona una empresa" con los 3 tenants; al elegir Constructora cargó contexto Constructora (`/tienda/minedu-prueba-2-kjos` en links de tienda); tras limpiar contexto y elegir Prueba Chulls cargó contexto Prueba Chulls (`/tienda/prueba-chulls`), sin mezcla visible. Datos temporales de prueba limpiados.
+- **Estado**: Paso 1 cerrado. Siguiente: Paso 2.

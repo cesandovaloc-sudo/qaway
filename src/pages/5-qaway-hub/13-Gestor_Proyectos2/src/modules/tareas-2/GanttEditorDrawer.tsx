@@ -1058,7 +1058,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                           }}
                         >
                           {(() => {
-                            const parent = items.find((x) => x.id === activeItem.parentId);
+                            const parent = activeParentItem;
                             if (!parent) return 'Selecciona el elemento padre...';
                             return parent.kind === 'hito'
                               ? `[Componente] ${parent.code} ${parent.name}`
@@ -1574,7 +1574,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                 {/* 6. Avance */}
                 {(() => {
-                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || isContainerEdtType(resolveEdtNodeType(activeItem, items)) || items.some((c) => c.parentId === activeItem.id));
+                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || isContainerEdtType(resolveEdtNodeType(activeItem, items)) || activeChildItems.length > 0);
                    const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
 
                   return (

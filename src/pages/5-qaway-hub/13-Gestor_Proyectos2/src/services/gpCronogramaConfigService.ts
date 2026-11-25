@@ -24,6 +24,10 @@ export interface ParametrosCronograma {
   diasGraciaHito: number;
   /** Si es true, solo un rol admin puede restablecer la Línea Base oficial en el Gantt. */
   bloquearResetLineaBase: boolean;
+  /** Días hábiles de adelanto (colchón interno) descontados sobre la fecha oficial/base. */
+  diasColchonAdelanto: number;
+  /** Si es true, oculta la fecha oficial (Línea Base) a usuarios no-admin para que solo vean la meta adelantada. */
+  ocultarFechaOficialANoAdmin: boolean;
 }
 
 export const DIAS_SEMANA_ORDEN: ReadonlyArray<{ dow: number; short: string; label: string }> = [
@@ -45,6 +49,8 @@ export const PARAMETROS_CRONOGRAMA_DEFAULT: ParametrosCronograma = {
   umbralDesvioCritico: 3,
   diasGraciaHito: 0,
   bloquearResetLineaBase: false,
+  diasColchonAdelanto: 0,
+  ocultarFechaOficialANoAdmin: false,
 };
 
 const STORAGE_KEY = 'qaway-cronograma-params-v1';
@@ -94,6 +100,8 @@ export function getParametrosCronograma(): ParametrosCronograma {
       umbralDesvioCritico: sanitizeNumber(parsed.umbralDesvioCritico, 3, 0, 60),
       diasGraciaHito: sanitizeNumber(parsed.diasGraciaHito, 0, 0, 15),
       bloquearResetLineaBase: Boolean(parsed.bloquearResetLineaBase),
+      diasColchonAdelanto: sanitizeNumber(parsed.diasColchonAdelanto, 0, 0, 30),
+      ocultarFechaOficialANoAdmin: Boolean(parsed.ocultarFechaOficialANoAdmin),
     };
   } catch {
     return { ...PARAMETROS_CRONOGRAMA_DEFAULT };
@@ -110,6 +118,8 @@ export function saveParametrosCronograma(params: ParametrosCronograma): void {
     umbralDesvioCritico: sanitizeNumber(params.umbralDesvioCritico, 3, 0, 60),
     diasGraciaHito: sanitizeNumber(params.diasGraciaHito, 0, 0, 15),
     bloquearResetLineaBase: Boolean(params.bloquearResetLineaBase),
+    diasColchonAdelanto: sanitizeNumber(params.diasColchonAdelanto, 0, 0, 30),
+    ocultarFechaOficialANoAdmin: Boolean(params.ocultarFechaOficialANoAdmin),
   };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(limpio));
@@ -197,4 +207,104 @@ export function workingDaysBetween(
     guard += 1;
   }
   return sign * count;
+}
+
+/**
+ * Retrocede `workingDays` días hábiles desde `endIso` (YYYY-MM-DD) respetando
+ * la semana laboral configurada (incluidos días hábiles personalizados).
+ */
+export function subtractWorkingDays(
+  endIso: string,
+  workingDays: number,
+  semana: SemanaLaboral = 'lun-vie',
+  customDays?: number[],
+): string {
+  if (!endIso || workingDays <= 0) return endIso ? endIso.slice(0, 10) : '';
+  const cur = new Date(`${endIso.slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(cur.getTime())) return endIso.slice(0, 10);
+  const days = customDays ?? (semana === 'personalizado' ? getParametrosCronograma().diasLaboralesCustom : undefined);
+  let remaining = Math.round(workingDays);
+  let guard = 0;
+  while (remaining > 0 && guard < 4000) {
+    cur.setDate(cur.getDate() - 1);
+    if (isDiaLaboral(cur, semana, days)) {
+      remaining -= 1;
+    }
+    guard += 1;
+  }
+  const y = cur.getFullYear();
+  const m = String(cur.getMonth() + 1).padStart(2, '0');
+  const d = String(cur.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export interface AlertaColchonPaquete {
+  id: string;
+  code: string;
+  name: string;
+  plazoHabil: number;
+  diasRestantes: number;
+}
+
+export interface ResultadoColchonAdelanto<T> {
+  items: T[];
+  aplicados: number;
+  alertas: AlertaColchonPaquete[];
+}
+
+/**
+ * Aplica un descuento de `diasColchon` días hábiles sobre la fecha oficial (`baselineEnd || end`)
+ * de cada paquete de trabajo. Si el paquete quedaría con menos de `minDiasRestantes` (por defecto 2),
+ * NO se le aplica el descuento automáticamente y se reporta en `alertas` para ajuste manual.
+ */
+export function aplicarColchonAdelantoItems<
+  T extends {
+    id: string;
+    code: string;
+    name: string;
+    kind: string;
+    start: string;
+    end: string;
+    baselineStart?: string;
+    baselineEnd?: string;
+  },
+>(
+  items: T[],
+  diasColchon: number,
+  semana: SemanaLaboral = 'lun-vie',
+  customDays?: number[],
+  minDiasRestantes = 2,
+): ResultadoColchonAdelanto<T> {
+  if (diasColchon <= 0) {
+    return { items, aplicados: 0, alertas: [] };
+  }
+  const alertas: AlertaColchonPaquete[] = [];
+  let aplicados = 0;
+  const nextItems = items.map((it) => {
+    if (it.kind !== 'subproceso' || !it.start || (!it.end && !it.baselineEnd)) {
+      return it;
+    }
+    const fechaOficial = (it.baselineEnd || it.end).slice(0, 10);
+    const plazoHabil = countWorkingDays(it.start, fechaOficial, semana, customDays);
+    const diasRestantes = plazoHabil - diasColchon;
+    if (diasRestantes < minDiasRestantes) {
+      alertas.push({
+        id: it.id,
+        code: it.code,
+        name: it.name,
+        plazoHabil,
+        diasRestantes,
+      });
+      return it;
+    }
+    const nuevoFin = subtractWorkingDays(fechaOficial, diasColchon, semana, customDays);
+    aplicados += 1;
+    return {
+      ...it,
+      baselineStart: it.baselineStart || it.start,
+      baselineEnd: fechaOficial,
+      end: nuevoFin,
+    };
+  });
+  return { items: nextItems, aplicados, alertas };
 }

@@ -158,17 +158,57 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
         return
       }
 
-      if (!user.tenant_id) {
+      // Paso 1 identidad/membresías: resolver tenant por contexto activo + membresías.
+      // Compatibilidad: fallback a users.tenant_id.
+      const { data: membershipsRows } = await consultaCacheada(
+        `memberships:${session.user.id}`,
+        () => supabase
+          .from('tenant_memberships')
+          .select('tenant_id, status')
+          .eq('user_id', session.user.id)
+          .eq('status', 'active'),
+      )
+      const activeMemberships = Array.isArray(membershipsRows) ? membershipsRows : []
+      const { data: activeCtx } = await consultaCacheada(
+        `activectx:${session.user.id}`,
+        () => supabase
+          .from('user_active_context')
+          .select('active_tenant_id')
+          .eq('user_id', session.user.id)
+          .maybeSingle(),
+      )
+      const activeCtxTenantId = activeCtx?.active_tenant_id || null
+      const hasActiveMembershipForCtx = !!activeCtxTenantId && activeMemberships.some((m) => m.tenant_id === activeCtxTenantId)
+
+      let resolvedTenantId = null
+      if (hasActiveMembershipForCtx) {
+        resolvedTenantId = activeCtxTenantId
+      } else if (activeMemberships.length === 1) {
+        resolvedTenantId = activeMemberships[0].tenant_id
+      } else if (activeMemberships.length > 1) {
+        // Múltiples membresías sin contexto activo: dejar pasar para que la app
+        // muestre el selector de tenant (Paso 1). No abrir acceso de plataforma.
+        if (rule.type === 'app') {
+          resolve(null)
+          return
+        }
+        resolve(null, true, rule.moduleKey)
+        return
+      } else {
+        resolvedTenantId = user.tenant_id || null
+      }
+
+      if (!resolvedTenantId) {
         resolve(null, true, rule.moduleKey)
         return
       }
 
       const { data: tenant, error: tenantError } = await consultaCacheada(
-        `tenant:${user.tenant_id}`,
+        `tenant:${resolvedTenantId}`,
         () => supabase
           .from('tenants')
           .select('id, name, legal_name, status, branding, content, features')
-          .eq('id', user.tenant_id)
+          .eq('id', resolvedTenantId)
           .maybeSingle(),
       )
 
@@ -180,7 +220,7 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
       // ONBOARDING GATE: deshabilitado temporalmente (no eliminado) para validar
       // el flujo operativo de la app primero. Rehabilitar poniendo en false.
       const ONBOARDING_GATE_DISABLED = true
-      const locallyCompleted = localStorage.getItem(`qaway.onboarding_completed.${user.tenant_id}`) === 'true'
+      const locallyCompleted = localStorage.getItem(`qaway.onboarding_completed.${resolvedTenantId}`) === 'true'
       const onboardingCompleted = tenant.features?.onboarding_completed === true || locallyCompleted
       const needsOnboarding = tenant.status !== 'active' && (tenant.status === 'draft' || !onboardingCompleted)
 
@@ -203,11 +243,11 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
       }
 
       const { data: subRows, error: subErr } = await consultaCacheada(
-        `sub:${user.tenant_id}:${appRow.id}`,
+        `sub:${resolvedTenantId}:${appRow.id}`,
         () => supabase
           .from('tenant_app_subscriptions')
           .select('id, status')
-          .eq('tenant_id', user.tenant_id)
+          .eq('tenant_id', resolvedTenantId)
           .eq('app_id', appRow.id)
           .in('status', ['active', 'trialing'])
           .limit(1),

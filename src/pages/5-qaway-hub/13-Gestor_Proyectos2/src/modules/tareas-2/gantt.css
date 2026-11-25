@@ -4139,10 +4139,10 @@
   position: fixed;
   z-index: 10000;
   top: 24px;
-  right: 28px;
-  left: auto;
+  left: 50%;
+  right: auto;
   bottom: auto;
-  transform: none;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -4161,11 +4161,11 @@
 @keyframes toastSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translate(-50%, -8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
 }
 

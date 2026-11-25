@@ -53,6 +53,33 @@ import TipoEntregableCatalogoSelect from '../../components/TipoEntregableCatalog
 import EstadoEntregableCatalogoSelect from '../../components/EstadoEntregableCatalogoSelect';
 import { listarEstadosEjecucionGestor } from '../../services/gpCatalogosService';
 import { fetchEquipoIntegrantesFromSupabase } from '../../services/gestorEquipoService';
+
+// Caché de módulo compartida (in-flight + resultado): evita re-consultar Supabase en cada apertura
+let cachedEstadosGestorPromise: Promise<Status[]> | null = null;
+let cachedEquipoIntegrantesPromise: Promise<Integrante[]> | null = null;
+const getEstadosGestorCached = (): Promise<Status[]> => {
+  if (!cachedEstadosGestorPromise) {
+    cachedEstadosGestorPromise = listarEstadosEjecucionGestor()
+      .then((res) => {
+        if (res.estado === 'lista' && res.items.length > 0) {
+          const validSet = new Set<string>(STATUS_OPTIONS);
+          const mapped = res.items.map((it) => it.nombre as Status).filter((name) => validSet.has(name));
+          if (mapped.length > 0) return mapped;
+        }
+        return STATUS_OPTIONS;
+      })
+      .catch(() => STATUS_OPTIONS);
+  }
+  return cachedEstadosGestorPromise;
+};
+const getEquipoIntegrantesCached = (): Promise<Integrante[]> => {
+  if (!cachedEquipoIntegrantesPromise) {
+    cachedEquipoIntegrantesPromise = fetchEquipoIntegrantesFromSupabase()
+      .then((list) => (Array.isArray(list) ? list : []))
+      .catch(() => []);
+  }
+  return cachedEquipoIntegrantesPromise;
+};
 import type { Integrante } from '../equipo/types';
 
 import {
@@ -284,26 +311,11 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   useEffect(() => {
     if (!panelOpen || !isNewDraft) return;
     let alive = true;
-    listarEstadosEjecucionGestor()
-      .then((res) => {
-        if (!alive) return;
-        if (res.estado === 'lista' && res.items.length > 0) {
-          const validSet = new Set<string>(STATUS_OPTIONS);
-          const mapped = res.items
-            .map((it) => it.nombre as Status)
-            .filter((name) => validSet.has(name));
-          if (mapped.length > 0) setSupabaseEstadoOptions(mapped);
-        }
-      })
-      .catch(() => {});
-
-    fetchEquipoIntegrantesFromSupabase()
-      .then((list) => {
-        if (!alive) return;
-        if (Array.isArray(list)) setEquipoIntegrantes(list);
-      })
-      .catch(() => {});
-
+    Promise.all([getEstadosGestorCached(), getEquipoIntegrantesCached()]).then(([estados, equipo]) => {
+      if (!alive) return;
+      setSupabaseEstadoOptions(estados);
+      setEquipoIntegrantes(equipo);
+    });
     return () => {
       alive = false;
     };
@@ -1130,7 +1142,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     <div className="drawer-summary-context">
                       <div><span>Fase</span><b>{activeItem.phase || 'Sin fase definida'}</b></div>
                       <div><span>Entidad responsable</span><b>{activeItem.entidadResponsable || activeItem.region || 'Gestión del proyecto'}</b></div>
-                      <div><span>Elementos asociados</span><b>{items.filter((child) => child.parentId === activeItem.id).length}</b></div>
+                      <div><span>Elementos asociados</span><b>{activeChildItems.length}</b></div>
                       <div><span>Tareas vinculadas</span><b>{activeItem.tasks ?? 0}</b></div>
                     </div>
                     <div className="drawer-summary-grid">
@@ -1594,7 +1606,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                           }}
                         >
                           {(() => {
-                            const parent = items.find((x) => x.id === activeItem.parentId);
+                            const parent = activeParentItem;
                             if (!parent) return 'Selecciona el elemento padre...';
                             return parent.kind === 'hito'
                               ? `[Componente] ${parent.code} ${parent.name}`
@@ -2134,7 +2146,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                 {/* 6. Avance */}
                 {(() => {
-                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || isContainerEdtType(resolveEdtNodeType(activeItem, items)) || items.some((c) => c.parentId === activeItem.id));
+                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || isContainerEdtType(resolveEdtNodeType(activeItem, items)) || activeChildItems.length > 0);
                    const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
 
                   return (
