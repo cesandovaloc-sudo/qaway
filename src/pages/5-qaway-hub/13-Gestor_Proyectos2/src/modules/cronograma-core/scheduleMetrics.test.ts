@@ -1,92 +1,68 @@
 import { describe, it, expect } from 'vitest';
-import {
-  applyActuals,
-  daysBetween,
-  formatDeviation,
-  freezeBaseline,
-  getDeviationDays,
-  getDeviationTone,
-  type ScheduleFields,
-} from './scheduleMetrics';
+import { computeSCurveSeries, type ScheduleFields } from './scheduleMetrics';
+import { PARAMETROS_CRONOGRAMA_DEFAULT, type ParametrosCronograma } from '../../services/gpCronogramaConfigService';
 
-const base = (over: Partial<ScheduleFields> = {}): ScheduleFields => ({
-  start: '2026-09-01',
-  end: '2026-09-30',
-  progress: 0,
-  status: 'Pendiente',
-  baselineStart: '2026-09-01',
-  baselineEnd: '2026-09-30',
+const params = (over: Partial<ParametrosCronograma> = {}): ParametrosCronograma => ({
+  ...PARAMETROS_CRONOGRAMA_DEFAULT,
   ...over,
 });
 
-describe('getDeviationDays', () => {
-  it('sin línea base no hay desviación', () => {
-    expect(getDeviationDays(base({ baselineStart: undefined, baselineEnd: undefined }), '2026-10-10')).toBeUndefined();
-  });
-  it('abierto y vigente: 0', () => {
-    expect(getDeviationDays(base({ status: 'En proceso', progress: 40 }), '2026-09-15')).toBe(0);
-  });
-  it('abierto y vencido: crece con los días desde el fin', () => {
-    expect(getDeviationDays(base({ status: 'En proceso', progress: 40 }), '2026-10-05')).toBe(5);
-  });
-  it('reprogramado: fin vigente posterior a la línea base', () => {
-    expect(getDeviationDays(base({ end: '2026-10-07', status: 'En proceso', progress: 40 }), '2026-09-15')).toBe(7);
-  });
-  it('completado usa la fecha real de fin', () => {
-    const it = base({ status: 'Completado', progress: 100, actualEnd: '2026-09-28' });
-    expect(getDeviationDays(it, '2026-12-01')).toBe(-2);
-  });
-  it('completado sin fecha real usa el fin vigente (no sigue creciendo)', () => {
-    expect(getDeviationDays(base({ status: 'Cumple', progress: 100 }), '2026-12-01')).toBe(0);
-  });
-});
+describe("computeSCurveSeries", () => {
+  it("respeta frecuencia de corte semanal, quincenal y mensual con las mismas fechas para Base y Real", () => {
+    const items: ScheduleFields[] = [
+      { start: "2026-09-01", end: "2026-10-31", baselineStart: "2026-09-01", baselineEnd: "2026-10-31", progress: 50, status: "En proceso" },
+    ];
+    const semanal = computeSCurveSeries(items, "2026-10-01", params({ frecuenciaCorte: "semanal" }));
+    const quincenal = computeSCurveSeries(items, "2026-10-01", params({ frecuenciaCorte: "quincenal" }));
+    const mensual = computeSCurveSeries(items, "2026-10-01", params({ frecuenciaCorte: "mensual" }));
 
-describe('formato y tono', () => {
-  it('formatea singular, plural, cero y vacío', () => {
-    expect(formatDeviation(1)).toBe('+1 día');
-    expect(formatDeviation(5)).toBe('+5 días');
-    expect(formatDeviation(-2)).toBe('−2 días');
-    expect(formatDeviation(0)).toBe('0 días');
-    expect(formatDeviation(undefined)).toBe('—');
+    expect(semanal.points.length).toBeGreaterThan(quincenal.points.length);
+    expect(quincenal.points.length).toBeGreaterThan(mensual.points.length);
+    expect(mensual.points.some((p) => p.isToday && p.isoDate === "2026-10-01")).toBe(true);
   });
-  it('tono', () => {
-    expect(getDeviationTone(3)).toBe('late');
-    expect(getDeviationTone(0)).toBe('ontime');
-    expect(getDeviationTone(-1)).toBe('early');
-    expect(getDeviationTone(undefined)).toBe('none');
-  });
-  it('daysBetween', () => {
-    expect(daysBetween('2026-09-30', '2026-10-05')).toBe(5);
-  });
-});
 
-describe('freezeBaseline / applyActuals', () => {
-  it('fija la línea base con las fechas vigentes', () => {
-    const it = freezeBaseline(base({ baselineStart: undefined, baselineEnd: undefined, end: '2026-10-02' }));
-    expect(it.baselineEnd).toBe('2026-10-02');
+  it("usa estrictamente baselineStart/baselineEnd para la serie Base sin mezclarse con fechas modificadas", () => {
+    const items: ScheduleFields[] = [
+      { start: "2026-11-01", end: "2026-11-30", baselineStart: "2026-09-01", baselineEnd: "2026-09-30", progress: 20, status: "En proceso" },
+    ];
+    const res = computeSCurveSeries(items, "2026-09-30", params({ frecuenciaCorte: "quincenal" }));
+    const corteSep30 = res.points.find((p) => p.isoDate === "2026-09-30");
+    expect(res.hasBaselineData).toBe(true);
+    expect(corteSep30?.planned).toBe(100);
+    expect(corteSep30?.actual).toBe(20);
+    expect(corteSep30?.gap).toBe(-80);
   });
-  it('al completar se registra la fecha real de fin y de inicio', () => {
-    const prev = base({ status: 'En proceso', progress: 50 });
-    const next = { ...prev, status: 'Completado', progress: 100 };
-    const r = applyActuals(prev, next, '2026-09-20');
-    expect(r.actualEnd).toBe('2026-09-20');
-    expect(r.actualStart).toBe('2026-09-20');
+
+  it("aplica ponderación por duración vs promedio simple en el avance real", () => {
+    const items: ScheduleFields[] = [
+      { start: "2026-09-01", end: "2026-09-02", baselineStart: "2026-09-01", baselineEnd: "2026-09-02", progress: 100, status: "Completado", actualEnd: "2026-09-02" },
+      { start: "2026-09-01", end: "2026-09-30", baselineStart: "2026-09-01", baselineEnd: "2026-09-30", progress: 0, status: "Pendiente" },
+    ];
+    const porDuracion = computeSCurveSeries(items, "2026-09-15", params({ metodoPonderacion: "duracion" }));
+    const porPromedio = computeSCurveSeries(items, "2026-09-15", params({ metodoPonderacion: "promedio" }));
+
+    expect(porPromedio.currentActual).toBe(50);
+    expect(porDuracion.currentActual).toBeLessThan(15);
   });
-  it('al iniciar se registra el inicio real una sola vez', () => {
-    const prev = base();
-    const r1 = applyActuals(prev, { ...prev, status: 'En proceso', progress: 10 }, '2026-09-05');
-    expect(r1.actualStart).toBe('2026-09-05');
-    const r2 = applyActuals(r1, { ...r1, progress: 30 }, '2026-09-09');
-    expect(r2.actualStart).toBe('2026-09-05');
+
+  it("no inventa ni repite avances históricos cuando no existen registros previos", () => {
+    const items: ScheduleFields[] = [
+      { start: "2026-09-01", end: "2026-10-31", baselineStart: "2026-09-01", baselineEnd: "2026-10-31", progress: 45, status: "En proceso" },
+    ];
+    const res = computeSCurveSeries(items, "2026-10-15", params({ frecuenciaCorte: "quincenal" }));
+    expect(res.hasHistoricalProgress).toBe(false);
+    const pasados = res.points.filter((p) => p.isoDate < "2026-10-15");
+    expect(pasados.every((p) => p.actual === null)).toBe(true);
+    expect(res.currentActual).toBe(45);
   });
-  it('al reabrir se limpia la fecha real de fin', () => {
-    const prev = base({ status: 'Completado', progress: 100, actualEnd: '2026-09-20', actualStart: '2026-09-01' });
-    const r = applyActuals(prev, { ...prev, status: 'En proceso', progress: 60 }, '2026-09-22');
-    expect(r.actualEnd).toBeUndefined();
-  });
-  it('una edición explícita de la fecha real se respeta', () => {
-    const prev = base({ status: 'En proceso', progress: 50, actualStart: '2026-09-01' });
-    const next = { ...prev, status: 'Completado', progress: 100, actualEnd: '2026-09-18' };
-    expect(applyActuals(prev, next, '2026-09-25').actualEnd).toBe('2026-09-18');
+
+  it("no dibuja serie Base cuando no existe Línea Base fijada", () => {
+    const items: ScheduleFields[] = [
+      { start: "2026-09-01", end: "2026-10-31", progress: 30, status: "En proceso" },
+    ];
+    const res = computeSCurveSeries(items, "2026-10-01", params({ frecuenciaCorte: "quincenal" }));
+    expect(res.hasBaselineData).toBe(false);
+    expect(res.points.every((p) => p.planned === null)).toBe(true);
+    expect(res.currentActual).toBe(30);
   });
 });

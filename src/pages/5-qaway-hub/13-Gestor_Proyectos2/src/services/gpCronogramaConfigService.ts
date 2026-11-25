@@ -20,6 +20,8 @@ export interface ParametrosCronograma {
   diasAvisoPrevio: number;
   /** Días de desviación sobre Línea Base para marcar alerta crítica roja. */
   umbralDesvioCritico: number;
+  /** Días hábiles de gracia tras la fecha programada de un hito antes de marcarlo vencido. */
+  diasGraciaHito: number;
   /** Si es true, solo un rol admin puede restablecer la Línea Base oficial en el Gantt. */
   bloquearResetLineaBase: boolean;
 }
@@ -41,6 +43,7 @@ export const PARAMETROS_CRONOGRAMA_DEFAULT: ParametrosCronograma = {
   frecuenciaCorte: 'semanal',
   diasAvisoPrevio: 5,
   umbralDesvioCritico: 3,
+  diasGraciaHito: 0,
   bloquearResetLineaBase: false,
 };
 
@@ -89,6 +92,7 @@ export function getParametrosCronograma(): ParametrosCronograma {
           : 'semanal',
       diasAvisoPrevio: sanitizeNumber(parsed.diasAvisoPrevio, 5, 0, 30),
       umbralDesvioCritico: sanitizeNumber(parsed.umbralDesvioCritico, 3, 0, 60),
+      diasGraciaHito: sanitizeNumber(parsed.diasGraciaHito, 0, 0, 15),
       bloquearResetLineaBase: Boolean(parsed.bloquearResetLineaBase),
     };
   } catch {
@@ -104,6 +108,7 @@ export function saveParametrosCronograma(params: ParametrosCronograma): void {
     frecuenciaCorte: params.frecuenciaCorte,
     diasAvisoPrevio: sanitizeNumber(params.diasAvisoPrevio, 5, 0, 30),
     umbralDesvioCritico: sanitizeNumber(params.umbralDesvioCritico, 3, 0, 60),
+    diasGraciaHito: sanitizeNumber(params.diasGraciaHito, 0, 0, 15),
     bloquearResetLineaBase: Boolean(params.bloquearResetLineaBase),
   };
   try {

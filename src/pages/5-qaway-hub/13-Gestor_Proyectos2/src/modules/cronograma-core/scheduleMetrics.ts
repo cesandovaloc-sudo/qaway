@@ -113,6 +113,12 @@ export const getScheduleAlertState = (
     return 'desvio_critico';
   }
   if (it.end && today > it.end) {
+    if (esHito) {
+      const diasDespues = workingDaysBetween(it.end, today, params.semanaLaboral);
+      if (diasDespues <= (params.diasGraciaHito ?? 0)) {
+        return 'por_vencer';
+      }
+    }
     return 'retraso';
   }
   if (it.end && !esHito) {
@@ -174,4 +180,187 @@ export const applyActuals = <T extends ScheduleFields>(prev: T, next: T, today: 
     }
   }
   return result;
+};
+
+export interface SCurvePoint {
+  isoDate: string;
+  date: string;
+  planned: number | null;
+  actual: number | null;
+  gap: number | null;
+  isToday: boolean;
+}
+
+export interface SCurveResult {
+  points: SCurvePoint[];
+  hasBaselineData: boolean;
+  hasHistoricalProgress: boolean;
+  currentActual: number | null;
+  currentPlanned: number | null;
+  currentGap: number | null;
+}
+
+const addCalendarDaysIso = (iso: string, days: number): string => {
+  const d = new Date(`${iso}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+const addMonthsIso = (iso: string, months: number): string => {
+  const d = new Date(`${iso}T12:00:00`);
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().slice(0, 10);
+};
+
+/**
+ * Calcula la Curva S (Programado Base vs. Avance Real) respetando:
+ * - Semana laboral (`semanaLaboral`)
+ * - Ponderación (`duracion` en días hábiles vs `promedio` simple)
+ * - Frecuencia de corte (`semanal`, `quincenal`, `mensual`)
+ * - Sin inventar ni interpolar avances históricos inexistentes.
+ */
+export const computeSCurveSeries = (
+  items: ReadonlyArray<ScheduleFields>,
+  todayIso: string,
+  params: ParametrosCronograma = getParametrosCronograma(),
+  options?: { minDateIso?: string; maxDateIso?: string },
+): SCurveResult => {
+  if (!items || items.length === 0) {
+    return {
+      points: [],
+      hasBaselineData: false,
+      hasHistoricalProgress: false,
+      currentActual: null,
+      currentPlanned: null,
+      currentGap: null,
+    };
+  }
+
+  const baselineItems = items.filter((it) => Boolean(it.baselineStart && it.baselineEnd));
+  const hasBaselineData = baselineItems.length > 0;
+  const hasHistoricalProgress = items.some((it) => Boolean(it.actualEnd));
+
+  let minIso = "";
+  let maxIso = "";
+  for (const it of items) {
+    const sIso = it.baselineStart || it.start;
+    const eIso = it.baselineEnd || it.end;
+    if (sIso && (!minIso || sIso < minIso)) minIso = sIso;
+    if (eIso && (!maxIso || eIso > maxIso)) maxIso = eIso;
+  }
+  if (!minIso || !maxIso || maxIso < minIso) {
+    minIso = todayIso;
+    maxIso = todayIso;
+  }
+  if (options?.minDateIso && options.minDateIso > minIso) minIso = options.minDateIso;
+  if (options?.maxDateIso && options.maxDateIso < maxIso) maxIso = options.maxDateIso;
+  if (maxIso < minIso) maxIso = minIso;
+
+  // Generar fechas de corte según frecuencia configurada
+  const cutSet = new Set<string>();
+  let cursor = minIso;
+  let guard = 0;
+  while (cursor <= maxIso && guard < 120) {
+    cutSet.add(cursor);
+    if (params.frecuenciaCorte === "mensual") {
+      cursor = addMonthsIso(cursor, 1);
+    } else if (params.frecuenciaCorte === "quincenal") {
+      cursor = addCalendarDaysIso(cursor, 15);
+    } else {
+      cursor = addCalendarDaysIso(cursor, 7);
+    }
+    guard += 1;
+  }
+  cutSet.add(maxIso);
+  if (todayIso >= minIso && todayIso <= maxIso) {
+    cutSet.add(todayIso);
+  }
+  const cutDates = Array.from(cutSet).sort();
+
+  const weightOf = (it: ScheduleFields): number => {
+    if (params.metodoPonderacion === "promedio") return 1;
+    const s = it.baselineStart || it.start;
+    const e = it.baselineEnd || it.end;
+    if (!s || !e) return 1;
+    return Math.max(1, workingDaysBetween(s, e, params.semanaLaboral));
+  };
+
+  let currentActual: number | null = null;
+  let currentPlanned: number | null = null;
+  let currentGap: number | null = null;
+
+  const points: SCurvePoint[] = cutDates.map((cutIso) => {
+    // 1. BASE / PLANIFICADO: usa estrictamente baselineStart y baselineEnd (sin fallback a start/end vigentes)
+    let planned: number | null = null;
+    if (hasBaselineData) {
+      let pWeighted = 0;
+      let pTotalW = 0;
+      for (const it of baselineItems) {
+        const bS = it.baselineStart!;
+        const bE = it.baselineEnd!;
+        const w = weightOf(it);
+        let pct = 0;
+        if (cutIso < bS) {
+          pct = 0;
+        } else if (cutIso >= bE) {
+          pct = 100;
+        } else {
+          const totalW = Math.max(1, workingDaysBetween(bS, bE, params.semanaLaboral));
+          const elapsedW = Math.max(0, workingDaysBetween(bS, cutIso, params.semanaLaboral));
+          pct = Math.min(100, Math.max(0, (elapsedW / totalW) * 100));
+        }
+        pWeighted += pct * w;
+        pTotalW += w;
+      }
+      planned = pTotalW > 0 ? Math.round(pWeighted / pTotalW) : 0;
+    }
+
+    // 2. REAL: en todayIso calcula el avance ponderado real; en cortes pasados solo si hay registros (actualEnd)
+    let actual: number | null = null;
+    const isToday = cutIso === todayIso;
+    if (isToday) {
+      let rWeighted = 0;
+      let rTotalW = 0;
+      for (const it of items) {
+        const w = weightOf(it);
+        const pct = Math.min(100, Math.max(0, Number(it.progress) || 0));
+        rWeighted += pct * w;
+        rTotalW += w;
+      }
+      actual = rTotalW > 0 ? Math.round(rWeighted / rTotalW) : 0;
+    } else if (cutIso < todayIso && hasHistoricalProgress) {
+      let rWeighted = 0;
+      let rTotalW = 0;
+      let anyEvidence = false;
+      for (const it of items) {
+        const w = weightOf(it);
+        if (it.actualEnd && it.actualEnd <= cutIso) {
+          rWeighted += 100 * w;
+          anyEvidence = true;
+        }
+        rTotalW += w;
+      }
+      actual = anyEvidence && rTotalW > 0 ? Math.round(rWeighted / rTotalW) : null;
+    }
+
+    const gap = planned !== null && actual !== null ? actual - planned : null;
+    if (isToday) {
+      currentActual = actual;
+      currentPlanned = planned;
+      currentGap = gap;
+    }
+
+    const dObj = new Date(`${cutIso}T12:00:00`);
+    const date = dObj.toLocaleDateString("es-PE", { day: "2-digit", month: "short" });
+    return { isoDate: cutIso, date, planned, actual, gap, isToday };
+  });
+
+  return {
+    points,
+    hasBaselineData,
+    hasHistoricalProgress,
+    currentActual,
+    currentPlanned,
+    currentGap,
+  };
 };

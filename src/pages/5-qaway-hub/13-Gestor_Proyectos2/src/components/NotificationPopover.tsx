@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Bell } from 'lucide-react';
+import { getScheduleAlertState } from '../modules/cronograma-core/scheduleMetrics';
+import { getParametrosCronograma, workingDaysBetween } from '../services/gpCronogramaConfigService';
 import {
   NOTIFICATIONS_STORAGE_KEY,
   type AppNotification,
@@ -52,11 +54,89 @@ export const pushAppNotification = (notification: AppNotification): void => {
   }
 };
 
+/** Sincroniza alertas reales (por vencer y desvío crítico) hacia la campanita sin duplicados. */
+export const syncScheduleAlertNotifications = (
+  scheduleItems: Array<{
+    id: string;
+    code?: string;
+    name: string;
+    start?: string;
+    end?: string;
+    baselineStart?: string;
+    baselineEnd?: string;
+    progress: number;
+    status: string;
+    kind?: string;
+    wbsNodeType?: string;
+    gestor?: string;
+  }>,
+  todayIso: string,
+): void => {
+  if (!scheduleItems || scheduleItems.length === 0 || !todayIso) return;
+  try {
+    const params = getParametrosCronograma();
+    const raw = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+    const current: AppNotification[] = raw === null ? load() : JSON.parse(raw);
+    const list = Array.isArray(current) ? [...current] : [];
+    const existingIds = new Set(list.map((n) => n.id));
+    const nowIso = new Date().toISOString();
+    let added = 0;
+
+    for (const it of scheduleItems) {
+      if (added >= 12) break;
+      const level = getScheduleAlertState(it, todayIso, params);
+      if (level !== 'por_vencer' && level !== 'desvio_critico') continue;
+      const notifId = `sched-${level}-${it.id}-${todayIso}`;
+      if (existingIds.has(notifId)) continue;
+      existingIds.add(notifId);
+      const label = it.code ? `${it.code} ${it.name}` : it.name;
+      if (level === 'desvio_critico') {
+        list.unshift({
+          id: notifId,
+          title: `Desvío crítico: ${label}`,
+          description: `Supera el umbral de ${params.umbralDesvioCritico} días hábiles respecto a la Línea Base.${it.gestor ? ` Responsable: ${it.gestor}.` : ''}`,
+          priority: 'CRITICAL',
+          category: 'nudo_critico',
+          targetModule: 'cronograma',
+          targetEntityId: it.id,
+          read: false,
+          createdAt: nowIso,
+        });
+      } else {
+        const restantes = it.end ? workingDaysBetween(todayIso, it.end, params.semanaLaboral) : 0;
+        list.unshift({
+          id: notifId,
+          title: `Próximo vencimiento: ${label}`,
+          description: restantes <= 0
+            ? `Vence hoy (${it.end || todayIso}).${it.gestor ? ` Responsable: ${it.gestor}.` : ''}`
+            : `Faltan ${restantes} día${restantes === 1 ? '' : 's'} hábiles (vence ${it.end}).${it.gestor ? ` Responsable: ${it.gestor}.` : ''}`,
+          priority: 'PREVENTIVE',
+          category: 'hito_vencido',
+          targetModule: 'cronograma',
+          targetEntityId: it.id,
+          read: false,
+          createdAt: nowIso,
+        });
+      }
+      added += 1;
+    }
+
+    if (added > 0) {
+      localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(list.slice(0, 60)));
+      window.dispatchEvent(new CustomEvent('qaway-gp-notifications-updated'));
+    }
+  } catch {
+    /* almacenamiento no disponible */
+  }
+};
+
 interface NotificationPopoverProps {
   onSelectNotification?: (notification: AppNotification) => void;
+  /** Empresa de la sesión: excluye avisos de otra empresa. Los legados sin tenant se conservan. */
+  tenantId?: string;
 }
 
-export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onSelectNotification }) => {
+export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onSelectNotification, tenantId }) => {
   const [items, setItems] = useState<AppNotification[]>(load);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -89,8 +169,18 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onSele
     };
   }, [open]);
 
-  const unread = items.filter((n) => !n.read).length;
-  const markAll = useCallback(() => setItems((p) => p.map((n) => ({ ...n, read: true }))), []);
+  // El estado conserva TODOS los avisos: filtrar al leer y volver a guardar
+  // borraría los de otras empresas. El filtro es solo de presentación.
+  const esDelTenant = useCallback(
+    (n: AppNotification) => !tenantId || !n.tenantId || n.tenantId === tenantId,
+    [tenantId]
+  );
+  const visibles = items.filter(esDelTenant);
+  const unread = visibles.filter((n) => !n.read).length;
+  const markAll = useCallback(
+    () => setItems((p) => p.map((n) => (esDelTenant(n) ? { ...n, read: true } : n))),
+    [esDelTenant]
+  );
   const markOne = (notification: AppNotification) => {
     setItems((p) => p.map((n) => (n.id === notification.id ? { ...n, read: true } : n)));
     onSelectNotification?.(notification);
@@ -161,12 +251,12 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onSele
             </button>
           </div>
 
-          {items.length === 0 && (
+          {visibles.length === 0 && (
             <p style={{ padding: 16, fontSize: 14, color: '#64748b', margin: 0 }}>Sin notificaciones.</p>
           )}
 
           {PRIORITY_ORDER.map((p) => {
-            const group = items.filter((n) => n.priority === p);
+            const group = visibles.filter((n) => n.priority === p);
             if (!group.length) return null;
             return (
               <div key={p}>

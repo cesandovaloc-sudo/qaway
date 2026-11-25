@@ -310,3 +310,16 @@ export async function deleteCronogramaItemFromSupabase(
     return false;
   }
 }
+
+/**
+ * [DESHABILITADO - NO USAR HASTA INDICACIÓN DIRECTA DE ADMIN DE PLATAFORMA]
+ * Suscripción en tiempo real (Supabase Realtime).
+ * Desactivado intencionalmente para evitar costos innecesarios por conexiones WebSocket
+ * y multiplicación de mensajes (Fan-Out). Ningún agente debe activarlo sin autorización explícita.
+ */
+export function subscribeCronogramaRealtime(
+  _projectId: string,
+  _onRemoteChange: () => void
+): () => void {
+  return () => {};
+}

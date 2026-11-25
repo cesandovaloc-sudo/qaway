@@ -13,6 +13,8 @@ import {
   getDeviationTone,
   hasBaseline,
 } from './scheduleMetrics';
+import { getScheduleAlertState } from '../cronograma-core/scheduleMetrics';
+import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma } from '../../services/gpCronogramaConfigService';
 import '../cronograma-gantt/gantt.css';
 import {
   Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
@@ -73,6 +75,11 @@ import {
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 import { usePerfilGp } from '../../services/gpPermisosService';
+import { usePerfilVisible } from '../../services/perfilVisibleService';
+import {
+  emitirNotificacionAsignacion,
+  emitirNotificacionesVencimiento,
+} from '../../services/gpNotificacionesService';
 
 type UnidadRemota = { name: string; region: string; unitType: string; status: string };
 
@@ -1308,6 +1315,9 @@ export default function Tareas2View({
   const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
   const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  // Directorio real de la empresa (caché compartida con el shell): resuelve
+  // destinatarios de los avisos de vencimiento y asignación. No crea consultas.
+  const { perfil: perfilVisible } = usePerfilVisible();
   const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
 
   // Estado reactivo de tareas operativas. Fuente de verdad: gp_tareas (RLS por
@@ -2870,6 +2880,27 @@ export default function Tareas2View({
   const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'componentes' | 'intermedios' | 'paquetes'>('todos');
   const [zoom, setZoom] = useState('Mes');
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
+  const [cronoParams, setCronoParams] = useState(() => getParametrosCronograma());
+
+  // Barrido de cortes de tareas operativas: avisa por cada tarea próxima o
+  // vencida. Es idempotente (ids deterministas en el almacén de GP2) y se repite
+  // solo cuando cambia el día o el volumen de tareas. El cronograma NO se barre
+  // aquí: el Gantt ya emite sus propias alertas (`syncScheduleAlertNotifications`,
+  // incluido desvío crítico) y duplicarlas sería ruido, no cobertura.
+  const barridoVencimientosRef = useRef('');
+  useEffect(() => {
+    if (!perfilVisible) return;
+    if (!rawTasks.length) return;
+    const clave = `${perfilVisible.tenantId}:${currentTodayIso}:${rawTasks.length}`;
+    if (barridoVencimientosRef.current === clave) return;
+    barridoVencimientosRef.current = clave;
+    emitirNotificacionesVencimiento({
+      tareas: rawTasks,
+      hoy: currentTodayIso,
+      directorio: perfilVisible.contactos,
+      tenantId: perfilVisible.tenantId,
+    });
+  }, [rawTasks, perfilVisible, currentTodayIso]);
   const [hoveredTask, setHoveredTask] = useState<{
     item: Item;
     x: number;
@@ -2909,8 +2940,13 @@ export default function Tareas2View({
         setCurrentTodayIso(getSystemTodayIso());
       }
     };
+    const onParamsChanged = () => setCronoParams(getParametrosCronograma());
     window.addEventListener('qaway-date-changed', onDateChanged);
-    return () => window.removeEventListener('qaway-date-changed', onDateChanged);
+    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, onParamsChanged);
+    return () => {
+      window.removeEventListener('qaway-date-changed', onDateChanged);
+      window.removeEventListener(EVENTO_PARAMS_CRONOGRAMA, onParamsChanged);
+    };
   }, []);
   const [newMenu, setNewMenu] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -5799,6 +5835,7 @@ export default function Tareas2View({
     if (colKey === 'deviation') {
       const dev = getDeviationDays(x, currentTodayIso);
       const tone = getDeviationTone(dev);
+      const alertLevel = getScheduleAlertState(x, currentTodayIso, cronoParams);
       const isEditingDev = isEditing(x, 'deviation');
       return (
         <div
@@ -5815,8 +5852,25 @@ export default function Tareas2View({
             toggleEdit(x, 'deviation');
           }}
         >
-          <span className={`dev-text ${tone}`} style={{ fontWeight: 500 }}>
-            {formatDeviation(dev)}
+          <span className={`dev-text ${tone}`} style={{ fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span>{formatDeviation(dev)}</span>
+            {alertLevel === 'desvio_critico' && (
+              <span
+                title={`Supera el umbral crítico de ${cronoParams.umbralDesvioCritico} días hábiles`}
+                style={{
+                  fontSize: '9.5px',
+                  fontWeight: 700,
+                  padding: '1px 5px',
+                  borderRadius: '999px',
+                  background: '#fef2f2',
+                  color: '#b91c1c',
+                  border: '1px solid #fecaca',
+                  lineHeight: 1.3,
+                }}
+              >
+                Crítico
+              </span>
+            )}
           </span>
           {isEditingDev && (
             <div
@@ -9921,6 +9975,11 @@ export default function Tareas2View({
             const updatedTasks = [newTask, ...rawTasks];
             setRawTasks(updatedTasks);
             void guardarTareasGp(projectId, updatedTasks);
+            emitirNotificacionAsignacion(newTask, {
+              directorio: perfilVisible?.contactos ?? [],
+              ...(perfilVisible?.tenantId ? { tenantId: perfilVisible.tenantId } : {}),
+              notificar: newTask.notifyAssignee !== false,
+            });
             notify(`Tarea "${newTask.title}" asignada con éxito a ${newTask.owner}`);
           }}
         />

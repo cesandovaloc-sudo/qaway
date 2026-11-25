@@ -100,6 +100,14 @@ export function updateSettings(patch) {
     ...settings,
     ...patch,
     tenant: { ...settings.tenant, ...(patch.tenant || {}) },
+    rules: {
+      ...settings.rules,
+      ...(patch.rules || {}),
+      deadlines: {
+        ...settings.rules?.deadlines,
+        ...(patch.rules?.deadlines || {}),
+      },
+    },
   }
   writeJSON(KEY_SETTINGS, next)
   emitChange({ kind: 'settings' })

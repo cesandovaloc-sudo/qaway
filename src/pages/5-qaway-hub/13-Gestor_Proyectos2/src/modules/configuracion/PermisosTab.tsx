@@ -17,6 +17,7 @@ import { supabase } from '../../services/supabaseClient';
 import { APP_SLUG } from '../../services/contextoSesion';
 import { aNodosJerarquia, listarUnidadesParaJerarquia } from '../../services/organizacionJerarquiaLectura';
 import { calcularNumeracion } from '../../services/organizacionJerarquia';
+import { getParametrosCronograma, saveParametrosCronograma } from '../../services/gpCronogramaConfigService';
 import SelectEstilizado, { type SelectOption } from './SelectEstilizado';
 import {
   LLAVES_V1,
@@ -96,6 +97,13 @@ const ESQUEMA_PERMISOS: DefinicionPermisoEsquema[] = [
     llaveCurable: 'gp.administrar_edt',
   },
   {
+    id: 'restablecer_linea_base',
+    grupo: 'Estructura EDT',
+    nombre: 'Restablecer Línea Base oficial',
+    descripcion: 'Permite recalibrar o limpiar las fechas congeladas de Línea Base aprobada en el Gantt.',
+    rolesBase: ['admin'],
+  },
+  {
     id: 'crear_tarea',
     grupo: 'Tareas y Seguimiento',
     nombre: 'Crear tareas y actividades',
@@ -162,6 +170,15 @@ export default function PermisosTab() {
   const [busquedaUsuario, setBusquedaUsuario] = useState('');
   const [areasAbiertas, setAreasAbiertas] = useState<Record<string, boolean>>({});
   const [esquemaAbierto, setEsquemaAbierto] = useState<Record<string, boolean>>({});
+  const [bloquearResetLineaBase, setBloquearResetLineaBase] = useState<boolean>(
+    () => getParametrosCronograma().bloquearResetLineaBase
+  );
+
+  const toggleProteccionLineaBase = (checked: boolean) => {
+    setBloquearResetLineaBase(checked);
+    const actual = getParametrosCronograma();
+    saveParametrosCronograma({ ...actual, bloquearResetLineaBase: checked });
+  };
   const [unidadResponsableId, setUnidadResponsableId] = useState<string | null>(null);
   const [llaveUserMenuAbierto, setLlaveUserMenuAbierto] = useState(false);
   const [llaveUserFiltro, setLlaveUserFiltro] = useState('');
@@ -1404,6 +1421,38 @@ export default function PermisosTab() {
               Detalle completo de capacidades por módulo. Los permisos con llave curable permiten otorgar acceso puntual a usuarios específicos.
             </span>
           </div>
+        </div>
+
+        {/* Control de seguridad de Línea Base en Permisos */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            padding: '10px 14px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            background: '#f8fafc',
+            marginBottom: '10px',
+          }}
+        >
+          <div>
+            <strong style={{ display: 'block', fontSize: '13px', color: '#0f172a' }}>
+              Protección de Línea Base oficial
+            </strong>
+            <span style={{ fontSize: '12px', color: '#64748b' }}>
+              Restringe a administradores el restablecimiento de la Línea Base aprobada en el Gantt (bloquea a editores).
+            </span>
+          </div>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 600, color: '#0f172a', cursor: 'pointer', flexShrink: 0 }}>
+            <input
+              type="checkbox"
+              checked={bloquearResetLineaBase}
+              onChange={(e) => toggleProteccionLineaBase(e.target.checked)}
+            />
+            <span>Solo administradores</span>
+          </label>
         </div>
 
         {(['Proyectos', 'Estructura EDT', 'Tareas y Seguimiento', 'Equipo y Gobernanza'] as const).map((grupo) => {

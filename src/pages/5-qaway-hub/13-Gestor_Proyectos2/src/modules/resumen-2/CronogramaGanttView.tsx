@@ -95,7 +95,8 @@ import {
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 import { usePerfilGp } from '../../services/gpPermisosService';
-import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma } from '../../services/gpCronogramaConfigService';
+import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma, type FrecuenciaCorte, type ParametrosCronograma } from '../../services/gpCronogramaConfigService';
+import { computeSCurveSeries } from '../cronograma-core/scheduleMetrics';
 
 type UnidadRemotaGantt = { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number };
 
@@ -972,7 +973,7 @@ const calcWidth = (a: string, b: string) => (getDays(a, b) / TOTAL_SPAN_DAYS) * 
 
 const getSystemTodayIso = () => {
   try {
-    const mode = localStorage.getItem('qaway-system-date-mode-v1') || 'custom';
+    const mode = localStorage.getItem('qaway-system-date-mode-v1') || 'real';
     const custom = localStorage.getItem('qaway-system-date-v1');
     if (mode === 'custom' && custom && custom >= RANGE_MIN && custom <= RANGE_MAX) {
       return custom;
@@ -1272,6 +1273,13 @@ export default function CronogramaGanttView({
   const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
   const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  const [cronoParamsLive, setCronoParamsLive] = useState<ParametrosCronograma>(() => getParametrosCronograma());
+  const [sCurveFreqOverride, setSCurveFreqOverride] = useState<FrecuenciaCorte | null>(null);
+  useEffect(() => {
+    const syncParams = () => setCronoParamsLive(getParametrosCronograma());
+    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, syncParams);
+    return () => window.removeEventListener(EVENTO_PARAMS_CRONOGRAMA, syncParams);
+  }, []);
   const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
   // Se retiró el parche local `cargandoNube` (0-SOLUCIONES/1-Pop Up.txt:16-19):
   // App.tsx ya no monta este canvas hasta que identidad y proyectos terminaron.
@@ -4979,54 +4987,16 @@ export default function CronogramaGanttView({
       { name: 'Pendiente', value: pendCount, color: '#94a3b8', pct: pctOf(pendCount) },
     ];
 
-    // 3. Curva S: Programado vs. Avance Real acumulado en el tiempo
+    // 3. Curva S: Programado (Base) vs. Avance Real según configuración del tenant
     const curveSource = source.length > 0 ? source : items;
-    const sCurveData: { date: string; planned: number; actual: number | null }[] = [];
-    if (curveSource.length > 0) {
-      let minMs = Infinity;
-      let maxMs = -Infinity;
-      for (const it of curveSource) {
-        const sMs = Date.parse((it.baselineStart || it.start || currentTodayIso) + "T12:00:00");
-        const eMs = Date.parse((it.baselineEnd || it.end || currentTodayIso) + "T12:00:00");
-        if (!Number.isNaN(sMs) && sMs < minMs) minMs = sMs;
-        if (!Number.isNaN(eMs) && eMs > maxMs) maxMs = eMs;
-      }
-      if (!Number.isFinite(minMs) || !Number.isFinite(maxMs) || maxMs <= minMs) {
-        minMs = Date.parse(currentTodayIso + "T12:00:00") - 30 * 86400000;
-        maxMs = Date.parse(currentTodayIso + "T12:00:00") + 30 * 86400000;
-      }
-      const todayMs = Date.parse(currentTodayIso + "T12:00:00");
-      const avgActualNow = curveSource.reduce((acc, it) => acc + (Number(it.progress) || 0), 0) / curveSource.length;
-      const steps = 6;
-      for (let i = 0; i <= steps; i++) {
-        const cutMs = minMs + ((maxMs - minMs) * i) / steps;
-        let plannedSum = 0;
-        for (const it of curveSource) {
-          const bS = Date.parse((it.baselineStart || it.start || currentTodayIso) + "T12:00:00");
-          const bE = Date.parse((it.baselineEnd || it.end || currentTodayIso) + "T12:00:00");
-          if (Number.isNaN(bS) || Number.isNaN(bE) || bE <= bS) {
-            plannedSum += cutMs >= bS ? 100 : 0;
-          } else if (cutMs <= bS) {
-            plannedSum += 0;
-          } else if (cutMs >= bE) {
-            plannedSum += 100;
-          } else {
-            plannedSum += ((cutMs - bS) / (bE - bS)) * 100;
-          }
-        }
-        const planned = Math.round(plannedSum / curveSource.length);
-        let actual: number | null = null;
-        if (cutMs <= todayMs || i === 0) {
-          const spanToToday = Math.max(1, todayMs - minMs);
-          const ratio = Math.min(1, Math.max(0, (cutMs - minMs) / spanToToday));
-          actual = Math.round(avgActualNow * ratio);
-        }
-        const dObj = new Date(cutMs);
-        const label = dObj.toLocaleDateString("es-PE", { day: "2-digit", month: "short" });
-        sCurveData.push({ date: label, planned, actual });
-      }
-    }
-
+    const activeFreq = sCurveFreqOverride ?? cronoParamsLive.frecuenciaCorte;
+    const sCurve = computeSCurveSeries(
+      curveSource,
+      currentTodayIso,
+      { ...cronoParamsLive, frecuenciaCorte: activeFreq },
+      afDatePreset === 'custom' ? { minDateIso: rangeFrom, maxDateIso: rangeTo } : undefined,
+    );
+    const sCurveData = sCurve.points;
     // 4. Avance por Región / DRE
     const regionMap = new Map<string, { sum: number; count: number }>();
     for (const it of source) {
@@ -5086,11 +5056,12 @@ export default function CronogramaGanttView({
       componentProgress,
       statusSlices,
       sCurveData,
+      sCurve,
       regionData,
       ownerWorkload,
       deviationByComp,
     };
-  }, [shown, items, currentTodayIso]);
+  }, [shown, items, currentTodayIso, cronoParamsLive, sCurveFreqOverride, afDatePreset, rangeFrom, rangeTo]);
 
   useEffect(() => {
     setRenderedRowCount(120);
@@ -9893,7 +9864,8 @@ export default function CronogramaGanttView({
                         formatter={(v) => [`${v}%`, 'Avance']}
                         labelFormatter={(label, payload) => (payload?.[0]?.payload?.name ? `${label} · ${payload[0].payload.name}` : String(label))}
                         cursor={{ fill: 'rgba(37, 99, 235, 0.08)', radius: 4 }}
-                        contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                        wrapperStyle={{ zIndex: 30, pointerEvents: 'none' }}
+                          contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                       />
                       <Bar
                         dataKey="v"
@@ -9920,6 +9892,7 @@ export default function CronogramaGanttView({
                       <PieChart>
                         <Tooltip
                           formatter={(v: any, name: any) => [`${v} registros (${resumenAnalytics.total > 0 ? Math.round((Number(v) / resumenAnalytics.total) * 100) : 0}%)`, name]}
+                          wrapperStyle={{ zIndex: 30, pointerEvents: 'none' }}
                           contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                         />
                         <Pie
@@ -9937,7 +9910,7 @@ export default function CronogramaGanttView({
                         </Pie>
                       </PieChart>
                     </ResponsiveContainer>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 1 }}>
                       <b style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{String(resumenAnalytics.total).padStart(2, '0')}</b>
                       <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>registros</small>
                     </div>
@@ -9956,16 +9929,52 @@ export default function CronogramaGanttView({
 
               {/* 3. Curva S · Programado vs. Real */}
               <section className="panel">
-                <div className="panel-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                <div className="panel-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
                   <div>
                     <h2>Curva S · Programado vs. Real</h2>
-                    <p>Avance acumulado frente a línea base.</p>
+                    <p>{!resumenAnalytics.sCurve.hasBaselineData ? "Falta establecer la Línea Base en Proyecto." : resumenAnalytics.sCurve.hasHistoricalProgress ? "Línea Base vs. Avance Real · Con historial." : "Línea Base vs. Avance Real · Sin historial previo."}</p>
                   </div>
-                  <div style={{ display: 'flex', gap: 10, fontSize: 11, fontWeight: 600, color: '#475569', flexShrink: 0, paddingTop: 2 }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 2.5, background: '#94a3b8', borderRadius: 2 }} />Base</span>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 2.5, background: '#2563eb', borderRadius: 2 }} />Real</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flexShrink: 0 }}>
+                    <div style={{ display: 'inline-flex', padding: 2, borderRadius: 7, background: '#f1f5f9', border: '1px solid #e2e8f0', gap: 2 }} role="group" aria-label="Frecuencia de corte de Curva S">
+                      {([
+                        { id: 'semanal', label: 'Sem' },
+                        { id: 'quincenal', label: 'Quinc' },
+                        { id: 'mensual', label: 'Mes' },
+                      ] as const).map((opt) => {
+                        const active = (sCurveFreqOverride ?? cronoParamsLive.frecuenciaCorte) === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setSCurveFreqOverride(opt.id)}
+                            style={{
+                              border: 0,
+                              borderRadius: 5,
+                              padding: '2px 7px',
+                              fontSize: 10.5,
+                              fontWeight: active ? 700 : 500,
+                              background: active ? '#ffffff' : 'transparent',
+                              color: active ? '#0066ff' : '#64748b',
+                              boxShadow: active ? '0 1px 2px rgba(15,23,42,0.08)' : 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, fontSize: 11, fontWeight: 600, color: '#475569' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 2.5, background: '#94a3b8', borderRadius: 2 }} />Base</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 8, height: 2.5, background: '#2563eb', borderRadius: 2 }} />Real</span>
+                    </div>
                   </div>
                 </div>
+                {!resumenAnalytics.sCurve.hasBaselineData && (
+                  <div style={{ fontSize: 11.5, color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 7, padding: '6px 10px', marginBottom: 8 }}>
+                    Falta establecer la Línea Base en Proyecto para comparar Base vs. Real.
+                  </div>
+                )}
                 <div className="line-chart">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={resumenAnalytics.sCurveData} margin={{ top: 14, right: 8, bottom: 0, left: -18 }}>
@@ -9973,9 +9982,16 @@ export default function CronogramaGanttView({
                       <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                       <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                       <Tooltip
-                        formatter={(v: any, name: any) => [v === null ? '—' : `${v}%`, name === 'planned' ? 'Programado (Base)' : 'Avance Real']}
+                        formatter={(v: any, name: any) => [v === null ? 'Sin registro' : `${v}%`, name === 'planned' ? 'Programado (Base)' : 'Avance Real']}
+                        labelFormatter={(label, payload) => {
+                          const pt = payload?.[0]?.payload;
+                          if (!pt) return String(label);
+                          const gapStr = pt.gap === null || pt.gap === undefined ? '' : ` · Brecha: ${pt.gap > 0 ? '+' : ''}${pt.gap}%`;
+                          return `${pt.isoDate}${pt.isToday ? ' (Hoy)' : ''}${gapStr}`;
+                        }}
                         cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '3 3' }}
-                        contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                        wrapperStyle={{ zIndex: 30, pointerEvents: 'none' }}
+                          contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                       />
                       <Line
                         dataKey="planned"
@@ -10021,7 +10037,8 @@ export default function CronogramaGanttView({
                       <Tooltip
                         formatter={(v: any, _n: any, p: any) => [`${v}% (${p?.payload?.count || 0} reg.)`, p?.payload?.fullName || 'Avance']}
                         cursor={{ fill: 'rgba(16, 185, 129, 0.08)' }}
-                        contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                        wrapperStyle={{ zIndex: 30, pointerEvents: 'none' }}
+                          contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                       />
                       <Bar dataKey="v" fill="#10b981" radius={[0, 5, 5, 0]} barSize={14} isAnimationActive={true} animationDuration={750} />
                     </BarChart>
@@ -10044,7 +10061,8 @@ export default function CronogramaGanttView({
                       <Tooltip
                         labelFormatter={(label, payload) => payload?.[0]?.payload?.name || String(label)}
                         cursor={{ fill: 'rgba(37, 99, 235, 0.06)' }}
-                        contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                        wrapperStyle={{ zIndex: 30, pointerEvents: 'none' }}
+                          contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                       />
                       <Bar dataKey="done" name="Completado" stackId="a" fill="#10b981" />
                       <Bar dataKey="inprog" name="En proceso" stackId="a" fill="#0066ff" />
@@ -10072,7 +10090,8 @@ export default function CronogramaGanttView({
                         formatter={(v: any) => [`${Number(v) > 0 ? '+' : ''}${v} días`, 'Desviación']}
                         labelFormatter={(label, payload) => (payload?.[0]?.payload?.name ? `${label} · ${payload[0].payload.name}` : String(label))}
                         cursor={{ fill: 'rgba(15, 23, 42, 0.05)' }}
-                        contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                        wrapperStyle={{ zIndex: 30, pointerEvents: 'none' }}
+                          contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                       />
                       <Bar dataKey="days" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={750}>
                         {resumenAnalytics.deviationByComp.map((entry) => (

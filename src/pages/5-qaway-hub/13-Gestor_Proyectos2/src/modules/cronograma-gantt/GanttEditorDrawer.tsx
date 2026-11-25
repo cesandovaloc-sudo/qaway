@@ -2134,8 +2134,12 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                 {/* 6. Avance */}
                 {(() => {
-                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || isContainerEdtType(resolveEdtNodeType(activeItem, items)) || items.some((c) => c.parentId === activeItem.id));
-                   const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
+                  const hasRealChildren = Boolean(
+                    (activeItem.children && activeItem.children.length > 0) ||
+                    items.some((c) => c.parentId === activeItem.id) ||
+                    resolveEdtNodeType(activeItem, items) === 'COMPONENTE'
+                  );
+                  const linkedTaskSummary = !hasRealChildren ? getLinkedTasksSummary(activeItem, rawTasks) : null;
 
                   return (
                     <div className="progress-edit">
@@ -2149,51 +2153,99 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                         tabla="gp_tipos_avance_c"
                         nota="6 tipos PMI; aquí se clasificará cada registro de avance con su sustento"
                       />
-                      {(isContainer || linkedTaskSummary) && (
-                        <div
-                          style={{
-                            height: '7px',
-                            width: '100%',
-                            backgroundColor: '#e2e8f0',
-                            borderRadius: '999px',
-                            overflow: 'hidden',
-                            marginBottom: '8px',
-                          }}
-                        >
+                      {hasRealChildren ? (
+                        <>
                           <div
                             style={{
-                              height: '100%',
-                              width: `${Math.max(0, Math.min(100, activeItem.progress))}%`,
-                              backgroundColor: activeItem.progress >= 100 ? '#16a34a' : '#2563eb',
-                              borderRadius: 'inherit',
-                              transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                              height: '7px',
+                              width: '100%',
+                              backgroundColor: '#e2e8f0',
+                              borderRadius: '999px',
+                              overflow: 'hidden',
+                              marginBottom: '8px',
                             }}
-                          />
-                        </div>
-                      )}
-                      {isContainer ? (
-                        <div style={{ padding: '7px 10px', background: '#f1f5f9', borderRadius: '6px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
-                          <span>Calculado por rollup de subelementos (PMI - Regla del 100%)</span>
-                        </div>
-                      ) : linkedTaskSummary ? (
-                        <div style={{ padding: '7px 10px', background: '#eff6ff', borderRadius: '6px', fontSize: '11px', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '7px' }}>
-                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563eb', flexShrink: 0 }} />
-                          <span>Gobernado por tareas operativas ({linkedTaskSummary.completed}/{linkedTaskSummary.total} completadas)</span>
-                        </div>
+                          >
+                            <div
+                              style={{
+                                height: '100%',
+                                width: `${Math.max(0, Math.min(100, activeItem.progress))}%`,
+                                backgroundColor: activeItem.progress >= 100 ? '#16a34a' : '#2563eb',
+                                borderRadius: 'inherit',
+                                transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                              }}
+                            />
+                          </div>
+                          <div style={{ padding: '7px 10px', background: '#f1f5f9', borderRadius: '6px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
+                            <span>Calculado por rollup de subelementos (PMI - Regla del 100%)</span>
+                          </div>
+                        </>
                       ) : (
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          step="5"
-                          value={activeItem.progress}
-                          onChange={(e) => setDraftProgress(+e.target.value)}
-                        />
+                        <>
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="5"
+                            value={activeItem.progress}
+                            onChange={(e) => setDraftProgress(+e.target.value)}
+                          />
+                          {linkedTaskSummary && (
+                            <div style={{ marginTop: 6, padding: '6px 10px', background: '#eff6ff', borderRadius: '6px', fontSize: '11px', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563eb', flexShrink: 0 }} />
+                              <span>Tareas vinculadas: {linkedTaskSummary.completed}/{linkedTaskSummary.total} completadas ({linkedTaskSummary.progress}%)</span>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   );
                 })()}
+
+                {/* 7. Línea base contractual (Baseline) */}
+                <div className="field" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '10px 12px', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      Línea base contractual
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateDraft({ baselineStart: activeItem.start, baselineEnd: activeItem.end })}
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 650,
+                        color: '#1e40af',
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '6px',
+                        padding: '3px 8px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {hasBaseline(activeItem) ? 'Actualizar línea base' : 'Fijar línea base'}
+                    </button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px', color: '#64748b' }}>
+                      <span>Inicio aprobado</span>
+                      <input
+                        type="date"
+                        value={activeItem.baselineStart || ''}
+                        onChange={(e) => updateDraft({ baselineStart: e.target.value })}
+                        style={{ height: '32px', border: '1px solid #cbd5e1', borderRadius: '7px', padding: '0 8px', fontSize: '12px', background: '#ffffff' }}
+                      />
+                    </label>
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px', color: '#64748b' }}>
+                      <span>Fin aprobado</span>
+                      <input
+                        type="date"
+                        value={activeItem.baselineEnd || ''}
+                        onChange={(e) => updateDraft({ baselineEnd: e.target.value })}
+                        style={{ height: '32px', border: '1px solid #cbd5e1', borderRadius: '7px', padding: '0 8px', fontSize: '12px', background: '#ffffff' }}
+                      />
+                    </label>
+                  </div>
+                </div>
 
                 {/* 8. Desglose de Tareas vinculadas (100% Dinámico) */}
                 {(() => {

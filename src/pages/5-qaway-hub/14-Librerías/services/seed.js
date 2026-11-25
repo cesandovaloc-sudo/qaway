@@ -401,5 +401,13 @@ export function defaultSettings() {
       quietHoursEnforced: true,
     },
     activeProfileId: 'usr-ana',
+    // Reglas compartidas de aviso (ver services/notificationRules.js y doc 11).
+    rules: {
+      deadlines: {
+        daysAhead: 5,
+        includeOverdue: true,
+        workingDays: [1, 2, 3, 4, 5],
+      },
+    },
   }
 }

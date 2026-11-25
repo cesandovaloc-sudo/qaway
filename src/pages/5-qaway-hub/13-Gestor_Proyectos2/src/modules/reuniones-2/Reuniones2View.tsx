@@ -9515,14 +9515,6 @@ export default function Reuniones2View({
                 <PanelRightOpen size={14} />
                 <span>{(perspective === 'equipo' ? Boolean(equipoSelectedId) : panelOpen) ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
               </button>
-              <button
-                className="btn secondary"
-                style={{ minHeight: '32px', fontSize: '12px' }}
-                onClick={() => notify('Cronograma maestro sincronizado con el equipo')}
-              >
-                <CheckCircle2 size={14} color="#16a34a" />
-                <span>Publicar Cronograma</span>
-              </button>
             </div>
           </footer>
         </ProjectShellWorkspace>

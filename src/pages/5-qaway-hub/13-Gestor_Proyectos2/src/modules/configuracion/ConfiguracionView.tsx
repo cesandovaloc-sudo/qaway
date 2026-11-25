@@ -55,6 +55,7 @@ import PerfilTab from './PerfilTab';
 import PreferenciasTab from './PreferenciasTab';
 import EmpresaTab from './EmpresaTab';
 import SelectEstilizado from './SelectEstilizado';
+import { MiniCalendar } from '../cronograma-gantt/CronogramaGanttView';
 import {
   DIAS_SEMANA_ORDEN,
   getParametrosCronograma,
@@ -243,7 +244,7 @@ export default function ConfiguracionView({
   });
 
   const [dateMode, setDateMode] = useState<'real' | 'custom'>(() => {
-    return (localStorage.getItem('qaway-system-date-mode-v1') as 'real' | 'custom') || 'custom';
+    return (localStorage.getItem('qaway-system-date-mode-v1') as 'real' | 'custom') || 'real';
   });
 
   const [customDate, setCustomDate] = useState(() => {
@@ -255,6 +256,16 @@ export default function ConfiguracionView({
   const [editandoProyecto, setEditandoProyecto] = useState(false);
   const [editandoCrono, setEditandoCrono] = useState(false);
   const [editandoGeneral, setEditandoGeneral] = useState(false);
+  const [generalCalOpen, setGeneralCalOpen] = useState(false);
+  useEffect(() => {
+    if (!generalCalOpen) return;
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && !target.closest('.cfg-date-picker-wrap')) setGeneralCalOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [generalCalOpen]);
   const [editandoAsistente, setEditandoAsistente] = useState(false);
 
   const estiloSoloLectura: React.CSSProperties = {
@@ -798,20 +809,12 @@ export default function ConfiguracionView({
                   <p>Aplica a todas las fechas de corte, reportes de gestores y actas del proyecto.</p>
                 </div>
                 <div className="field-control">
-                  <select
-                    id="cfg-timezone"
-                    className="select-input"
-                    disabled={!editandoGeneral}
-                    style={!editandoGeneral ? estiloSoloLectura : undefined}
+                  <SelectEstilizado
                     value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                  >
-                    {TIMEZONES.map((tz) => (
-                      <option key={tz.id} value={tz.id}>
-                        {tz.label}
-                      </option>
-                    ))}
-                  </select>
+                    disabled={!editandoGeneral}
+                    options={TIMEZONES.map((tz) => ({ value: tz.id, label: tz.label }))}
+                    onChange={(val) => setTimezone(val)}
+                  />
                 </div>
               </div>
 
@@ -822,6 +825,20 @@ export default function ConfiguracionView({
                 </div>
                 <div className="field-control">
                   <div className="radio-group">
+                    <label className={`radio-card ${dateMode === 'real' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        name="dateMode"
+                        disabled={!editandoGeneral}
+                        checked={dateMode === 'real'}
+                        onChange={() => setDateMode('real')}
+                      />
+                      <div className="radio-text">
+                        <strong>Fecha en Tiempo Real del Dispositivo</strong>
+                        <span>Toma la fecha y hora del reloj del equipo según la zona horaria seleccionada.</span>
+                      </div>
+                    </label>
+
                     <label className={`radio-card ${dateMode === 'custom' ? 'active' : ''}`}>
                       <input
                         type="radio"
@@ -836,36 +853,50 @@ export default function ConfiguracionView({
                           Fija la fecha de control territorial para evaluar con precisión el estado de hitos pasados, presentes y futuros.
                         </span>
                         {dateMode === 'custom' && (
-                          <div className="date-picker-wrap">
-                            <input
-                              type="date"
-                              className="date-input"
-                              disabled={!editandoGeneral}
-                              style={!editandoGeneral ? estiloSoloLectura : undefined}
-                              value={customDate}
-                              min="2026-09-01"
-                              max="2027-04-30"
-                              onChange={(e) => setCustomDate(e.target.value)}
-                            />
+                          <div className="date-picker-wrap cfg-date-picker-wrap" style={{ position: 'relative' }}>
+                            <div style={{ position: 'relative', display: 'inline-flex' }}>
+                              <button
+                                type="button"
+                                className="date-input"
+                                disabled={!editandoGeneral}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!editandoGeneral) return;
+                                  setGeneralCalOpen((v) => !v);
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: '10px',
+                                  minWidth: '150px',
+                                  cursor: editandoGeneral ? 'pointer' : 'not-allowed',
+                                  ...(!editandoGeneral ? estiloSoloLectura : {}),
+                                }}
+                              >
+                                <span>{customDate ? customDate.split('-').reverse().join('/') : 'Seleccionar'}</span>
+                                <Calendar size={14} color="#64748b" />
+                              </button>
+                              {generalCalOpen && editandoGeneral && (
+                                <MiniCalendar
+                                  value={customDate}
+                                  min="2026-09-01"
+                                  max="2027-04-30"
+                                  onChange={(val) => {
+                                    setCustomDate(val);
+                                    setGeneralCalOpen(false);
+                                  }}
+                                  onClose={() => setGeneralCalOpen(false)}
+                                  align="left"
+                                />
+                              )}
+                            </div>
                             <span style={{ fontSize: '12px', color: '#64748b' }}>
                               Fecha actual de seguimiento territorial: <strong>{customDate}</strong>
                             </span>
                           </div>
                         )}
-                      </div>
-                    </label>
-
-                    <label className={`radio-card ${dateMode === 'real' ? 'active' : ''}`}>
-                      <input
-                        type="radio"
-                        name="dateMode"
-                        disabled={!editandoGeneral}
-                        checked={dateMode === 'real'}
-                        onChange={() => setDateMode('real')}
-                      />
-                      <div className="radio-text">
-                        <strong>Fecha en Tiempo Real del Dispositivo</strong>
-                        <span>Toma la fecha y hora del reloj del equipo según la zona horaria seleccionada.</span>
                       </div>
                     </label>
                   </div>
@@ -1454,10 +1485,15 @@ export default function ConfiguracionView({
               </div>
               {!esAdmin && renderBannerSoloLectura()}
 
+              {/* A. Umbrales de alerta y control */}
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: 6 }}>
+                Umbrales de alerta y control
+              </div>
+
               <div className="form-row">
                 <div className="field-info">
-                  <label htmlFor="cfg-aviso-previo">Aviso previo antes de vencer (días hábiles)</label>
-                  <p>Anticipación para marcar una actividad o hito próximo en alerta temprana.</p>
+                  <label htmlFor="cfg-aviso-previo">1. Aviso previo al vencimiento (días hábiles)</label>
+                  <p>Marca preventivamente en el cronograma y en la campanita cuando faltan estos días hábiles o menos para vencer.</p>
                 </div>
                 <div className="field-control">
                   <input
@@ -1476,8 +1512,28 @@ export default function ConfiguracionView({
 
               <div className="form-row">
                 <div className="field-info">
-                  <label htmlFor="cfg-desvio-critico">Umbral de desvío crítico sobre Línea Base</label>
-                  <p>Días hábiles de retraso respecto a la Línea Base para activar alerta crítica.</p>
+                  <label htmlFor="cfg-hitos-gracia">2. Días hábiles de gracia al vencer</label>
+                  <p>Un hito mantiene duración 0 días; si supera este margen tras su fecha programada sin cumplirse, pasa a vencido.</p>
+                </div>
+                <div className="field-control">
+                  <input
+                    id="cfg-hitos-gracia"
+                    type="number"
+                    min={0}
+                    max={15}
+                    disabled={!editandoCrono}
+                    className="select-input"
+                    style={{ maxWidth: 120, ...(!editandoCrono ? estiloSoloLectura : {}) }}
+                    value={cronoParams.diasGraciaHito}
+                    onChange={(e) => setCronoParams((p) => ({ ...p, diasGraciaHito: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-desvio-critico">3. Desvío crítico respecto a Línea Base (días hábiles)</label>
+                  <p>Retraso frente a la Línea Base aprobada que activa alerta crítica en el cronograma y notificaciones.</p>
                 </div>
                 <div className="field-control">
                   <input
@@ -1491,52 +1547,6 @@ export default function ConfiguracionView({
                     value={cronoParams.umbralDesvioCritico}
                     onChange={(e) => setCronoParams((p) => ({ ...p, umbralDesvioCritico: Number(e.target.value) }))}
                   />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="field-info">
-                  <label htmlFor="cfg-hitos-regla">Criterio de Hitos</label>
-                  <p>Regla fija de gestión de proyectos para hitos de control.</p>
-                </div>
-                <div className="field-control">
-                  <input
-                    id="cfg-hitos-regla"
-                    type="text"
-                    value="Duración 0 días · Sin días de gracia al vencer"
-                    disabled
-                    readOnly
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      background: '#f8fafc',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      color: '#64748b',
-                      cursor: 'not-allowed',
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="field-info">
-                  <label htmlFor="cfg-proteger-baseline">Protección de Línea Base oficial</label>
-                  <p>Restringe el restablecimiento de la Línea Base en el Gantt solo a administradores.</p>
-                </div>
-                <div className="field-control">
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: !editandoCrono ? '#64748b' : '#0f172a', cursor: !editandoCrono ? 'not-allowed' : 'pointer' }}>
-                    <input
-                      id="cfg-proteger-baseline"
-                      type="checkbox"
-                      disabled={!editandoCrono}
-                      checked={cronoParams.bloquearResetLineaBase}
-                      onChange={(e) => setCronoParams((p) => ({ ...p, bloquearResetLineaBase: e.target.checked }))}
-                    />
-                    <span>Solo un administrador puede restablecer la Línea Base</span>
-                  </label>
                 </div>
               </div>
             </div>

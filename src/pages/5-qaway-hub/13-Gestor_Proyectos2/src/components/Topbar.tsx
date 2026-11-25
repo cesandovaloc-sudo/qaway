@@ -152,7 +152,7 @@ export default function Topbar({
           <CircleHelp size={18} />
         </button>
 
-        <NotificationPopover />
+        <NotificationPopover tenantId={perfilVisible?.tenantId || undefined} />
 
         {/* Botón de Perfil en Topbar */}
         <div

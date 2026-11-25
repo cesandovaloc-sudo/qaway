@@ -256,6 +256,8 @@ Estos son los adaptadores que existen en las apps actuales. **No se comparten lo
 
 **Excepción documentada:** el adaptador GP2 ya existe como módulo real del framework en `services/adapters/gp2Adapter.js` (solo lectura y con identidad inyectada). Su contrato, mapeo y límites están en `10-adaptador-gp2-motor.md`.
 
+**Reglas compartidas:** los avisos por corte/vencimiento y por asignación de tarea viven en `services/notificationRules.js`, con configuración por tenant y contrato completo en `11-reglas-vencimientos-y-asignaciones.md`.
+
 ---
 
 ### 4. Preferencias Por Tenant (estructuras opcionales)

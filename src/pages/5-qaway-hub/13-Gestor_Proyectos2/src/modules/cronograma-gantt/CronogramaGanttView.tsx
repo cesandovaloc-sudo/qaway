@@ -1,5 +1,6 @@
 import { claveTareasLocal, esTenantMineduPrincipal } from '../../services/gestorTareasLocalService';
 import { GanttEditorDrawer } from './GanttEditorDrawer';
+import InlineDatePopover from './InlineDatePopover';
 import DeliverableCellPopover from '../../components/DeliverableCellPopover';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback, lazy, Suspense } from 'react';
@@ -11,6 +12,7 @@ import {
   freezeBaseline,
   getDeviationDays,
   getDeviationTone,
+  getScheduleAlertState,
   hasBaseline,
 } from './scheduleMetrics';
 import './gantt.css';
@@ -80,6 +82,7 @@ import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { EVENTO_PARAMS_CRONOGRAMA, getParametrosCronograma } from '../../services/gpCronogramaConfigService';
+import { syncScheduleAlertNotifications } from '../../components/NotificationPopover';
 
 type UnidadRemotaGantt = { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number };
 
@@ -152,6 +155,8 @@ import {
   GitFork,
   GripVertical,
   Link2,
+  Lock,
+  Unlock,
   MapPin,
   Maximize2,
   Minimize2,
@@ -956,7 +961,7 @@ const calcWidth = (a: string, b: string) => (getDays(a, b) / TOTAL_SPAN_DAYS) * 
 
 const getSystemTodayIso = () => {
   try {
-    const mode = localStorage.getItem('qaway-system-date-mode-v1') || 'custom';
+    const mode = localStorage.getItem('qaway-system-date-mode-v1') || 'real';
     const custom = localStorage.getItem('qaway-system-date-v1');
     if (mode === 'custom' && custom && custom >= RANGE_MIN && custom <= RANGE_MAX) {
       return custom;
@@ -1530,12 +1535,61 @@ export default function CronogramaGanttView({
       // Sincronización a Supabase con debounce de 2.5s para no saturar la red ni congelar la UI
       if (isMaestro && items.length > 0) {
         const timer = setTimeout(() => {
-          syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
+          const snap = lastSyncedSnapshotRef.current;
+          const prevPid = lastSyncedPidRef.current;
+
+          if (prevPid !== projectId || snap.size === 0) {
+            const nextSnap = new Map<string, string>();
+            items.forEach((it) => nextSnap.set(it.id, JSON.stringify(it)));
+            lastSyncedSnapshotRef.current = nextSnap;
+            lastSyncedPidRef.current = projectId;
+            return;
+          }
+
+          const changedItems: Item[] = [];
+          const nextSnap = new Map<string, string>();
+          items.forEach((it) => {
+            const serialized = JSON.stringify(it);
+            nextSnap.set(it.id, serialized);
+            if (snap.get(it.id) !== serialized) {
+              changedItems.push(it);
+            }
+          });
+
+          lastSyncedSnapshotRef.current = nextSnap;
+          if (changedItems.length > 0) {
+            syncAllCronogramaItemsToSupabase(projectId, changedItems as GanttItemData[]);
+          }
         }, 2500);
         return () => clearTimeout(timer);
       }
     }
   }, [items, projectId, isActive, perspective]);
+
+  const lastSyncedSnapshotRef = useRef<Map<string, string>>(new Map());
+  const lastSyncedPidRef = useRef<string>('');
+
+  /* [DESHABILITADO - NO USAR HASTA INDICACIÓN DIRECTA DE ADMIN DE PLATAFORMA]
+     Supabase Realtime (subscribeCronogramaRealtime) está desactivado intencionalmente
+     para evitar costos innecesarios por conexiones WebSocket y mensajes Fan-Out.
+     Ningún agente debe reactivarlo sin autorización expresa del administrador. */
+
+  // Candado de Línea Base oficial + modal de confirmación profesional
+  const [baselineLocked, setBaselineLocked] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(uiKey('baseline-locked-v1')) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [baselineModalMode, setBaselineModalMode] = useState<'freeze' | 'unlock' | null>(null);
+
+  const toggleBaselineLock = (locked: boolean) => {
+    setBaselineLocked(locked);
+    try {
+      localStorage.setItem(uiKey('baseline-locked-v1'), String(locked));
+    } catch {}
+  };
 
   const [resizingCol, setResizingCol] = useState<ColKey | null>(null);
   const prevVisibleColsRef = useRef<ColKey[]>([...DEFAULT_VISIBLE_COLS]);
@@ -2748,6 +2802,7 @@ export default function CronogramaGanttView({
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
   const [resizeTempWidth, setResizeTempWidth] = useState<number | null>(null);
   const [resizeTempEndDate, setResizeTempEndDate] = useState<string | null>(null);
+  const [resizeLivePos, setResizeLivePos] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const onDateChanged = (e: any) => {
@@ -2758,10 +2813,18 @@ export default function CronogramaGanttView({
         setCurrentTodayIso(getSystemTodayIso());
       }
     };
+    const onParamsChanged = () => {
+      setCronoParams(getParametrosCronograma());
+      setItems((prev) => computeWbsHierarchy(prev));
+    };
     window.addEventListener('qaway-date-changed', onDateChanged);
-    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, () => setItems((prev) => computeWbsHierarchy(prev)));
-    return () => window.removeEventListener('qaway-date-changed', onDateChanged);
+    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, onParamsChanged);
+    return () => {
+      window.removeEventListener('qaway-date-changed', onDateChanged);
+      window.removeEventListener(EVENTO_PARAMS_CRONOGRAMA, onParamsChanged);
+    };
   }, []);
+  const [cronoParams, setCronoParams] = useState(() => getParametrosCronograma());
   const [newMenu, setNewMenu] = useState(false);
   const [showSecondaryFilters, setShowSecondaryFilters] = useState(false);
   const [kanbanResetSignal, setKanbanResetSignal] = useState(0);
@@ -3244,9 +3307,8 @@ export default function CronogramaGanttView({
       if (prev.includes(key)) {
         return prev.filter((k) => k !== key);
       }
-      // Reinsertar respetando el orden canónico de la tabla matriz + columnas custom
-      const allAllowed = [...CANONICAL_COLS, ...customCols.map((c) => c.key as ColKey)];
-      return allAllowed.filter((k) => prev.includes(k) || k === key);
+      // Agregar al final respetando el orden personalizado vigente
+      return [...prev, key];
     });
   };
 
@@ -4160,6 +4222,13 @@ export default function CronogramaGanttView({
   };
 
   /* Recalibra o limpia la línea base contractual en caso de adenda formal MINEDU */
+  useEffect(() => {
+    const runSync = () => syncScheduleAlertNotifications(items, currentTodayIso);
+    runSync();
+    window.addEventListener(EVENTO_PARAMS_CRONOGRAMA, runSync);
+    return () => window.removeEventListener(EVENTO_PARAMS_CRONOGRAMA, runSync);
+  }, [items, currentTodayIso]);
+
   const resetBaselines = () => {
     const params = getParametrosCronograma();
     if (params.bloquearResetLineaBase && perfilGp && perfilGp.rol !== 'admin' && !perfilGp.esPlataforma) {
@@ -4252,6 +4321,7 @@ export default function CronogramaGanttView({
     setResizingTaskId(item.id);
     setResizeTempWidth(initialWidth);
     setResizeTempEndDate(item.end);
+    setResizeLivePos({ x: e.clientX, y: e.clientY });
     setHoveredTask(null);
 
     const onMouseMove = (moveEvent: MouseEvent) => {
@@ -4259,6 +4329,7 @@ export default function CronogramaGanttView({
       const newWidth = Math.max(pxPerDay, initialWidth + deltaX);
       const addedDays = Math.round((newWidth - initialWidth) / pxPerDay);
       const newEnd = shiftDays(item.end, addedDays);
+      setResizeLivePos({ x: moveEvent.clientX, y: moveEvent.clientY });
 
       if (newEnd >= item.start) {
         setResizeTempWidth(newWidth);
@@ -4279,6 +4350,7 @@ export default function CronogramaGanttView({
       setResizingTaskId(null);
       setResizeTempWidth(null);
       setResizeTempEndDate(null);
+      setResizeLivePos(null);
 
       if (finalEnd !== item.end) {
         update(item.id, { end: finalEnd });
@@ -5810,26 +5882,19 @@ export default function CronogramaGanttView({
         <div
           key="start"
           className="start editable"
+          style={{ position: 'relative' }}
           onClick={(e) => {
             e.stopPropagation();
             toggleEdit(x, 'start');
           }}
         >
-          {isEditing(x, 'start') ? (
-            <input
-              className="cell-editor cell-input date-edit"
-              type="date"
-              autoFocus
-              defaultValue={x.start}
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => {
-                setStart(x, e.target.value);
-                closeEdit();
-              }}
-              onBlur={closeEdit}
+          <span className="cell-text">{formatDatePE(x.start)}</span>
+          {isEditing(x, 'start') && (
+            <InlineDatePopover
+              value={x.start}
+              onChange={(val) => setStart(x, val)}
+              onClose={closeEdit}
             />
-          ) : (
-            <span className="cell-text">{formatDatePE(x.start)}</span>
           )}
         </div>
       );
@@ -5840,26 +5905,19 @@ export default function CronogramaGanttView({
         <div
           key="end"
           className="end editable"
+          style={{ position: 'relative' }}
           onClick={(e) => {
             e.stopPropagation();
             toggleEdit(x, 'end');
           }}
         >
-          {isEditing(x, 'end') ? (
-            <input
-              className="cell-editor cell-input date-edit"
-              type="date"
-              autoFocus
-              defaultValue={x.end}
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => {
-                setEnd(x, e.target.value);
-                closeEdit();
-              }}
-              onBlur={closeEdit}
+          <span className="cell-text">{formatDatePE(x.end)}</span>
+          {isEditing(x, 'end') && (
+            <InlineDatePopover
+              value={x.end}
+              onChange={(val) => setEnd(x, val)}
+              onClose={closeEdit}
             />
-          ) : (
-            <span className="cell-text">{formatDatePE(x.end)}</span>
           )}
         </div>
       );
@@ -5910,29 +5968,15 @@ export default function CronogramaGanttView({
 
     if (colKey === 'progress') {
       const statusTone = x.progress === 100 ? 'green' : x.status === 'Con retraso' ? 'red' : x.status === 'Pendiente' ? 'gray' : 'blue';
-      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'PRODUCTO' || childrenByParent.has(x.id));
-      const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
+      const hasRealChildren = Boolean((x.children && x.children.length > 0) || childrenByParent.has(x.id) || x.wbsNodeType === 'COMPONENTE');
       const format = percentGraphFormats['progress'] || 'bar';
 
-      if (isContainer) {
+      if (hasRealChildren) {
         return (
           <div
             key="progress"
             className="progress is-rollup"
             title="Avance calculado por rollup de subelementos (PMI - Regla del 100%)"
-            style={{ cursor: 'default' }}
-          >
-            {renderProgressInner(x.progress, statusTone, format)}
-          </div>
-        );
-      }
-
-      if (linkedTaskSummary) {
-        return (
-          <div
-            key="progress"
-            className="progress is-linked-tasks"
-            title={`Avance gobernado por tareas operativas: ${linkedTaskSummary.completed}/${linkedTaskSummary.total} completadas (Regla del 100%)`}
             style={{ cursor: 'default' }}
           >
             {renderProgressInner(x.progress, statusTone, format)}
@@ -5973,6 +6017,7 @@ export default function CronogramaGanttView({
     if (colKey === 'deviation') {
       const dev = getDeviationDays(x, currentTodayIso);
       const tone = getDeviationTone(dev);
+      const alertLevel = getScheduleAlertState(x, currentTodayIso, cronoParams);
       const isEditingDev = isEditing(x, 'deviation');
       return (
         <div
@@ -5989,8 +6034,25 @@ export default function CronogramaGanttView({
             toggleEdit(x, 'deviation');
           }}
         >
-          <span className={`dev-text ${tone}`} style={{ fontWeight: 500 }}>
-            {formatDeviation(dev)}
+          <span className={`dev-text ${tone}`} style={{ fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span>{formatDeviation(dev)}</span>
+            {alertLevel === 'desvio_critico' && (
+              <span
+                title={`Supera el umbral crítico de ${cronoParams.umbralDesvioCritico} días hábiles`}
+                style={{
+                  fontSize: '9.5px',
+                  fontWeight: 700,
+                  padding: '1px 5px',
+                  borderRadius: '999px',
+                  background: '#fef2f2',
+                  color: '#b91c1c',
+                  border: '1px solid #fecaca',
+                  lineHeight: 1.3,
+                }}
+              >
+                Crítico
+              </span>
+            )}
           </span>
           {isEditingDev && (
             <div
@@ -8558,10 +8620,33 @@ export default function CronogramaGanttView({
                       notify(showBaseline ? 'Línea base oculta' : 'Línea base oficial visible');
                     }
                   }}
-                  data-tooltip={(viewMode === 'calendario' ? calShowBaseline : showBaseline) ? "Ocultar línea base oficial" : "Mostrar línea base oficial"}
+                  style={{ position: 'relative' }}
+                  data-tooltip={(() => {
+                    const pending = items.filter((x) => !hasBaseline(x)).length;
+                    if (!baselineLocked && pending > 0) {
+                      return `Falta fijar línea base en ${pending} registro${pending === 1 ? '' : 's'} (pasa el cursor para fijar)`;
+                    }
+                    return (viewMode === 'calendario' ? calShowBaseline : showBaseline) ? "Ocultar línea base oficial" : "Mostrar línea base oficial";
+                  })()}
                   aria-label="Conmutar visualización de la línea base oficial"
                 >
                   <Layers3 size={15} />
+                  {!baselineLocked && items.some((x) => !hasBaseline(x)) && (
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        width: 7,
+                        height: 7,
+                        borderRadius: '999px',
+                        background: '#f59e0b',
+                        border: '1.5px solid #ffffff',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  )}
                 </button>
 
                 {/* Despliegue suave al pasar el mouse (hover): Fijar Línea Base + Porcentaje + Dependencias + Responsables */}
@@ -8572,12 +8657,35 @@ export default function CronogramaGanttView({
                     className="btn secondary qm-btn-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      freezeBaselines();
+                      setBaselineModalMode(baselineLocked ? 'unlock' : 'freeze');
                     }}
-                    data-tooltip="Fijar / Congelar fechas actuales como línea base oficial"
+                    style={{ position: 'relative' }}
+                    data-tooltip={(() => {
+                      if (baselineLocked) return 'Línea base fijada y protegida con candado (Clic para desbloquear)';
+                      const pending = items.filter((x) => !hasBaseline(x)).length;
+                      return pending > 0
+                        ? `Falta fijar línea base en ${pending} registro${pending === 1 ? '' : 's'} · Clic para establecer`
+                        : 'Establecer fechas actuales como línea base oficial';
+                    })()}
                     aria-label="Fijar línea base del cronograma (PMBOK)"
                   >
-                    <Anchor size={14} />
+                    {baselineLocked ? <Lock size={14} color="#1d4ed8" /> : <Anchor size={14} />}
+                    {!baselineLocked && items.some((x) => !hasBaseline(x)) && (
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          width: 6,
+                          height: 6,
+                          borderRadius: '999px',
+                          background: '#f59e0b',
+                          border: '1.5px solid #ffffff',
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    )}
                   </button>
 
                   {/* [ % ] Conmutar etiquetas de Porcentaje en barras */}
@@ -8672,6 +8780,179 @@ export default function CronogramaGanttView({
             >
               <ArrowLeftRight size={14} />
             </button>
+
+            {(viewMode === 'gantt' || viewMode === 'lista') && (
+              <>
+                <div className="filter-group-divider" aria-hidden="true" />
+                <div className="filter-dropdown-wrap cols-dropdown-wrap" style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    className={`btn secondary qm-btn-icon ${colsMenuOpen ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setColsMenuOpen((v) => !v);
+                    }}
+                    data-tooltip={colsMenuOpen ? undefined : 'Configurar y agregar columnas'}
+                    aria-label="Configurar columnas visibles de la tabla"
+                  >
+                    <Columns3 size={15} />
+                  </button>
+
+                  {colsMenuOpen && (
+                    <div
+                      className="cols-popover"
+                      style={{ left: 0, right: 'auto', zIndex: 200 }}
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onWheel={(e) => {
+                        e.stopPropagation();
+                        const list = e.currentTarget.querySelector('.cols-pop-list') as HTMLElement | null;
+                        if (list && e.target !== list && !list.contains(e.target as Node)) {
+                          list.scrollTop += e.deltaY;
+                        }
+                      }}
+                    >
+                      <div className="cols-pop-head">
+                        <div>
+                          <strong>Columnas de la vista</strong>
+                          <span className="cols-pop-subtitle">Elige columnas o guarda tu orden actual.</span>
+                        </div>
+                        <button type="button" onClick={() => setColsMenuOpen(false)} title="Cerrar panel">
+                          <X size={14} />
+                        </button>
+                      </div>
+                      <div className="cols-pop-list">
+                        {(() => {
+                          const allMeta = [
+                            ...ALL_COL_META,
+                            ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
+                          ];
+                          const moveCol = (key: ColKey, dir: -1 | 1) => {
+                            setVisibleCols((prev) => {
+                              const idx = prev.indexOf(key);
+                              if (idx === -1) return prev;
+                              const target = idx + dir;
+                              if (target < 0 || target >= prev.length) return prev;
+                              if (prev[target] === 'name' || prev[idx] === 'name') return prev;
+                              const next = [...prev];
+                              [next[idx], next[target]] = [next[target], next[idx]];
+                              return next;
+                            });
+                          };
+                          return allMeta.map((col) => {
+                            const isVisible = visibleCols.includes(col.key);
+                            const visIdx = visibleCols.indexOf(col.key);
+                            const canMoveUp = isVisible && !col.fixed && visIdx > 0 && visibleCols[visIdx - 1] !== 'name';
+                            const canMoveDown = isVisible && !col.fixed && visIdx !== -1 && visIdx < visibleCols.length - 1;
+                            return (
+                              <div key={col.key} className="col-option-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                                <label className={`col-option ${col.fixed ? 'disabled' : ''}`} style={{ flex: 1, minWidth: 0 }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isVisible}
+                                    disabled={col.fixed}
+                                    onChange={() => toggleColVisibility(col.key)}
+                                  />
+                                  <span className="col-opt-label">{getColLabel(col.key, col.label)}</span>
+                                </label>
+                                {isVisible && !col.fixed && (
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', flexShrink: 0, paddingRight: '4px' }}>
+                                    <button
+                                      type="button"
+                                      disabled={!canMoveUp}
+                                      onClick={(e) => { e.stopPropagation(); moveCol(col.key, -1); }}
+                                      title="Mover columna arriba"
+                                      style={{ width: '22px', height: '22px', borderRadius: '6px', border: 'none', background: 'transparent', color: canMoveUp ? '#475569' : '#cbd5e1', cursor: canMoveUp ? 'pointer' : 'default', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                      <ChevronUp size={13} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={!canMoveDown}
+                                      onClick={(e) => { e.stopPropagation(); moveCol(col.key, 1); }}
+                                      title="Mover columna abajo"
+                                      style={{ width: '22px', height: '22px', borderRadius: '6px', border: 'none', background: 'transparent', color: canMoveDown ? '#475569' : '#cbd5e1', cursor: canMoveDown ? 'pointer' : 'default', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                      <ChevronDown size={13} />
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          });
+                        })()}
+                        <button
+                          type="button"
+                          className="cols-add-custom-btn"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '8px', width: '100%', fontSize: '12.5px', fontWeight: 500, fontFamily: 'inherit', padding: '7px 10px', textAlign: 'left' }}
+                          onClick={() => {
+                            setColsMenuOpen(false);
+                            setNewColModalOpen(true);
+                          }}
+                        >
+                          <Plus size={14} style={{ flexShrink: 0 }} />
+                          <span>Crear campo personalizado</span>
+                        </button>
+                      </div>
+
+                      <div className="cols-pop-foot" style={{ alignItems: 'stretch' }}>
+                        <button
+                          type="button"
+                          className="cols-reorder-btn"
+                          style={{ background: '#eff6ff', color: '#1e40af', borderColor: '#bfdbfe', fontWeight: 650, justifyContent: 'flex-start', textAlign: 'left', width: '100%', gap: '8px', paddingLeft: '10px' }}
+                          onClick={() => {
+                            const isLista = viewMode === 'lista';
+                            const colsKey = isLista ? uiKey('visible-cols-lista-v5') : uiKey('visible-cols-gantt-v3');
+                            try {
+                              localStorage.setItem(colsKey, JSON.stringify(visibleCols));
+                              localStorage.setItem(uiKey('col-widths-v3'), JSON.stringify(colWidths));
+                            } catch {}
+                            setColsMenuOpen(false);
+                            notify('Configuración de orden y columnas guardada');
+                          }}
+                        >
+                          <Save size={13} />
+                          <span>Guardar configuración de tabla</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="cols-reorder-btn"
+                          style={{ justifyContent: 'flex-start', textAlign: 'left', width: '100%', gap: '8px', paddingLeft: '10px' }}
+                          onClick={() => {
+                            resetColWidths();
+                            setColsMenuOpen(false);
+                            notify('Anchos de columna auto-ajustados al contenido');
+                          }}
+                        >
+                          <ArrowLeftRight size={13} />
+                          <span>Ajustar anchos al contenido</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="cols-reset-defaults-btn"
+                          style={{ justifyContent: 'flex-start', textAlign: 'left', width: '100%', gap: '8px', paddingLeft: '10px' }}
+                          onClick={() => {
+                            const isLista = viewMode === 'lista';
+                            const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
+                            setVisibleCols(defaultCols);
+                            const storageKey = isLista ? uiKey('visible-cols-lista-v5') : uiKey('visible-cols-gantt-v3');
+                            try {
+                              localStorage.setItem(storageKey, JSON.stringify(defaultCols));
+                            } catch {}
+                            notify('Columnas restablecidas al orden predeterminado');
+                          }}
+                        >
+                          <RotateCcw size={12} />
+                          <span>Restablecer columnas</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Controles exclusivos de Kanban en Fila 2 (solo ícono, estilo Filtros avanzados) */}
             {viewMode === 'kanban' && (
@@ -9987,9 +10268,6 @@ export default function CronogramaGanttView({
                   onClick={() => {
                     setSelectedId(x.id);
                   }}
-                  onDoubleClick={() => {
-                    openEditorForItem(x);
-                  }}
                 >
                   <div
                     className="fixed-cols"
@@ -10138,12 +10416,7 @@ export default function CronogramaGanttView({
                         onMouseDown={(e) => handleResizeMouseDown(e, x)}
                       />
 
-                      {/* Badge flotante en vivo durante el arrastre */}
-                      {resizingTaskId === x.id && resizeTempEndDate && (
-                        <div className="resize-live-badge">
-                          Hasta {formatDate(resizeTempEndDate)} ({getDays(x.start, resizeTempEndDate)}d)
-                        </div>
-                      )}
+
                     </div>
                   );
                 })()}
@@ -10836,17 +11109,127 @@ export default function CronogramaGanttView({
                 <PanelRightOpen size={14} />
                 <span>{((perspective === 'equipo' && ['organigrama', 'sedes', 'carga'].includes(viewMode)) ? Boolean(equipoSelectedId) : panelOpen) ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
               </button>
-              <button
-                className="btn secondary"
-                style={{ minHeight: '32px', fontSize: '12px' }}
-                onClick={() => notify('Cronograma maestro sincronizado con el equipo')}
-              >
-                <CheckCircle2 size={14} color="#16a34a" />
-                <span>Publicar Cronograma</span>
-              </button>
             </div>
           </footer>
         </ProjectShellWorkspace>
+        {/* Modal Profesional Qaway: Confirmar / Desbloquear Línea Base Oficial */}
+        {baselineModalMode && (
+          <div
+            className="overlay"
+            style={{ zIndex: 99995, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setBaselineModalMode(null);
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              style={{
+                width: 'min(460px, 100%)',
+                background: '#ffffff',
+                borderRadius: '14px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 24px 60px rgba(15, 23, 42, 0.22)',
+                overflow: 'hidden',
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '20px 22px 14px', borderBottom: '1px solid #f1f5f9' }}>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: baselineModalMode === 'freeze' ? '#eff6ff' : '#fffbeb',
+                    color: baselineModalMode === 'freeze' ? '#2563eb' : '#d97706',
+                    display: 'grid',
+                    placeItems: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {baselineModalMode === 'freeze' ? <Lock size={19} /> : <Unlock size={19} />}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.07em', color: '#64748b' }}>
+                    {baselineModalMode === 'freeze' ? 'GOBERNANZA DE CRONOGRAMA · PMBOK' : 'PROTECCIÓN DE LÍNEA BASE'}
+                  </span>
+                  <h3 style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: 750, color: '#0f172a' }}>
+                    {baselineModalMode === 'freeze'
+                      ? '¿Establecer Línea Base oficial?'
+                      : '¿Desbloquear Línea Base protegida?'}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBaselineModalMode(null)}
+                  style={{ border: 0, background: 'transparent', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+                  aria-label="Cerrar"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div style={{ padding: '16px 22px', fontSize: '13px', lineHeight: 1.55, color: '#475569' }}>
+                {baselineModalMode === 'freeze' ? (
+                  <>
+                    <p style={{ margin: '0 0 10px' }}>
+                      Las fechas actuales se fijarán como <strong>Línea Base oficial</strong> y se activará el{' '}
+                      <strong>candado de protección</strong> para evitar cambios accidentales.
+                    </p>
+                    <div
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '10px 12px',
+                        fontSize: '12px',
+                        color: '#334155',
+                      }}
+                    >
+                      • Registros pendientes de línea base: <strong>{items.filter((x) => !hasBaseline(x)).length}</strong> de{' '}
+                      <strong>{items.length}</strong>.<br />• Las futuras desviaciones y atrasos se calcularán frente a esta fecha.
+                    </div>
+                  </>
+                ) : (
+                  <p style={{ margin: 0 }}>
+                    La Línea Base actual está bloqueada con candado. Si la desbloqueas podrás establecer nuevas fechas de referencia para los elementos pendientes.
+                  </p>
+                )}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  gap: '8px',
+                  padding: '14px 22px',
+                  background: '#f8fafc',
+                  borderTop: '1px solid #e2e8f0',
+                }}
+              >
+                <button type="button" className="btn secondary" onClick={() => setBaselineModalMode(null)}>
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={() => {
+                    if (baselineModalMode === 'freeze') {
+                      freezeBaselines();
+                      toggleBaselineLock(true);
+                      notify('Línea base oficial fijada y protegida con candado');
+                    } else {
+                      toggleBaselineLock(false);
+                      notify('Candado de línea base desbloqueado');
+                    }
+                    setBaselineModalMode(null);
+                  }}
+                >
+                  {baselineModalMode === 'freeze' ? 'Sí, fijar y bloquear' : 'Sí, desbloquear'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modales y Drawer Exclusivos de la Perspectiva Equipo */}
         {perspective === 'equipo' && (
@@ -10889,6 +11272,40 @@ export default function CronogramaGanttView({
           onSave={handleCreateSede}
           unidadesExistentes={unidades}
         />
+
+        {/* Píldora flotante de fecha en vivo al arrastrar barras (fuera de .gantt-scroll para no sufrir recorte) */}
+        {resizingTaskId && resizeTempEndDate && resizeLivePos && (() => {
+          const resizingItem = items.find((it) => it.id === resizingTaskId);
+          if (!resizingItem) return null;
+          return (
+            <div
+              style={{
+                position: 'fixed',
+                left: resizeLivePos.x,
+                top: Math.max(12, resizeLivePos.y - 44),
+                transform: 'translateX(-50%)',
+                background: '#0f172a',
+                color: '#ffffff',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                padding: '5px 12px',
+                borderRadius: '999px',
+                boxShadow: '0 8px 22px rgba(15, 23, 42, 0.28)',
+                pointerEvents: 'none',
+                whiteSpace: 'nowrap',
+                zIndex: 9999,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <span>{formatDatePE(resizingItem.start)}</span>
+              <span style={{ color: '#94a3b8' }}>→</span>
+              <span style={{ color: '#60a5fa' }}>{formatDatePE(resizeTempEndDate)}</span>
+              <span style={{ color: '#cbd5e1', fontWeight: 500 }}>({getDays(resizingItem.start, resizeTempEndDate)}d)</span>
+            </div>
+          );
+        })()}
 
         {/* Panel Lateral Editor Aislado y Memoizado (Cero re-renders en el Gantt al escribir) */}
         <GanttEditorDrawer

@@ -164,6 +164,8 @@ export interface AppNotification {
   priority: NotificationPriority;       // 'CRITICAL' (Badge rojo), 'PREVENTIVE', 'INFO'
   category?: 'mencion' | 'nudo_critico' | 'prorroga' | 'hito_vencido' | 'asignacion';
   recipientUserId?: string;
+  /** Empresa dueña del aviso. Ausente en los avisos legados (se muestran siempre). */
+  tenantId?: string;
   senderName?: string;
   targetModule?: ModuleKey;             // Módulo destino al hacer clic (ej. 'sedes', 'cronograma')
   targetEntityId?: string;              // ID de la tarea, UGEL o sede relacionada
