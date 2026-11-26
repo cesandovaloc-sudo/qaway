@@ -1,1 +1,0 @@
-import"./rolldown-runtime-C0FnF6B9.js";import{t as e}from"./react-C21x__mS.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";import n from"./CronogramaGanttView-Bengfolz.js";e();var r=t();function i({activeProject:e,onActions:t,isActive:i=!0,...a}){return(0,r.jsx)(n,{perspective:`equipo`,activeProject:e,onActions:t,isActive:i,...a})}export{i as default};

@@ -1705,6 +1705,32 @@ export default function ConfiguracionView({
                     </div>
                   </div>
 
+                  {Boolean(perfilGp?.esPlataforma) && (
+                    <div className="form-row">
+                      <div className="form-label">
+                        <strong>Modo de guardado en Cronograma</strong>
+                        <span>Control exclusivo de Administrador de Plataforma (oculto para tenants).</span>
+                      </div>
+                      <div className="form-control">
+                        <select
+                          id="cfg-modo-sync"
+                          className="select"
+                          disabled={!editandoCrono}
+                          value={cronoParams.modoSincronizacionCronograma}
+                          onChange={(e) =>
+                            setCronoParams((p) => ({
+                              ...p,
+                              modoSincronizacionCronograma: e.target.value === 'auto' ? 'auto' : 'manual',
+                            }))
+                          }
+                        >
+                          <option value="manual">Manual con botón Guardar (recomendado)</option>
+                          <option value="auto">Automático cada 2.5 segundos</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
                   {(resumenColchon || alertasColchon.length > 0) && (
                     <div className="form-row" style={{ alignItems: 'flex-start' }}>
                       <div

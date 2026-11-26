@@ -1680,7 +1680,83 @@ export default function CronogramaGanttView({
     };
   }, [projectId, isActive]);
 
-  // Persistencia segura por proyecto activo (Doble capa: LocalStorage inmediato + Sincronización Supabase)
+  const [pendingChangesCount, setPendingChangesCount] = useState(0);
+  const [isSavingToSupabase, setIsSavingToSupabase] = useState(false);
+  const modoSync = cronoParams.modoSincronizacionCronograma;
+
+  const computeSyncDiff = (sourceItems: Item[]) => {
+    const snap = lastSyncedSnapshotRef.current;
+    const changedItems: Item[] = [];
+    const nextSnap = new Map<string, string>();
+    const currentIdSet = new Set<string>();
+    sourceItems.forEach((it) => {
+      // No subir borradores inline mientras el usuario aún no confirma su nombre
+      if (it.id === inlineDraftCreatedIdRef.current) return;
+      currentIdSet.add(it.id);
+      const serialized = JSON.stringify(it);
+      nextSnap.set(it.id, serialized);
+      if (snap.get(it.id) !== serialized) {
+        changedItems.push(it);
+      }
+    });
+    const removedIds: string[] = [];
+    snap.forEach((_prevVal, prevId) => {
+      if (!currentIdSet.has(prevId) && prevId !== inlineDraftCreatedIdRef.current) {
+        removedIds.push(prevId);
+      }
+    });
+    return { changedItems, removedIds, nextSnap };
+  };
+
+  const sincronizarCambiosConSupabase = async (manualTrigger = false): Promise<boolean> => {
+    if (isSavingToSupabase) return false;
+    const { changedItems, removedIds, nextSnap } = computeSyncDiff(items);
+    if (changedItems.length === 0 && removedIds.length === 0) {
+      setPendingChangesCount(0);
+      if (manualTrigger) notify('No hay cambios pendientes por guardar');
+      return true;
+    }
+    setIsSavingToSupabase(true);
+    try {
+      const [upsertOk, delRes] = await Promise.all([
+        changedItems.length > 0
+          ? syncAllCronogramaItemsToSupabase(projectId, changedItems as GanttItemData[])
+          : Promise.resolve(true),
+        removedIds.length > 0
+          ? deleteCronogramaItemsVerified(projectId, removedIds)
+          : Promise.resolve({ ok: true, deletedIds: [] as string[], blockedIds: [] as string[], error: undefined }),
+      ]);
+      if (upsertOk && delRes.ok) {
+        lastSyncedSnapshotRef.current = nextSnap;
+        setPendingChangesCount(0);
+        if (manualTrigger) {
+          notify('Cambios guardados definitivamente en Supabase');
+        }
+        return true;
+      }
+      notify(
+        !delRes.ok
+          ? delRes.error || 'No se pudieron eliminar algunos registros en Supabase.'
+          : 'No se pudieron guardar algunos cambios en Supabase. Siguen pendientes localmente.',
+        'warn'
+      );
+      return false;
+    } finally {
+      setIsSavingToSupabase(false);
+    }
+  };
+
+  useEffect(() => {
+    if (modoSync !== 'manual' || pendingChangesCount <= 0) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [modoSync, pendingChangesCount]);
+
+  // Persistencia segura por proyecto activo (LocalStorage inmediato + Supabase manual o auto 2.5s)
   useEffect(() => {
     if (!isActive) return;
     if (currentPidRef.current === projectId) {
@@ -1692,57 +1768,31 @@ export default function CronogramaGanttView({
       } catch {
         /* fallback */
       }
-      // Sincronización a Supabase con debounce de 2.5s para no saturar la red ni congelar la UI
       if (isMaestro && items.length > 0) {
-        const timer = setTimeout(() => {
-          const snap = lastSyncedSnapshotRef.current;
-          const prevPid = lastSyncedPidRef.current;
-
-          if (prevPid !== projectId) {
-            const nextSnap = new Map<string, string>();
-            items.forEach((it) => nextSnap.set(it.id, JSON.stringify(it)));
-            lastSyncedSnapshotRef.current = nextSnap;
-            lastSyncedPidRef.current = projectId;
-            return;
-          }
-
-          const changedItems: Item[] = [];
+        const prevPid = lastSyncedPidRef.current;
+        if (prevPid !== projectId) {
           const nextSnap = new Map<string, string>();
-          const currentIdSet = new Set<string>();
-          items.forEach((it) => {
-            // No subir borradores inline mientras el usuario aún no confirma su nombre
-            if (it.id === inlineDraftCreatedIdRef.current) return;
-            currentIdSet.add(it.id);
-            const serialized = JSON.stringify(it);
-            nextSnap.set(it.id, serialized);
-            if (snap.get(it.id) !== serialized) {
-              changedItems.push(it);
-            }
-          });
-
-          const removedIds: string[] = [];
-          snap.forEach((_prevVal, prevId) => {
-            if (!currentIdSet.has(prevId) && prevId !== inlineDraftCreatedIdRef.current) {
-              removedIds.push(prevId);
-            }
-          });
-
+          items.forEach((it) => nextSnap.set(it.id, JSON.stringify(it)));
           lastSyncedSnapshotRef.current = nextSnap;
-          if (changedItems.length > 0) {
-            syncAllCronogramaItemsToSupabase(projectId, changedItems as GanttItemData[]);
-          }
-          if (removedIds.length > 0) {
-            void deleteCronogramaItemsVerified(projectId, removedIds).then((res) => {
-              if (!res.ok) {
-                notify(res.error || 'No se pudo sincronizar eliminación con Supabase.', 'warn');
-              }
-            });
-          }
-        }, 2500);
-        return () => clearTimeout(timer);
+          lastSyncedPidRef.current = projectId;
+          setPendingChangesCount(0);
+          return;
+        }
+        const { changedItems, removedIds } = computeSyncDiff(items);
+        const totalPending = changedItems.length + removedIds.length;
+        setPendingChangesCount(totalPending);
+
+        if (modoSync === 'auto' && totalPending > 0) {
+          const timer = setTimeout(() => {
+            void sincronizarCambiosConSupabase(false);
+          }, 2500);
+          return () => clearTimeout(timer);
+        }
+      } else {
+        setPendingChangesCount(0);
       }
     }
-  }, [items, projectId, isActive, perspective]);
+  }, [items, projectId, isActive, perspective, modoSync]);
 
   const lastSyncedSnapshotRef = useRef<Map<string, string>>(new Map());
   const lastSyncedPidRef = useRef<string>('');
@@ -5544,6 +5594,17 @@ export default function CronogramaGanttView({
     };
     collectDescendants(activeItem.id);
 
+    if (modoSync === 'manual' && perspective === 'maestro') {
+      const remaining = items.filter((x) => !idsToDelete.has(x.id));
+      commitChange(() => remaining);
+      setDeleteConfirmModalOpen(false);
+      setDrawerDraft(null);
+      setSelectedId(null);
+      setPanelOpen(false);
+      notify('Eliminación en borrador. Pulsa "Guardar" para aplicar en Supabase (puedes deshacer antes de guardar).');
+      return;
+    }
+
     setIsDeletingItem(true);
     try {
       const res = await deleteCronogramaItemsVerified(projectId, Array.from(idsToDelete));
@@ -5584,6 +5645,13 @@ export default function CronogramaGanttView({
       collectDescendants(id);
     });
 
+    if (modoSync === 'manual' && perspective === 'maestro') {
+      commitChange((prev) => prev.filter((item) => !idsToDelete.has(item.id)));
+      setSelectedRowIds(new Set());
+      notify(`${idsToDelete.size} registro(s) marcados para eliminar. Pulsa "Guardar" para aplicar en Supabase.`);
+      return;
+    }
+
     const ok = window.confirm(
       `¿Eliminar definitivamente ${idsToDelete.size} registro(s) (incluyendo dependientes) de Supabase y del cronograma?`
     );
@@ -5603,7 +5671,7 @@ export default function CronogramaGanttView({
     } finally {
       setIsDeletingItem(false);
     }
-  }, [puedeAdministrarEdt, selectedRowIds, isDeletingItem, items, projectId]);
+  }, [puedeAdministrarEdt, selectedRowIds, isDeletingItem, items, projectId, modoSync, perspective]);
 
   const renderProgressInner = (val: number, statusTone: string, format: 'bar' | 'ring' | 'number') => {
     if (format === 'ring') {
@@ -8312,6 +8380,32 @@ export default function CronogramaGanttView({
               >
                 <Redo2 size={14} />
               </button>
+              {perspective === 'maestro' && modoSync === 'manual' && (
+                <button
+                  type="button"
+                  className={`btn ${pendingChangesCount > 0 ? 'primary' : 'secondary'}`}
+                  style={{ height: '32px', padding: '0 12px', fontSize: '12px', fontWeight: 650, gap: '6px' }}
+                  disabled={isSavingToSupabase || pendingChangesCount === 0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void sincronizarCambiosConSupabase(true);
+                  }}
+                  title={
+                    pendingChangesCount > 0
+                      ? `Guardar ${pendingChangesCount} cambio(s) pendiente(s) en Supabase`
+                      : 'Todo sincronizado con Supabase'
+                  }
+                >
+                  <Save size={14} />
+                  <span>
+                    {isSavingToSupabase
+                      ? 'Guardando...'
+                      : pendingChangesCount > 0
+                      ? `Guardar (${pendingChangesCount})`
+                      : 'Guardado'}
+                  </span>
+                </button>
+              )}
               <div className="filter-group-divider" aria-hidden="true" />
               <button
                 type="button"

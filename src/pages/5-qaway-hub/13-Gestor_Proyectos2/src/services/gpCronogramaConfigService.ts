@@ -9,6 +9,7 @@
 export type SemanaLaboral = 'lun-vie' | 'lun-sab' | 'lun-dom' | 'personalizado';
 export type MetodoPonderacion = 'duracion' | 'promedio';
 export type FrecuenciaCorte = 'semanal' | 'quincenal' | 'mensual';
+export type ModoSincronizacionCronograma = 'manual' | 'auto';
 
 export interface ParametrosCronograma {
   semanaLaboral: SemanaLaboral;
@@ -28,6 +29,8 @@ export interface ParametrosCronograma {
   diasColchonAdelanto: number;
   /** Si es true, oculta la fecha oficial (Línea Base) a usuarios no-admin para que solo vean la meta adelantada. */
   ocultarFechaOficialANoAdmin: boolean;
+  /** Modo de guardado en Cronograma Maestro ('manual' con botón Guardar o 'auto' cada 2.5s). */
+  modoSincronizacionCronograma: ModoSincronizacionCronograma;
 }
 
 export const DIAS_SEMANA_ORDEN: ReadonlyArray<{ dow: number; short: string; label: string }> = [
@@ -51,6 +54,7 @@ export const PARAMETROS_CRONOGRAMA_DEFAULT: ParametrosCronograma = {
   bloquearResetLineaBase: false,
   diasColchonAdelanto: 0,
   ocultarFechaOficialANoAdmin: false,
+  modoSincronizacionCronograma: 'manual',
 };
 
 const STORAGE_KEY = 'qaway-cronograma-params-v1';
@@ -102,6 +106,7 @@ export function getParametrosCronograma(): ParametrosCronograma {
       bloquearResetLineaBase: Boolean(parsed.bloquearResetLineaBase),
       diasColchonAdelanto: sanitizeNumber(parsed.diasColchonAdelanto, 0, 0, 30),
       ocultarFechaOficialANoAdmin: Boolean(parsed.ocultarFechaOficialANoAdmin),
+      modoSincronizacionCronograma: parsed.modoSincronizacionCronograma === 'auto' ? 'auto' : 'manual',
     };
   } catch {
     return { ...PARAMETROS_CRONOGRAMA_DEFAULT };
@@ -120,6 +125,7 @@ export function saveParametrosCronograma(params: ParametrosCronograma): void {
     bloquearResetLineaBase: Boolean(params.bloquearResetLineaBase),
     diasColchonAdelanto: sanitizeNumber(params.diasColchonAdelanto, 0, 0, 30),
     ocultarFechaOficialANoAdmin: Boolean(params.ocultarFechaOficialANoAdmin),
+    modoSincronizacionCronograma: params.modoSincronizacionCronograma === 'auto' ? 'auto' : 'manual',
   };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(limpio));
